@@ -11,7 +11,7 @@ jobs:
         run: |
           brew uninstall --force $(brew list --formula)
           brew untap adoptopenjdk/openjdk
-          brew untap caskroom/versions
+          # brew untap caskroom/versions
           brew uninstall --cask --force $(brew list --cask)
           # brew uninstall --cask --force firefox google-chrome
           brew cleanup --prune-prefix
