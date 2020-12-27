@@ -16,7 +16,7 @@
 }
 
 @test "Test if recent applications in Dock are disabled" {
-  result="$(defaults write com.apple.dock show-recents)"
+  result="$(defaults read com.apple.dock show-recents)"
   [ "$result" -eq 0 ]
 }
 
