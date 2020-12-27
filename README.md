@@ -9,6 +9,10 @@
 ## Get started
 
 ```
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/scripts/master/install.sh)"
+```
+
+```
 sudo softwareupdate -i -a
 xcode-select --install
 ```
