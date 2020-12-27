@@ -1,5 +1,7 @@
 # Dotfiles
 
+![CI](https://github.com/robocopklaus/dotfiles/workflows/ci/badge.svg)
+
 ## What the project does
 
 ## Why the project is useful
