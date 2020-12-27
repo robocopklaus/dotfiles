@@ -11,7 +11,7 @@ jobs:
         run: |
           brew uninstall --force $(brew list --formula)
           brew untap adoptopenjdk/openjdk
-          brew uninstall --cask --force $(brew list --cask)
+          # brew uninstall --cask --force $(brew list --cask)
           brew cleanup --prune-prefix
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
           rm -rf "$NVM_DIR"
@@ -22,3 +22,7 @@ jobs:
       - name: Install using Makefile
         run: |
           make
+
+      - name: Run tests
+        run: |
+          make test
