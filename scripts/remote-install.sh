@@ -8,18 +8,12 @@ sudo -v
 sudo softwareupdate -i -a
 
 # Install Command Line Tools
-touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
-PROD=$(softwareupdate -l |
-  grep "\*.*Command Line.*$(sw_vers -productVersion|awk -F. '{print $1"."$2}')" |
-  head -n 1 | awk -F"*" '{print $2}' |
-  sed -e 's/^ *//' |
-  tr -d '\n')
-softwareupdate -i "$PROD" --verbose
-rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-
-# if [ $(xcode-select -p 1>/dev/null;echo $?) -eq 2 ]; then
-#   xcode-select --install
-# fi
+if [ $(xcode-select -p 1>/dev/null;echo $?) -eq 2 ]; then
+  touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
+  PROD=$(softwareupdate -l | grep "*.*Command Line" | tail -n 1 | awk -F"*" '{print $2}' | sed -e 's/^ *//' | sed 's/Label: //g' | tr -d '\n')
+  softwareupdate -i "$PROD" --verbose
+  rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+fi
 
 if [ ! -d "$DOTFILES_PATH" ]; then
   echo "Installing dotfiles..."
