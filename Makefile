@@ -21,7 +21,7 @@ brew-packages: brew
 	brew cleanup
 
 system-preferences:
-	$(SHELL) config/macos-system-preferences.sh
+	$(SHELL) scripts/macos-system-preferences.sh
 
 test:
 	brew install bats-core
