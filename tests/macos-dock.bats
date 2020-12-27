@@ -12,7 +12,7 @@
 
 @test "Test if magnified icon size of Dock items is 90px" {
   result="$(defaults read com.apple.dock largesize)"
-  [ "$result" -eq 36 ]
+  [ "$result" -eq 90 ]
 }
 
 @test "Test if recent applications in Dock are disabled" {
@@ -22,5 +22,5 @@
 
 @test "Test if animation effect for minimizing windows is set to suck" {
   result="$(defaults read com.apple.dock mineffect)"
-  [ "$result" -eq "suck" ]
+  [ "$result" = "suck" ]
 }
