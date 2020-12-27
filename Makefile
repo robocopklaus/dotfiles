@@ -24,4 +24,5 @@ system-preferences:
 	$(SHELL) config/macos-system-preferences.sh
 
 test:
+	brew install bats-core
 	bats tests
