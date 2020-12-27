@@ -26,5 +26,3 @@ jobs:
       - name: Run tests
         run: |
           make test
-          ls -aOl ~/Library | sed -n 2p | grep -c hidden
-          nvram StartupMute
