@@ -9,7 +9,7 @@
 ## Get started
 
 ```
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/scripts/master/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh)"
 ```
 
 ```
