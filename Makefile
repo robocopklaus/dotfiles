@@ -2,7 +2,7 @@ SHELL = /bin/bash
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PATH := $(DOTFILES_DIR)/bin:$(PATH)
 
-all: sudo brew packages
+all: sudo brew packages system-preferences
 
 sudo:
 ifndef GITHUB_ACTION
@@ -19,3 +19,6 @@ brew-packages: brew
 	brew update --force	
 	brew bundle
 	brew cleanup
+
+system-preferences:
+	$(SHELL) config/macos-system-preferences.sh
