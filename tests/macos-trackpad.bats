@@ -12,7 +12,7 @@
 
 @test "Test if tracking speed is set to 2.5" {
   result="$(defaults read NSGlobalDomain com.apple.trackpad.scaling)"
-  [ "$result" -eq 2.5 ]
+  [ "$result" = "2.5" ]
 }
 
 @test "Test if App Exposé is enabled" {

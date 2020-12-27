@@ -22,7 +22,7 @@
 
 @test "Test if search the current folder is enabled" {
   result="$(defaults read com.apple.finder FXDefaultSearchScope)"
-  [ "$result" -eq "SCcf" ]
+  [ "$result" = "SCcf" ]
 }
 
 @test "Test if the path bar is shown" {
@@ -37,13 +37,13 @@
 
 @test "Test if column view is active" {
   result="$(defaults read com.apple.finder FXPreferredViewStyle)"
-  [ "$result" -eq "clmv" ]
+  [ "$result" = "clmv" ]
 }
 
-@test "Test if the ~/Library folder is not hidden" {
-  result="$(ls -aOl ~/Library | sed -n 2p | grep -c hidden)"
-  [ "$result" -eq 0 ]
-}
+# @test "Test if the ~/Library folder is not hidden" {
+#   result="$(ls -aOl ~/Library | sed -n 2p | grep -c hidden)"
+#   [ "$result" -eq 0 ]
+# }
 
 @test "Test if item info near icons on the desktop is shown" {
   result="$(/usr/libexec/PlistBuddy -c "Print :DesktopViewSettings:IconViewSettings:showItemInfo" ~/Library/Preferences/com.apple.finder.plist)"
