@@ -16,7 +16,7 @@ brew:
 packages: brew-packages
 
 brew-packages: brew
-	brew update --force	
+	#brew update --force	
 	brew bundle
 	brew cleanup
 
