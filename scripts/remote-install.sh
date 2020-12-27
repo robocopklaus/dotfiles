@@ -8,18 +8,14 @@ sudo -v
 sudo softwareupdate -i -a
 
 # Install Command Line Tools
-os=$(sw_vers -productVersion | awk -F. '{print $1 "." $2}')
-if softwareupdate --history | grep --silent "Command Line Tools.*${os}"; then
-    echo 'Command-line tools already installed.' 
-else
-    echo 'Installing Command-line tools...'
-    in_progress=/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-    touch ${in_progress}
-    product=$(softwareupdate --list | awk "/\* Command Line.*${os}/ { sub(/^   \* /, \"\"); print }")
-    softwareupdate --verbose --install "${product}" || echo 'Installation failed.' 1>&2 && rm ${in_progress} && exit 1
-    rm ${in_progress}
-    echo 'Installation succeeded.'
-fi
+touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
+PROD=$(softwareupdate -l |
+  grep "\*.*Command Line.*$(sw_vers -productVersion|awk -F. '{print $1"."$2}')" |
+  head -n 1 | awk -F"*" '{print $2}' |
+  sed -e 's/^ *//' |
+  tr -d '\n')
+softwareupdate -i "$PROD" --verbose
+rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
 # if [ $(xcode-select -p 1>/dev/null;echo $?) -eq 2 ]; then
 #   xcode-select --install
