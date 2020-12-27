@@ -27,5 +27,4 @@ test:
 	brew install bats-core
 	bats tests
 	brew rm bats-core
-	brew rm $(join <(brew leaves) <(brew deps bats-core))
 	brew cleanup
