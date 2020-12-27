@@ -8,3 +8,7 @@ brew "git"
 
 # Terminal
 cask "iterm2"
+
+if ENV['GITHUB_ACTION']
+  brew "bats-core"
+end

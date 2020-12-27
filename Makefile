@@ -22,3 +22,6 @@ brew-packages: brew
 
 system-preferences:
 	$(SHELL) config/macos-system-preferences.sh
+
+test:
+	bats tests
