@@ -15,11 +15,6 @@ jobs:
           brew cleanup --prune-prefix
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
           rm -rf "$NVM_DIR"
-          rm -rf $(xcode-select --print-path)
-
-      - name: Install Command Line Tools
-        run: |
-          xcode-select --install
 
       - name: Clone this repository
         uses: actions/checkout@v2
