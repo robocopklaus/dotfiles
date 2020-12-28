@@ -1,4 +1,5 @@
 # Shell tools
+brew "antigen"
 brew "zsh-autosuggestions"
 brew "zsh-completions"
 brew "zsh-syntax-highlighting"
