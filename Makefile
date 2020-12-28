@@ -21,7 +21,7 @@ brew-packages: brew
 	@brew cleanup
 
 package-post-install-fixes:
-	@defaults write com.googlecode.iterm2 PrefsCustomFolder "$(DOTFILES_DIR)/files"
+	@$(SHELL) scripts/post-install-iterm2-fix.sh
 
 system-preferences:
 	@$(SHELL) scripts/macos-system-preferences.sh
