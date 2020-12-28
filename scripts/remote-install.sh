@@ -7,7 +7,7 @@ sudo -v
 # Update macOS
 sudo softwareupdate -i -a
 
-# Install Command Line Tools
+# Command Line Tools
 if [ $(xcode-select -p 1>/dev/null;echo $?) -eq 2 ]; then
   touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
   PROD=$(softwareupdate -l | grep "*.*Command Line" | tail -n 1 | awk -F"*" '{print $2}' | sed -e 's/^ *//' | sed 's/Label: //g' | tr -d '\n')
