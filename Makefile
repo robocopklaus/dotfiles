@@ -43,6 +43,7 @@ system-preferences:
 symlinks:
 	@echo Creating symlinks...
 	@ln -nsf $(FILES_DIR)/.antigenrc $(HOME)/.antigenrc
+	@ln -nsf $(FILES_DIR)/.gitconfig $(HOME)/.gitconfig
 	@ln -nsf $(FILES_DIR)/.p10k.zsh $(HOME)/.p10k.zsh
 	@ln -nsf $(FILES_DIR)/.zshrc $(HOME)/.zshrc
 
