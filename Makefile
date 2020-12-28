@@ -1,10 +1,11 @@
 SHELL = /bin/bash
 export DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PATH := $(DOTFILES_DIR)/bin:$(PATH)
+FILES_DIR := $(DOTFILES_DIR)/files
 OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 POWERLEVEL10K_DIR := $(OH_MY_ZSH_DIR)/custom/themes/powerlevel10k
 
-all: sudo brew packages system-preferences
+all: sudo brew packages system-preferences symlinks
 
 sudo:
 ifndef GITHUB_ACTION
@@ -33,6 +34,9 @@ package-post-install-fixes:
 
 system-preferences:
 	@$(SHELL) scripts/macos-system-preferences.sh
+
+symlinks:
+	ln -nsf $(FILES_DIR)/zshrc ~/.zshrc
 
 test:
 	@brew install bats-core
