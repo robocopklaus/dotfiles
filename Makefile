@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+export DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PATH := $(DOTFILES_DIR)/bin:$(PATH)
 
 all: sudo brew packages system-preferences
