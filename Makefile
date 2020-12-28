@@ -1,6 +1,7 @@
 SHELL = /bin/bash
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PATH := $(DOTFILES_DIR)/bin:$(PATH)
+HOMEBREW_CASK_OPTS := --no-quarantine
 
 all: sudo brew packages system-preferences
 
@@ -17,7 +18,7 @@ packages: brew-packages
 
 brew-packages: brew
 	brew update --force	
-	brew bundle
+	brew bundle --no-lock
 	brew cleanup
 
 system-preferences:
