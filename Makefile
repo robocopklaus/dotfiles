@@ -1,6 +1,8 @@
 SHELL = /bin/bash
 export DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PATH := $(DOTFILES_DIR)/bin:$(PATH)
+OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
+POWERLEVEL10K_DIR := $(OH_MY_ZSH_DIR)/custom/themes/powerlevel10k
 
 all: sudo brew packages system-preferences
 
@@ -21,7 +23,10 @@ brew-packages: brew
 	@brew cleanup
 
 oh-my-zsh:
-	@is-directory $(HOME)/.oh-my-zsh || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
+	@is-directory $(OH_MY_ZSH_DIR) || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
+
+powerlevel10k:
+	@is-directory $(POWERLEVEL10K_DIR) || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $(POWERLEVEL10K_DIR)
 
 package-post-install-fixes:
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
