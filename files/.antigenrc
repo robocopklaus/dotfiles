@@ -13,9 +13,6 @@ antigen bundles <<EOBUNDLES
   # Bundles from external repos                              #
   ############################################################
   
-  # Adds real-time type-ahead autocompletion to Zsh
-  # marlonrichert/zsh-autocomplete
-
   # Syntax highlighting bundle.
   zsh-users/zsh-syntax-highlighting
 
