@@ -5,6 +5,10 @@ antigen use oh-my-zsh
 # Bundles from the default repo (robbyrussell's oh-my-zsh) #
 ############################################################
 
+antigen bundles <<EOBUNDLES
+  marlonrichert/zsh-autocomplete
+EOBUNDLES
+
 # Provide suggested packages to be installed if a command cannot be found.
 antigen bundle command-not-found
 
