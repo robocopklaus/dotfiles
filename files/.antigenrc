@@ -1,15 +1,22 @@
 # Load oh-my-zsh library
 antigen use oh-my-zsh
 
-# Load bundles from the default repo (oh-my-zsh)
-#antigen bundle git
-#antigen bundle command-not-found
-#antigen bundle docker
+antigen bundle <<EOBUNDLES
+    # Bundles from the default repo (robbyrussell's oh-my-zsh)
+    
+    # git
 
-# Load bundles from external repos
-#antigen bundle zsh-users/zsh-completions
-#antigen bundle zsh-users/zsh-autosuggestions
-#antigen bundle zsh-users/zsh-syntax-highlighting
+    # Bundles from external repos
+
+    # Syntax highlighting bundle.
+    # zsh-users/zsh-syntax-highlighting
+
+    # Fish-like auto suggestions
+    zsh-users/zsh-autosuggestions
+
+    # Extra zsh completions
+    # zsh-users/zsh-completions
+EOBUNDLES
 
 # Load theme
 #antigen theme romkatv/powerlevel10k
