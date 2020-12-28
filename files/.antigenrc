@@ -1,29 +1,30 @@
 # Load oh-my-zsh library
 antigen use oh-my-zsh
 
-############################################################
-# Bundles from the default repo (robbyrussell's oh-my-zsh) #
-############################################################
-
 antigen bundles <<EOBUNDLES
+  ############################################################
+  # Bundles from the default repo (robbyrussell's oh-my-zsh) #
+  ############################################################
+  
+  # Provide suggested packages to be installed if a command cannot be found.
+  command-not-found
+
+  ############################################################
+  # Bundles from external repos                              #
+  ############################################################
+  
+  # Adds real-time type-ahead autocompletion to Zsh
   marlonrichert/zsh-autocomplete
+
+  # Syntax highlighting bundle.
+  zsh-users/zsh-syntax-highlighting
+
+  # Fish-like auto suggestions
+  zsh-users/zsh-autosuggestions
+
+  # Extra zsh completions
+  zsh-users/zsh-completions
 EOBUNDLES
-
-# Provide suggested packages to be installed if a command cannot be found.
-antigen bundle command-not-found
-
-############################################################
-# Bundles from external repos                              #
-############################################################
-
-# Syntax highlighting bundle.
-antigen bundle zsh-users/zsh-syntax-highlighting
-
-# Fish-like auto suggestions
-antigen bundle zsh-users/zsh-autosuggestions
-
-# Extra zsh completions
-antigen bundle zsh-users/zsh-completions
 
 ############################################################
 # Theme                                                    #
