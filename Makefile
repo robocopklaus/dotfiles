@@ -16,7 +16,7 @@ endif
 brew:
 	@is-command brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 
-packages: brew-packages oh-my-zsh package-post-install-fixes install-meslo-nerd-font
+packages: brew-packages oh-my-zsh package-post-install-fixes meslo-nerd-font
 
 brew-packages: brew
 	@brew update --force	
@@ -29,6 +29,13 @@ oh-my-zsh:
 package-post-install-fixes:
 	@export DOTFILES_DIR
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
+
+meslo-nerd-font:
+	@echo Installing Meslo LGS Nerd Font...
+	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf --output "$(FONTS_DIR)/MesloLGS NF Regular.ttf"
+	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf --output "$(FONTS_DIR)/MesloLGS NF Bold.ttf"
+	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf --output "$(FONTS_DIR)/MesloLGS NF Italic.ttf"
+	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf --output "$(FONTS_DIR)/MesloLGS NF Bold Italic.ttf"
 
 system-preferences:
 	@$(SHELL) scripts/macos-system-preferences.sh
@@ -44,10 +51,3 @@ test:
 	@bats tests
 	@brew rm bats-core
 	@brew cleanup
-
-install-meslo-nerd-font:
-	@echo Downloading Meslo LGS Nerd Font...
-	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf --output "$(FONTS_DIR)/MesloLGS NF Regular.ttf"
-	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf --output "$(FONTS_DIR)/MesloLGS NF Bold.ttf"
-	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf --output "$(FONTS_DIR)/MesloLGS NF Italic.ttf"
-	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf --output "$(FONTS_DIR)/MesloLGS NF Bold Italic.ttf"
