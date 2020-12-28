@@ -1,6 +1,5 @@
-# Dotfiles
-
-![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+# Dotfiles ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+![](https://raw.githubusercontent.com/robocopklaus/dotfiles/main/screenshot.png)
 
 ## What the project does
 
