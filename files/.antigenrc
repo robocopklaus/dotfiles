@@ -5,7 +5,13 @@ antigen use oh-my-zsh
 # Bundles from the default repo (robbyrussell's oh-my-zsh) #
 ############################################################
 
-antigen bundle command-not-found
+antigen bundles <<EOBUNDLES
+  # Guess what to install when running an unknown command.
+  command-not-found
+EOBUNDLES
+
+# Provide suggested packages to be installed if a command cannot be found.
+# antigen bundle command-not-found
 
 ############################################################
 # Bundles from external repos                              #
