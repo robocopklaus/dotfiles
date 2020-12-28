@@ -1,9 +1,8 @@
 SHELL = /bin/bash
-export DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PATH := $(DOTFILES_DIR)/bin:$(PATH)
 FILES_DIR := $(DOTFILES_DIR)/files
 OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
-POWERLEVEL10K_DIR := $(OH_MY_ZSH_DIR)/custom/themes/powerlevel10k
 
 all: sudo brew packages system-preferences symlinks
 
@@ -26,17 +25,17 @@ brew-packages: brew
 oh-my-zsh:
 	@is-directory $(OH_MY_ZSH_DIR) || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
-powerlevel10k:
-	@is-directory $(POWERLEVEL10K_DIR) || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $(POWERLEVEL10K_DIR)
-
 package-post-install-fixes:
+	@export DOTFILES_DIR
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
 
 system-preferences:
 	@$(SHELL) scripts/macos-system-preferences.sh
 
 symlinks:
-	ln -nsf $(FILES_DIR)/zshrc ~/.zshrc
+	@echo Creating symlinks...
+	@ln -nsf $(FILES_DIR)/.zshrc ~/.zshrc
+	@ln -nsf $(FILES_DIR)/.antigenrc ~/.antigenrc
 
 test:
 	@brew install bats-core
