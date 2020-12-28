@@ -9,13 +9,13 @@ antigen bundle <<EOBUNDLES
     # Bundles from external repos
 
     # Syntax highlighting bundle.
-    # zsh-users/zsh-syntax-highlighting
+    zsh-users/zsh-syntax-highlighting
 
     # Fish-like auto suggestions
     zsh-users/zsh-autosuggestions
 
     # Extra zsh completions
-    # zsh-users/zsh-completions
+    zsh-users/zsh-completions
 EOBUNDLES
 
 # Load theme
