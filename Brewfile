@@ -2,8 +2,8 @@
 brew "git"
 
 # Shell tools
-brew "antigen"
 tap "homebrew/command-not-found"
+brew "antigen"
 
 # Terminal
 cask "iterm2"
