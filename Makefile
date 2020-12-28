@@ -13,7 +13,7 @@ endif
 brew:
 	@is-command brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 
-packages: brew-packages package-post-install-fixes oh-my-zsh
+packages: brew-packages oh-my-zsh package-post-install-fixes
 
 brew-packages: brew
 	@brew update --force	
@@ -22,8 +22,8 @@ brew-packages: brew
 
 oh-my-zsh:
 	@is-directory $(HOME)/.oh-my-zsh || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
-	@rm -f ~/.zcompdump
-  @compaudit | xargs chmod g-w,o-w
+	@rm -f $(HOME)/.zcompdump
+	@compaudit | xargs chmod g-w,o-w
 
 package-post-install-fixes:
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
