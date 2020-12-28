@@ -13,12 +13,15 @@ endif
 brew:
 	@is-command brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 
-packages: brew-packages package-post-install-fixes
+packages: brew-packages package-post-install-fixes oh-my-zsh
 
 brew-packages: brew
 	@brew update --force	
 	@HOMEBREW_CASK_OPTS="--no-quarantine" brew bundle --no-lock
 	@brew cleanup
+
+oh-my-zsh:
+	@is-directory $(HOME)/.oh-my-zsh || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
 package-post-install-fixes:
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
