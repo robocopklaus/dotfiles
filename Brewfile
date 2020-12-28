@@ -7,3 +7,6 @@ brew "antigen"
 
 # Terminal
 cask "iterm2"
+
+# Code Editor
+cask "visual-studio-code"
