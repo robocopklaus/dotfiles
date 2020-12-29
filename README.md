@@ -11,7 +11,8 @@
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh)"
 ```
 
-```
-sudo softwareupdate -i -a
-xcode-select --install
-```
+## Dependencies
+
+- [Antigen](https://github.com/zsh-users/antigen)
+- [iTerm2 Material Design](https://github.com/MartinSeeler/iterm2-material-design)
+- [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
