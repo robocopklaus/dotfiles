@@ -1,6 +1,7 @@
 {
     "editor.fontSize": 13,
     "editor.minimap.enabled": false,
+    "git.autofetch": true,
     "telemetry.enableTelemetry": false,
     "terminal.integrated.fontFamily": "MesloLGS NF",
     "workbench.iconTheme": "material-icon-theme"
