@@ -16,7 +16,7 @@ endif
 brew:
 	@is-command brew || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 
-packages: brew-packages oh-my-zsh package-post-install-fixes meslo-nerd-font
+packages: brew-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font
 
 brew-packages: brew
 	@brew update --force	
@@ -26,14 +26,16 @@ brew-packages: brew
 oh-my-zsh:
 	@is-directory $(OH_MY_ZSH_DIR) || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
+vs-code-extensions:
+	@for EXT in $$(cat Codefile); do code --install-extension $$EXT; done
+
 package-post-install-fixes:
 	@export DOTFILES_DIR
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
-	@for EXT in $$(cat Codefile); do code --install-extension $$EXT; done
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
-	@mkdir -p "$(FONTS_DIR)"
+	@is-directory $(FONTS_DIR) || mkdir -p "$(FONTS_DIR)"
 	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf -o "$(FONTS_DIR)/Meslo LGS NF Regular.ttf"
 	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold.ttf"
 	@curl -s -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Italic.ttf"
@@ -45,11 +47,12 @@ system-preferences:
 symlinks:
 	@echo Creating symlinks...
 	@ln -nsf $(FILES_DIR)/.antigenrc $(HOME)/.antigenrc
+	@ln -nsf $(FILES_DIR)/.editorconfig $(HOME)/.editorconfig
 	@ln -nsf $(FILES_DIR)/.gitconfig $(HOME)/.gitconfig
 	@ln -nsf $(FILES_DIR)/.p10k.zsh $(HOME)/.p10k.zsh
+	@ln -nsf $(FILES_DIR)/.zshrc $(HOME)/.zshrc
 	@mkdir -p "$(HOME)/Library/Application Support/Code/User"
 	@ln -nsf $(FILES_DIR)/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
-	@ln -nsf $(FILES_DIR)/.zshrc $(HOME)/.zshrc
 
 test:
 	@brew install bats-core

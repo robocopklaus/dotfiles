@@ -5,7 +5,7 @@ antigen bundles <<EOBUNDLES
   ############################################################
   # Bundles from the default repo (robbyrussell's oh-my-zsh) #
   ############################################################
-  
+
   # Provide suggested packages to be installed if a command cannot be found
   command-not-found
 
@@ -15,7 +15,7 @@ antigen bundles <<EOBUNDLES
   ############################################################
   # Bundles from external repos                              #
   ############################################################
-  
+
   # Syntax highlighting bundle
   zsh-users/zsh-syntax-highlighting
 
