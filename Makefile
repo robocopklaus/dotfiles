@@ -29,6 +29,7 @@ oh-my-zsh:
 package-post-install-fixes:
 	@export DOTFILES_DIR
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
+	@for EXT in $$(cat Codefile); do code --install-extension $$EXT; done
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
