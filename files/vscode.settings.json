@@ -1,5 +1,6 @@
 {
     "editor.minimap.enabled": false,
     "telemetry.enableTelemetry": false,
-    "terminal.integrated.fontFamily": "MesloLGS NF"
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "workbench.iconTheme": "material-icon-theme"
 }
