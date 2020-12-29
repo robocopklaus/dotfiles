@@ -32,6 +32,7 @@ package-post-install-fixes:
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
+	@mkdir -p "$(FONTS_DIR)"
 	@curl -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf -o "$(FONTS_DIR)"/MesloLGSNFRegular.ttf
 	@curl -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf -o "$(FONTS_DIR)"/MesloLGSNFBold.ttf
 	@curl -L https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -o "$(FONTS_DIR)"/MesloLGSNFItalic.ttf
