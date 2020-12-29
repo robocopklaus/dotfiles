@@ -5,7 +5,7 @@
 
 ## Why the project is useful
 
-## Get started
+## Installation aka The lazy ass one liner that sets everything up
 
 ```
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh)"
