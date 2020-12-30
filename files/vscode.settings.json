@@ -4,5 +4,6 @@
     "git.autofetch": true,
     "telemetry.enableTelemetry": false,
     "terminal.integrated.fontFamily": "MesloLGS NF",
+    "workbench.colorTheme": "Material Neutral",
     "workbench.iconTheme": "material-icon-theme"
 }
