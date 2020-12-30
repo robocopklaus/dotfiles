@@ -52,7 +52,7 @@ symlinks:
 	@ln -nsf $(FILES_DIR)/.gitignore $(HOME)/.gitignore
 	@ln -nsf $(FILES_DIR)/.p10k.zsh $(HOME)/.p10k.zsh
 	@ln -nsf $(FILES_DIR)/.zshrc $(HOME)/.zshrc
-	@is-directory "$(HOME)/Library/Application Support/Code/User" || mkdir -p "$(HOME)/Library/Application Support/Code/User"
+	@is-directory "$(HOME)/Library/Application\ Support/Code/User" || mkdir -p "$(HOME)/Library/Application Support/Code/User"
 	@ln -nsf $(FILES_DIR)/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
 
 test:
