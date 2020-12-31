@@ -1,6 +1,6 @@
 # Programming language prerequisites and package managers
-brew "asdf"
 brew "git"
+brew "volta"
 
 # Shell tools
 tap "homebrew/command-not-found"
