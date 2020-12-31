@@ -22,7 +22,7 @@ cask "visual-studio-code"
 # Productivity
 # cask "google-drive-file-stream"
 cask "keka"
-cask "kekadefaultapp"
+cask "kekaexternalhelper"
 # cask "notion"
 
 # Time Tracking
