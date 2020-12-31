@@ -12,6 +12,16 @@
 [diff]
 	# Detect copies as well as renames
 	renames = copies
+    tool = vscode
+
+[difftool "vscode"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+
+[merge]
+    tool = vscode
+
+[mergetool "vscode"]
+    cmd = code --wait $MERGED	
 
 [init]
 	# Default branch name e.g. when initializing a new repository or when cloning an empty repository
