@@ -32,6 +32,7 @@ vs-code-extensions:
 package-post-install-fixes:
 	@export DOTFILES_DIR
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
+	@asdf plugin-add "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
