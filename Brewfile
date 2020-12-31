@@ -32,4 +32,4 @@ cask "kekadefaultapp"
 # cask "spotify"
 
 # Video
-cask "vlc"
+cask "iina"
