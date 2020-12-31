@@ -11,3 +11,25 @@ cask "iterm2"
 
 # Code Editor
 cask "visual-studio-code"
+
+# Dev Ops
+# cask "docker"
+
+# Browsers
+# cask "google-chrome"
+# cask "firefox-developer-edition"
+
+# Productivity
+# cask "google-drive-file-stream"
+cask "keka"
+cask "kekadefaultapp"
+# cask "notion"
+
+# Time Tracking
+# cask "clockify"
+
+# Music
+# cask "spotify"
+
+# Video
+cask "vlc"
