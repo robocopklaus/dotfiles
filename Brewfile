@@ -1,4 +1,5 @@
 # Programming language prerequisites and package managers
+brew "asdf"
 brew "git"
 
 # Shell tools
