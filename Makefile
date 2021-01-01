@@ -32,6 +32,7 @@ vs-code-extensions:
 package-post-install-fixes:
 	@export DOTFILES_DIR
 	@$(SHELL) scripts/post-install-iterm2-fix.sh
+	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(shell which dockutil) && sudo chmod +x $(shell which dockutil)
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...

@@ -16,15 +16,20 @@ cask "visual-studio-code"
 # cask "docker"
 
 # Browsers
-# cask "google-chrome"
-# cask "firefox-developer-edition"
+cask "google-chrome"
+cask "firefox-developer-edition"
 
 # Productivity
 # cask "google-drive-file-stream"
 brew "dockutil"
+
+# Utils
 cask "keka"
 cask "kekaexternalhelper"
-# cask "notion"
+
+# Communication
+cask "notion"
+cask "slack"
 
 # Time Tracking
 # cask "clockify"
