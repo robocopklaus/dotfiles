@@ -23,11 +23,12 @@ cask "firefox-developer-edition"
 
 # Productivity
 # cask "google-drive-file-stream"
+cask "1password"
 brew "dockutil"
 cask "notion"
-mas 'Keynote', id: 409183694
-mas 'Numbers', id: 409203825
-mas "Pages", id: 409201541
+# mas 'Keynote', id: 409183694
+# mas 'Numbers', id: 409203825
+# mas "Pages", id: 409201541
 
 # Utils
 cask "keka"

@@ -21,8 +21,8 @@ dockutil --no-restart --add "/System/Applications/Messages.app"
 dockutil --no-restart --add '' --type small-spacer --section apps
 
 # Productivity
-dockutil --no-restart --add "/System/Applications/Calendar.app"
 dockutil --no-restart --add "/Applications/Notion.app"
+dockutil --no-restart --add "/System/Applications/Calendar.app"
 dockutil --no-restart --add '' --type small-spacer --section apps
 
 # Dev
