@@ -37,7 +37,7 @@ cask "slack"
 # cask "clockify"
 
 # Music
-# cask "spotify"
+cask "spotify"
 
 # Video
 cask "iina"
