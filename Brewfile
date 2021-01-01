@@ -1,9 +1,11 @@
+tap "homebrew/cask-versions"
+tap "homebrew/command-not-found"
+
 # Programming language prerequisites and package managers
 brew "git"
 brew "volta"
 
 # Shell tools
-tap "homebrew/command-not-found"
 brew "antigen"
 
 # Terminal
