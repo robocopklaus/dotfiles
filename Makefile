@@ -44,6 +44,7 @@ meslo-nerd-font:
 
 system-preferences:
 	@$(SHELL) scripts/macos-system-preferences.sh
+	@$(SHELL) scripts/dock-items.sh
 
 symlinks:
 	@echo Creating symlinks...
