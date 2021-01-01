@@ -24,13 +24,16 @@ cask "firefox-developer-edition"
 # Productivity
 # cask "google-drive-file-stream"
 brew "dockutil"
+cask "notion"
+mas 'Keynote', id: 409183694
+mas 'Numbers', id: 409203825
+mas "Pages", id: 409201541
 
 # Utils
 cask "keka"
 cask "kekaexternalhelper"
 
 # Communication
-cask "notion"
 cask "slack"
 
 # Time Tracking
