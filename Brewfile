@@ -21,6 +21,7 @@ cask "visual-studio-code"
 
 # Productivity
 # cask "google-drive-file-stream"
+brew "dockutil"
 cask "keka"
 cask "kekaexternalhelper"
 # cask "notion"
