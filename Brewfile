@@ -11,11 +11,10 @@ brew "antigen"
 # Terminal
 cask "iterm2"
 
-# Code Editor
-cask "visual-studio-code"
-
-# Dev Ops
+# Dev tools
 # cask "docker"
+cask "tableplus"
+cask "visual-studio-code"
 
 # Browsers
 cask "google-chrome"
