@@ -5,6 +5,8 @@ FILES_DIR := $(DOTFILES_DIR)/files
 OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 FONTS_DIR := $(HOME)/Library/Fonts
 
+.PHONY: all sudo brew packages brew-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
+
 all: sudo brew packages system-preferences symlinks
 
 sudo:
