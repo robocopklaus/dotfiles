@@ -12,7 +12,7 @@ brew "antigen"
 cask "iterm2"
 
 # Dev tools
-# cask "docker"
+cask "docker"
 cask "tableplus"
 cask "visual-studio-code"
 
@@ -21,7 +21,7 @@ cask "google-chrome"
 cask "firefox-developer-edition"
 
 # Productivity
-# cask "google-drive-file-stream"
+cask "google-drive-file-stream"
 cask "1password"
 brew "dockutil"
 cask "notion"
