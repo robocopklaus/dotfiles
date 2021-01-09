@@ -1,14 +1,16 @@
 # The default shell is /bin/sh. We use bash
 SHELL = /bin/bash
+# Path to oh-my-zsh
+OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
+
 # DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # PATH := $(DOTFILES_DIR)/bin:$(PATH)
 # FILES_DIR := $(DOTFILES_DIR)/files
-# OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 # FONTS_DIR := $(HOME)/Library/Fonts
 
 # Helper functions
 install_brew_package: brew list --versions $(1) > /dev/null || brew install $(1)
-install_brew_cask: brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine $(1)
+install_brew_cask: brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1) 
 uninstall_brew_package: brew rm $$(brew deps $(1)) $(1)
 uninstall_brew_cask: brew rm $(1)
 
@@ -30,49 +32,50 @@ install-brew: sudo
 uninstall-brew: sudo
 	@if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
-install-packages: install-brew
-	# Programming language prerequisites and package managers
+install-packages: install-brew install-oh-my-zsh
+# Programming language prerequisites and package managers
 	@$(call install_brew_package, git)
 	@$(call install_brew_package, volta)
-	# Shell tools
+# Terminal tools
 	@$(call install_brew_package, antigen)
+	@$(call install_brew_cask, iterm2)
 
-	# Terminal
-	# cask "iterm2"
+install-oh-my-zsh:
+	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
-	# Dev tools
-	# cask "docker"
-	# cask "tableplus"
-	# cask "visual-studio-code"
+# Dev tools
+# cask "docker"
+# cask "tableplus"
+# cask "visual-studio-code"
 
-	# Browsers
-	# cask "google-chrome"
-	# cask "firefox-developer-edition"
+# Browsers
+# cask "google-chrome"
+# cask "firefox-developer-edition"
 
-	# Productivity
-	# cask "google-drive-file-stream"
-	# cask "1password"
-	# brew "dockutil"
-	# cask "notion"
-	# mas 'Keynote', id: 409183694
-	# mas 'Numbers', id: 409203825
-	# mas "Pages", id: 409201541
+# Productivity
+# cask "google-drive-file-stream"
+# cask "1password"
+# brew "dockutil"
+# cask "notion"
+# mas 'Keynote', id: 409183694
+# mas 'Numbers', id: 409203825
+# mas "Pages", id: 409201541
 
-	# Utils
-	# cask "keka"
-	# cask "kekaexternalhelper"
+# Utils
+# cask "keka"
+# cask "kekaexternalhelper"
 
-	# Communication
-	# cask "slack"
+# Communication
+# cask "slack"
 
-	# Time Tracking
-	# cask "clockify"
+# Time Tracking
+# cask "clockify"
 
-	# Music
-	# cask "spotify"
+# Music
+# cask "spotify"
 
-	# Video
-	# cask "iina"
+# Video
+# cask "iina"
 
 # install-brew-packages: install-brew
 # 	@brew update --force	
