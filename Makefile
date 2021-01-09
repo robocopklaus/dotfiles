@@ -32,13 +32,15 @@ install-brew: sudo
 uninstall-brew: sudo
 	@if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
-install-packages: install-brew install-oh-my-zsh
+install-packages: install-brew-packages install-oh-my-zsh
+
+install-brew-packages: install-brew
 # Programming language prerequisites and package managers
-	@$(call install_brew_package, git)
-	@$(call install_brew_package, volta)
+	$(call install_brew_package, git)
+	$(call install_brew_package, volta)
 # Terminal tools
-	@$(call install_brew_package, antigen)
-	@$(call install_brew_cask, iterm2)
+	$(call install_brew_package, antigen)
+	$(call install_brew_cask, iterm2)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
