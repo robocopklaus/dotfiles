@@ -24,42 +24,25 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 ## :battery: Batteries included
 
 
-### Programming language prerequisites and package managers
+### Programming language utilities and package managers
 
-
-#### Homebrew
-
-[Homebrew](https://github.com/Homebrew/brew) is a package manager that simplifies the installation of software on Apple's macOS operating system and Linux.
-
-#### Git
-
-Even though Git is shipped with macOS, the shipped version is often not up to date.
-
-#### Volta
-
-[Volta](https://github.com/volta-cli/volta)'s job is to manage your JavaScript command-line tools, such as `node`, `npm`, `yarn`, or executables shipped as part of JavaScript packages. It is similar to [NVM](https://github.com/nvm-sh/nvm) but faster.
+- [x] **[Homebrew](https://github.com/Homebrew/brew)** is a package manager that simplifies the installation of software on Apple's macOS operating system and Linux
+- [x] **[Git](https://github.com/git/git)** - Even though it is shipped with macOS, the shipped version is often not up to date.
+- [x] **[Volta](https://github.com/volta-cli/volta)**'s job is to manage your JavaScript command-line tools, such as `node`, `npm`, `yarn`, or executables shipped as part of JavaScript packages. It is similar to [NVM](https://github.com/nvm-sh/nvm) but faster.
 
 ### Terminal Tools
 
-#### Antigen
+- [x] **[Antigen](https://github.com/zsh-users/antigen)** is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
 
-[Antigen](https://github.com/zsh-users/antigen) is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
-
-#### iTerm2
-
-[iTerm2](https://github.com/gnachman/iTerm2) is a replacement for Terminal. It is super fast and looks great.
+- [x] **[iTerm2](https://github.com/gnachman/iTerm2)** is a replacement for Terminal. It is super fast and looks great.
 
 ### Dev (Ops) Tools
 
-#### Docker
+- [x] **[Docker](https://www.docker.com)** allows you to build, test, and deploy applications quickly. It packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. You can quickly deploy and scale applications into any environment and know your code will run.
 
-[Docker](https://www.docker.com) allows you to build, test, and deploy applications quickly. It packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. You can quickly deploy and scale applications into any environment and know your code will run.
+- [x] **[TablePlus](https://tableplus.com)** is a GUI tool for several relational databases including MySQL, PostgreSQL, SQLite & more.
 
-#### TablePlus
-
-[TablePlus](https://tableplus.com) is a GUI tool for several relational databases including MySQL, PostgreSQL, SQLite & more.
-
-#### Visual Studio Code
+- [x] **[Visual Studio Code]()**
 
 <!-- ### Terminal tools
 
