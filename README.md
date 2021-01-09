@@ -32,9 +32,11 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 
 ### Terminal Tools
 
-- [x] **[Antigen](https://github.com/zsh-users/antigen)** is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
-
 - [x] **[iTerm2](https://github.com/gnachman/iTerm2)** is a replacement for Terminal. It is super fast and looks great.
+
+- [x] **[Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)** is a framework for managing your Zsh configuration.
+
+- [x] **[Antigen](https://github.com/zsh-users/antigen)** is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
 
 ### Dev (Ops) Tools
 
@@ -42,14 +44,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 
 - [x] **[TablePlus](https://tableplus.com)** is a GUI tool for several relational databases including MySQL, PostgreSQL, SQLite & more.
 
-- [x] **[Visual Studio Code]()**
+- [x] **[Visual Studio Code](https://github.com/microsoft/vscode)** was ranked the [most popular developer environment tool](https://insights.stackoverflow.com/survey/2019#technology-_-most-popular-development-environments) and that rightfully so.
+
+### Productivity Tools
+
+- [x] **[dockutil](https://github.com/kcrawford/dockutil)** is a command line utility for managing macOS dock items.
 
 <!-- ### Terminal tools
 
-- [Antigen](https://github.com/zsh-users/antigen)
-- [iTerm2 Material Design](https://github.com/MartinSeeler/iterm2-material-design)
 - [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 
-### Code editor
-
-- [Visual Studio Code](https://code.visualstudio.com) -->

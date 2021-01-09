@@ -2,13 +2,14 @@
 SHELL = /bin/bash
 # Path to oh-my-zsh
 OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
-
-# DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+# Path to .dotfiles
+DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # PATH := $(DOTFILES_DIR)/bin:$(PATH)
 # FILES_DIR := $(DOTFILES_DIR)/files
 # FONTS_DIR := $(HOME)/Library/Fonts
 
 # Helper functions
+install_vscode_extension = code --install-extension $(1)
 install_brew_package = brew list --versions $(1) > /dev/null || brew install $(1)
 install_brew_cask = brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1) 
 uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
@@ -42,16 +43,27 @@ install-brew-packages: install-brew
 # Terminal tools
 	@$(call install_brew_package,antigen)
 	@$(call install_brew_cask,iterm2)
+	@defaults write com.googlecode.iterm2 PrefsCustomFolder $(DOTFILES_DIR)/files
+	@defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
 # Dev tools
 	@$(call install_brew_cask,docker)
 	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
+# Productivity
+	@$(call install_brew_cask,dockutil)
+	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(shell which dockutil) && sudo chmod +x $(shell which dockutil)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
 uninstall-oh-my-zsh:
-	curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/uninstall.sh | bash
+# https://github.com/ohmyzsh/ohmyzsh/wiki/FAQ#how-do-i-uninstall-oh-my-zsh
+	#curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/uninstall.sh | bash
+
+install-vs-code-extensions:
+	@$(call install_vscode_extension,bernardodsanderson.theme-material-neutral)
+	@$(call install_vscode_extension,PKief.material-icon-theme)
+	@$(call install_vscode_extension,sharat.vscode-brewfile)
 
 test:
 	@brew unlink bats
