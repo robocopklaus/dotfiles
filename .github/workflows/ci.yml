@@ -21,13 +21,9 @@ jobs:
       - name: Clone this repository
         uses: actions/checkout@v2
 
-      - name: Install packages
+      - name: Install everything
         run: |
-          make install-packages
-
-      - name: Uninstall oh-my-zsh
-        run: |
-          make uninstall-oh-my-zsh
+          make
 
       # - name: Run tests
       #   run: |

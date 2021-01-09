@@ -6,9 +6,8 @@ OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # Path to dockutil script
 DOCKUTIL_PATH = /usr/local/bin/dockutil
-# PATH := $(DOTFILES_DIR)/bin:$(PATH)
-# FILES_DIR := $(DOTFILES_DIR)/files
-# FONTS_DIR := $(HOME)/Library/Fonts
+# Path to macOS user fonts
+FONTS_DIR := $(HOME)/Library/Fonts
 
 # Helper functions
 install_vscode_extension = code --install-extension $(1)
@@ -21,7 +20,7 @@ uninstall_brew_cask = brew rm $(1)
 .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
 
 # all: sudo brew packages system-preferences symlinks
-all: install-packages
+all: install-packages install-vs-code-extensions install-meslo-nerd-font
 
 sudo:
 ifndef GITHUB_ACTION
@@ -66,6 +65,14 @@ install-vs-code-extensions:
 	@$(call install_vscode_extension,bernardodsanderson.theme-material-neutral)
 	@$(call install_vscode_extension,PKief.material-icon-theme)
 	@$(call install_vscode_extension,sharat.vscode-brewfile)
+
+install-meslo-nerd-font:
+	@echo Installing Meslo LGS Nerd Font...
+	@[[ ! -d $(FONTS_DIR) ]] && mkdir -p "$(FONTS_DIR)"
+	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf -o "$(FONTS_DIR)/Meslo LGS NF Regular.ttf"
+	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold.ttf"
+	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Italic.ttf"
+	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold Italic.ttf"
 
 test:
 	@brew unlink bats
