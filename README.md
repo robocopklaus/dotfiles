@@ -1,15 +1,31 @@
-# Dotfiles ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+# :computer: .files: A hassle free development setup in just a few minutes without doing anything :rocket: ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+
+So you just got a new mac or you just want to do a clean install of the new macOS but you don't have much time setting everything up the way you like it? Then meet **.files**!
+
+**.files** is a collection of configuration files (dotfiles *duh!*) plus an automated setup to install all the apps and tools to get you running in no time.
+
 ![](https://raw.githubusercontent.com/robocopklaus/dotfiles/main/screenshot.png)
 
-## Installation aka _The lazy ass one liner that sets everything up_
+## :robot: Installation
+
+After you've successfully installed macOS you can just paste this line into the terminal:
 
 ```
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh)"
 ```
 
-## Stack
+## :monocle_face: Ok, but what the hell is going on?
 
-### Terminal tools
+
+
+## :battery: Batteries included
+
+
+
+### Homebrew
+
+
+<!-- ### Terminal tools
 
 - [Antigen](https://github.com/zsh-users/antigen)
 - [iTerm2 Material Design](https://github.com/MartinSeeler/iterm2-material-design)
@@ -17,4 +33,4 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 
 ### Code editor
 
-- [Visual Studio Code](https://code.visualstudio.com)
+- [Visual Studio Code](https://code.visualstudio.com) -->
