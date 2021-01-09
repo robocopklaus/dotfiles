@@ -23,7 +23,7 @@ jobs:
 
       - name: Clean up
         run: |
-          brew bundle cleanup
+          brew bundle cleanup --force
 
       - name: Install Homebrew
         run: |
