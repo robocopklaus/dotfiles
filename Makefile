@@ -22,8 +22,7 @@ uninstall_brew_cask = brew rm $(1)
 # Do not care about local files
 .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
 
-# all: sudo brew packages system-preferences symlinks
-all: install-packages install-vs-code-extensions install-meslo-nerd-font macos-preferences
+all: install-packages install-addons macos-preferences link
 
 sudo:
 ifndef GITHUB_ACTION
@@ -64,6 +63,8 @@ uninstall-oh-my-zsh:
 # https://github.com/ohmyzsh/ohmyzsh/wiki/FAQ#how-do-i-uninstall-oh-my-zsh
 	#curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/uninstall.sh | bash
 
+install-addons: install-vs-code-extensions install-meslo-nerd-font
+
 install-vs-code-extensions:
 	@$(call install_vscode_extension,bernardodsanderson.theme-material-neutral)
 	@$(call install_vscode_extension,PKief.material-icon-theme)
@@ -82,6 +83,8 @@ macos-preferences:
 #	@$(SHELL) scripts/dock-items.sh
 
 link: | $(DOTFILES)
+	@[[ ! -d "$(HOME)/Library/Application Support/Code/User" ]] && mkdir -p "$(HOME)/Library/Application Support/Code/User"
+	@ln -nsf $(FILES_DIR)/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
 
 # This will link all of our dot files into our files directory. The
 # magic happening in the first arg to ln is just grabbing the file name
@@ -89,6 +92,7 @@ link: | $(DOTFILES)
 $(DOTFILES):
 	@ln -sv "$(PWD)/files/$(notdir $@)" $@
 
+# Interactively delete symbolic links.
 unlink:
 	@echo "Unlinking dotfiles"
 	@for f in $(DOTFILES); do if [ -h $$f ]; then rm -i $$f; fi ; done
@@ -98,7 +102,6 @@ test:
 	@$(call install_brew_package,bats-core)
 	@bats tests
 	@$(call uninstall_brew_package,bats-core)
-# @brew rm bats-core
 	@brew cleanup
 
 # Browsers
@@ -129,59 +132,3 @@ test:
 
 # Video
 # cask "iina"
-
-# install-brew-packages: install-brew
-# 	@brew update --force	
-# 	@HOMEBREW_CASK_OPTS="--no-quarantine" brew bundle --no-lock
-# 	@brew cleanup
-
-# uninstall-brew-packages:
-# 	echo $$(brew bundle list --formula)
-# 	echo $$(brew list --formula)
-	
-# install-packages: install-brew-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font
-
-
-
-# oh-my-zsh:
-# 	@is-directory $(OH_MY_ZSH_DIR) || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
-
-# vs-code-extensions:
-# 	@for EXT in $$(cat Codefile); do code --install-extension $$EXT; done
-
-# package-post-install-fixes:
-# 	@export DOTFILES_DIR
-# 	@$(SHELL) scripts/post-install-iterm2-fix.sh
-# 	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(shell which dockutil) && sudo chmod +x $(shell which dockutil)
-
-# meslo-nerd-font:
-# 	@echo Installing Meslo LGS Nerd Font...
-# 	@is-directory $(FONTS_DIR) || mkdir -p "$(FONTS_DIR)"
-# 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf -o "$(FONTS_DIR)/Meslo LGS NF Regular.ttf"
-# 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold.ttf"
-# 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Italic.ttf"
-# 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold Italic.ttf"
-
-# system-preferences:
-# 	@$(SHELL) scripts/macos-system-preferences.sh
-# 	@$(SHELL) scripts/dock-items.sh
-
-# symlinks:
-# 	@echo Creating symlinks...
-# 	@ln -nsf $(FILES_DIR)/.antigenrc $(HOME)/.antigenrc
-# 	@ln -nsf $(FILES_DIR)/.editorconfig $(HOME)/.editorconfig
-# 	@ln -nsf $(FILES_DIR)/.gitconfig $(HOME)/.gitconfig
-# 	@ln -nsf $(FILES_DIR)/.gitignore $(HOME)/.gitignore
-# 	@ln -nsf $(FILES_DIR)/.p10k.zsh $(HOME)/.p10k.zsh
-# 	@ln -nsf $(FILES_DIR)/.zshrc $(HOME)/.zshrc
-# 	@mkdir -p "$(HOME)/Library/Application Support/Code/User"
-# 	@ln -nsf $(FILES_DIR)/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
-
-# test:
-# 	@brew install bats-core
-# 	@bats tests
-# 	@brew rm bats-core
-# 	@brew cleanup
-
-# foo:
-# 	if ! command -v $1 >/dev/null; then echo "Not installed"; fi
