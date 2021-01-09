@@ -21,13 +21,9 @@ jobs:
       - name: Clone this repository
         uses: actions/checkout@v2
 
-      - name: Install Git
+      - name: Install packages
         run: |
-          make install-git
-
-      - name: Uninstall Git
-        run: |
-          make uninstall-git
+          make install-packages
 
       # - name: Run tests
       #   run: |
