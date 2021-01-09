@@ -86,7 +86,7 @@ macos-preferences:
 #	@$(SHELL) scripts/dock-items.sh
 
 link: | $(DOTFILES)
-	@[[ ! -d "$(HOME)/Library/Application Support/Code/User" ]] && mkdir -p "$(HOME)/Library/Application Support/Code/User"
+	@[[ -d "$(HOME)/Library/Application Support/Code/User" ]] || mkdir -p "$(HOME)/Library/Application Support/Code/User"
 	@ln -nsf $(FILES_DIR)/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
 
 # This will link all of our dot files into our files directory. The
