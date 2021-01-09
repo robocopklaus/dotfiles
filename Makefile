@@ -4,6 +4,9 @@ SHELL = /bin/bash
 OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 # Path to .dotfiles
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+# List all dotfiles
+HOMEFILES := $(shell ls -A files | grep "^\.")
+DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
 # Path to dockutil script
 DOCKUTIL_PATH = /usr/local/bin/dockutil
 # Path to macOS user fonts
@@ -20,7 +23,7 @@ uninstall_brew_cask = brew rm $(1)
 .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
 
 # all: sudo brew packages system-preferences symlinks
-all: install-packages install-vs-code-extensions install-meslo-nerd-font
+all: install-packages install-vs-code-extensions install-meslo-nerd-font macos-preferences
 
 sudo:
 ifndef GITHUB_ACTION
@@ -73,6 +76,22 @@ install-meslo-nerd-font:
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold.ttf"
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Italic.ttf"
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold Italic.ttf"
+
+macos-preferences:
+	@$(SHELL) scripts/macos-system-preferences.sh
+#	@$(SHELL) scripts/dock-items.sh
+
+link: | $(DOTFILES)
+
+# This will link all of our dot files into our files directory. The
+# magic happening in the first arg to ln is just grabbing the file name
+# and appending the path to dotfiles/home
+$(DOTFILES):
+	@ln -sv "$(PWD)/files/$(notdir $@)" $@
+
+unlink:
+	@echo "Unlinking dotfiles"
+	@for f in $(DOTFILES); do if [ -h $$f ]; then rm -i $$f; fi ; done
 
 test:
 	@brew unlink bats
