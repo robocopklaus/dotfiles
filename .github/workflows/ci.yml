@@ -9,32 +9,21 @@ jobs:
   install:
     runs-on: macos-latest
     steps:
-      # - name: Clean up installed software
-      #   run: |
-      #     brew uninstall --force $(brew list --formula)
-      #     brew untap adoptopenjdk/openjdk
-      #     brew uninstall --cask --force $(brew list --cask)
-      #     brew cleanup --prune-prefix
-      #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
-      #     rm -rf "$NVM_DIR"
-      - name: Clean up
+      - name: Clean up installed software
         run: |
+          brew uninstall --force $(brew list --formula)
+          brew untap adoptopenjdk/openjdk
+          brew uninstall --cask --force $(brew list --cask)
+          brew cleanup --prune-prefix
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
           rm -rf "$NVM_DIR"
 
       - name: Clone this repository
         uses: actions/checkout@v2
 
-      - name: Uninstall brew
+      - name: Install Homebrew
         run: |
-          brew bundle cleanup
-
-      - name: Uninstall brew
-        run: |
-          make uninstall-brew
-
-      - name: Install using Makefile
-        run: |
-          make install-packages
+          make install-brew
 
       # - name: Run tests
       #   run: |

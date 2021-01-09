@@ -23,18 +23,20 @@ install-brew: sudo
 uninstall-brew: sudo
 	@if command -v $1 >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
-install-packages: install-brew-packages
+# install-packages: install-brew-packages
 
-install-brew-packages: install-brew
-	@brew update --force	
-	@HOMEBREW_CASK_OPTS="--no-quarantine" brew bundle --no-lock
-	@brew cleanup
+# install-brew-packages: install-brew
+# 	@brew update --force	
+# 	@HOMEBREW_CASK_OPTS="--no-quarantine" brew bundle --no-lock
+# 	@brew cleanup
 
+# uninstall-brew-packages:
+# 	echo $$(brew bundle list --formula)
+# 	echo $$(brew list --formula)
+	
 # install-packages: install-brew-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font
 
 
-# uninstall-brew-packages:
-# 	@brew uninstall --force $(brew list --formula)
 
 # oh-my-zsh:
 # 	@is-directory $(OH_MY_ZSH_DIR) || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash

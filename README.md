@@ -1,11 +1,13 @@
 ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
 
 # .files
-### :rocket: A hassle free development setup in just a few minutes without doing anything
+
+## :rocket: A hassle free development setup in just a few minutes without doing anything
 
 So you just got a new :computer: or you just want to do a clean install of the new macOS but you don't have much time setting everything up the way you like it? Then meet **.files**!
 
-**.files** is a collection of configuration files (dotfiles *duh!*) plus an automated setup to install all the apps and tools to get you running in no time.
+**.files** is a collection of configuration files (dotfiles *duh!*) plus an automated setup to install all the apps and tools to get running in no time.
+
 
 ![](https://raw.githubusercontent.com/robocopklaus/dotfiles/main/screenshot.png)
 
