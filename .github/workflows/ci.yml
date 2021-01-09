@@ -26,6 +26,10 @@ jobs:
 
       - name: Uninstall brew
         run: |
+          brew bundle cleanup
+
+      - name: Uninstall brew
+        run: |
           make uninstall-brew
 
       - name: Install using Makefile
