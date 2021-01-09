@@ -6,6 +6,9 @@ SHELL = /bin/bash
 # OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 # FONTS_DIR := $(HOME)/Library/Fonts
 
+install_brew_package: brew list --versions $(1) > /dev/null || brew install $(1)
+install_brew_cask: brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine $(1)
+
 .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
 
 # all: sudo brew packages system-preferences symlinks
@@ -13,16 +16,23 @@ all: install-brew
 
 sudo:
 ifndef GITHUB_ACTION
-	@sudo -v
-	@while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+	sudo -v
+	while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 endif
 
 install-brew: sudo
-	@if ! command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash; fi
+	if ! command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash; fi
 
 uninstall-brew: sudo
-	@if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
+	if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
+install-packages: install-git
+
+install-git: install-brew
+	$(call install_brew_package, git)
+
+uninstall-git:
+	brew rm $(brew deps git) git
 # install-packages: install-brew-packages
 
 # install-brew-packages: install-brew

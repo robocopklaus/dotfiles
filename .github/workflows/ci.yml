@@ -33,6 +33,14 @@ jobs:
         run: |
           make install-brew
 
+      - name: Install Git
+        run: |
+          make install-git
+
+      - name: Uninstall Git
+        run: |
+          make uninstall-git
+
       # - name: Run tests
       #   run: |
       #     make test
