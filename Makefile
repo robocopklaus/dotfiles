@@ -51,7 +51,7 @@ install-brew-packages: install-brew
 	@$(call install_brew_cask,visual-studio-code)
 # Productivity
 	@$(call install_brew_package,dockutil)
-	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o "$(shell which dockutil)" && sudo chmod +x "$(shell which dockutil)"
+	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(shell which dockutil) && sudo chmod +x $(shell which dockutil)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
