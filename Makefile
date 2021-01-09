@@ -39,11 +39,15 @@ install-brew-packages: install-brew
 	$(call install_brew_package, git)
 	$(call install_brew_package, volta)
 # Terminal tools
-	$(call install_brew_package, antigen)
+#	$(call install_brew_package, antigen)
+	brew list --versions antigen > /dev/null || brew install antigen
 	$(call install_brew_cask, iterm2)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
+
+uninstall-oh-my-zsh:
+	uninstall_oh_my_zsh
 
 # Dev tools
 # cask "docker"
