@@ -54,9 +54,11 @@ uninstall-oh-my-zsh:
 	uninstall_oh_my_zsh
 
 test:
-	@brew install bats-core
+	@brew unlink bats
+	$(call install_brew_package,bats-core)
 	@bats tests/brew-volta.bats
-	@brew rm bats-core
+	$(call uninstall_brew_package,bats-core)
+# @brew rm bats-core
 	@brew cleanup
 
 # Browsers
