@@ -25,6 +25,10 @@ jobs:
         run: |
           make install-packages
 
+      - name: Uninstall oh-my-zsh
+        run: |
+          make uninstall-oh-my-zsh
+
       # - name: Run tests
       #   run: |
       #     make test
