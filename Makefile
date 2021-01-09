@@ -75,7 +75,7 @@ install-vs-code-extensions:
 
 install-meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
-	@[[ ! -d $(FONTS_DIR) ]] && mkdir -p "$(FONTS_DIR)"
+	@[[ -d $(FONTS_DIR) ]] || mkdir -p "$(FONTS_DIR)"
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf -o "$(FONTS_DIR)/Meslo LGS NF Regular.ttf"
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf -o "$(FONTS_DIR)/Meslo LGS NF Bold.ttf"
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -o "$(FONTS_DIR)/Meslo LGS NF Italic.ttf"
@@ -87,7 +87,7 @@ macos-preferences:
 
 link: | $(DOTFILES)
 	@[[ -d "$(HOME)/Library/Application Support/Code/User" ]] || mkdir -p "$(HOME)/Library/Application Support/Code/User"
-	@ln -nsf $(FILES_DIR)/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
+	@ln -nsf $(DOTFILES_DIR)/files/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
 
 # This will link all of our dot files into our files directory. The
 # magic happening in the first arg to ln is just grabbing the file name
