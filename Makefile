@@ -1,4 +1,5 @@
-# SHELL = /bin/bash
+# The default shell is /bin/sh. We use bash
+SHELL = /bin/bash
 # DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # PATH := $(DOTFILES_DIR)/bin:$(PATH)
 # FILES_DIR := $(DOTFILES_DIR)/files
@@ -16,23 +17,21 @@ ifndef GITHUB_ACTION
 	@while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 endif
 
-install-brew:
+install-brew: sudo
 	@if ! command -v $1 >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash; fi
 
 uninstall-brew: sudo
-	@if command -v $1 >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi 
+	@if command -v $1 >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
-# .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
+install-packages: install-brew-packages
 
-
-
+install-brew-packages: install-brew
+	@brew update --force	
+	@HOMEBREW_CASK_OPTS="--no-quarantine" brew bundle --no-lock
+	@brew cleanup
 
 # install-packages: install-brew-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font
 
-# install-brew-packages: install-brew
-# 	@brew update --force	
-# 	@HOMEBREW_CASK_OPTS="--no-quarantine" brew bundle --no-lock
-# 	@brew cleanup
 
 # uninstall-brew-packages:
 # 	@brew uninstall --force $(brew list --formula)

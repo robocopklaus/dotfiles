@@ -1,4 +1,6 @@
-# :computer: .files: A hassle free development setup in just a few minutes without doing anything :rocket: ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+
+# :computer: .files: A hassle free development setup in just a few minutes without doing anything :rocket: 
 
 So you just got a new mac or you just want to do a clean install of the new macOS but you don't have much time setting everything up the way you like it? Then meet **.files**!
 
@@ -14,7 +16,7 @@ After you've successfully installed macOS you can just paste this line into the 
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh)"
 ```
 
-## :monocle_face: Ok, but what the hell is going on?
+## :monocle_face: So what the hell is going on?
 
 
 

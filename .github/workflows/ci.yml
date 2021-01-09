@@ -30,7 +30,7 @@ jobs:
 
       - name: Install using Makefile
         run: |
-          make
+          make install-packages
 
       # - name: Run tests
       #   run: |
