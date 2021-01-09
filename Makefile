@@ -37,15 +37,15 @@ install-packages: install-brew-packages install-oh-my-zsh
 install-brew-packages: install-brew
 	@brew update --force	
 # Programming language prerequisites and package managers
-	@$(call install_brew_package,git)
-	@$(call install_brew_package,volta)
+	$(call install_brew_package,git)
+	$(call install_brew_package,volta)
 # Terminal tools
-	@$(call install_brew_package,antigen)
-	@$(call install_brew_cask,iterm2)
+	$(call install_brew_package,antigen)
+	$(call install_brew_cask,iterm2)
 # Dev tools
-	@$(call install_brew_cask,docker)
-	@$(call install_brew_cask,tableplus)
-	@$(call install_brew_cask,visual-studio-code)
+	$(call install_brew_cask,docker)
+	$(call install_brew_cask,tableplus)
+	$(call install_brew_cask,visual-studio-code)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
@@ -53,6 +53,11 @@ install-oh-my-zsh:
 uninstall-oh-my-zsh:
 	uninstall_oh_my_zsh
 
+test:
+	@brew install bats-core
+	@bats tests/brew-volta.bats
+	@brew rm bats-core
+	@brew cleanup
 
 # Browsers
 # cask "google-chrome"

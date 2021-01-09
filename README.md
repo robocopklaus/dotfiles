@@ -33,7 +33,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 
 #### Git
 
-Even though Git is shipped with macOS, the shipped version might often not be the latest one.
+Even though Git is shipped with macOS, the shipped version is often not up to date.
 
 #### Volta
 
@@ -47,9 +47,13 @@ Even though Git is shipped with macOS, the shipped version might often not be th
 
 #### iTerm2
 
-### Dev Tools
+[iTerm2](https://github.com/gnachman/iTerm2) is a replacement for Terminal. It is super fast and looks great.
+
+### Dev (Ops) Tools
 
 #### Docker
+
+[Docker](https://www.docker.com) allows you to build, test, and deploy applications quickly. It packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. You can quickly deploy and scale applications into any environment and know your code will run.
 
 #### TablePlus
 
