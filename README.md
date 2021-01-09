@@ -2,7 +2,7 @@
 
 ## :rocket: A hassle free development setup in just a few minutes without doing anything
 
-So you just got a new :computer: or you just want to do a clean install of the new macOS but you don't have much time setting everything up the way you like it? Then meet **.files**!
+So you just got a new :computer: or you just want to do a clean install of the new macOS but don't have much time setting everything up the way you like it? Well, meet **.files**!
 
 **.files** is a collection of configuration files (dotfiles *duh!*) plus an automated setup to install all the apps and tools to get running in no time.
 
@@ -24,14 +24,26 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 ## :battery: Batteries included
 
 
+### Programming language prerequisites and package managers
 
-### Homebrew
+
+#### Homebrew
 
 [Homebrew](https://github.com/Homebrew/brew) is a package manager that simplifies the installation of software on Apple's macOS operating system and Linux.
 
-### Git
+#### Git
 
-Even though git is shipped with macOS, the shipped version might often not be the latest one.
+Even though Git is shipped with macOS, the shipped version might often not be the latest one.
+
+#### Volta
+
+[Volta](https://github.com/volta-cli/volta)'s job is to manage your JavaScript command-line tools, such as `node`, `npm`, `yarn`, or executables shipped as part of JavaScript packages. It is similar to [NVM](https://github.com/nvm-sh/nvm) but faster.
+
+### Terminal tools
+
+#### Antigen
+
+[Antigen](https://github.com/zsh-users/antigen) is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
 
 <!-- ### Terminal tools
 

@@ -31,8 +31,48 @@ uninstall-brew: sudo
 	@if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
 install-packages: install-brew
+	# Programming language prerequisites and package managers
 	@$(call install_brew_package, git)
-	
+	@$(call install_brew_package, volta)
+	# Shell tools
+	@$(call install_brew_package, antigen)
+
+	# Terminal
+	# cask "iterm2"
+
+	# Dev tools
+	# cask "docker"
+	# cask "tableplus"
+	# cask "visual-studio-code"
+
+	# Browsers
+	# cask "google-chrome"
+	# cask "firefox-developer-edition"
+
+	# Productivity
+	# cask "google-drive-file-stream"
+	# cask "1password"
+	# brew "dockutil"
+	# cask "notion"
+	# mas 'Keynote', id: 409183694
+	# mas 'Numbers', id: 409203825
+	# mas "Pages", id: 409201541
+
+	# Utils
+	# cask "keka"
+	# cask "kekaexternalhelper"
+
+	# Communication
+	# cask "slack"
+
+	# Time Tracking
+	# cask "clockify"
+
+	# Music
+	# cask "spotify"
+
+	# Video
+	# cask "iina"
 
 # install-brew-packages: install-brew
 # 	@brew update --force	
