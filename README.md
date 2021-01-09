@@ -39,11 +39,23 @@ Even though Git is shipped with macOS, the shipped version might often not be th
 
 [Volta](https://github.com/volta-cli/volta)'s job is to manage your JavaScript command-line tools, such as `node`, `npm`, `yarn`, or executables shipped as part of JavaScript packages. It is similar to [NVM](https://github.com/nvm-sh/nvm) but faster.
 
-### Terminal tools
+### Terminal Tools
 
 #### Antigen
 
 [Antigen](https://github.com/zsh-users/antigen) is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
+
+#### iTerm2
+
+### Dev Tools
+
+#### Docker
+
+#### TablePlus
+
+[TablePlus](https://tableplus.com) is a GUI tool for several relational databases including MySQL, PostgreSQL, SQLite & more.
+
+#### Visual Studio Code
 
 <!-- ### Terminal tools
 
