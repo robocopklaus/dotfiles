@@ -20,7 +20,7 @@ uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
 uninstall_brew_cask = brew rm $(1)
 
 # Do not care about local files
-.PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
+.PHONY: all sudo install-brew uninstall-brew install-packages install-brew-packages install-oh-my-zsh uninstall-oh-my-zsh install-addons install-vs-code-extensions install-meslo-nerd-font macos-preferences link unlink test
 
 all: install-packages install-addons macos-preferences link
 
@@ -55,6 +55,9 @@ install-brew-packages: install-brew
 # Productivity
 	@$(call install_brew_package,dockutil)
 	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(DOCKUTIL_PATH) && sudo chmod +x $(DOCKUTIL_PATH)
+	@$(call install_brew_cask,google-drive-file-stream)
+	@$(call install_brew_cask,1password)
+	@$(call install_brew_cask,notion)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
@@ -109,10 +112,6 @@ test:
 # cask "firefox-developer-edition"
 
 # Productivity
-# cask "google-drive-file-stream"
-# cask "1password"
-# brew "dockutil"
-# cask "notion"
 # mas 'Keynote', id: 409183694
 # mas 'Numbers', id: 409203825
 # mas "Pages", id: 409201541
