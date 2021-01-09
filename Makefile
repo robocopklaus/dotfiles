@@ -51,7 +51,7 @@ install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
 uninstall-oh-my-zsh:
-	uninstall_oh_my_zsh
+	curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/uninstall.sh | bash
 
 test:
 	@brew unlink bats
