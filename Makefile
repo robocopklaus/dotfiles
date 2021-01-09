@@ -4,6 +4,8 @@ SHELL = /bin/bash
 OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 # Path to .dotfiles
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+# Path to dockutil script
+DOCKUTIL_PATH = /usr/local/bin/dockutil
 # PATH := $(DOTFILES_DIR)/bin:$(PATH)
 # FILES_DIR := $(DOTFILES_DIR)/files
 # FONTS_DIR := $(HOME)/Library/Fonts
@@ -51,7 +53,7 @@ install-brew-packages: install-brew
 	@$(call install_brew_cask,visual-studio-code)
 # Productivity
 	@$(call install_brew_package,dockutil)
-	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(shell which dockutil) && sudo chmod +x $(shell which dockutil)
+	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(DOCKUTIL_PATH) && sudo chmod +x $(DOCKUTIL_PATH)
 
 install-oh-my-zsh:
 	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash

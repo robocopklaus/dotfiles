@@ -14,7 +14,7 @@ So you just got a new :computer: or you just want to do a clean install of the n
 After you've successfully installed macOS you can just paste this line into the terminal:
 
 ```
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh)"
+curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh) | bash
 ```
 
 ## :monocle_face: So what the hell is going on?
