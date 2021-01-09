@@ -25,6 +25,10 @@ jobs:
         run: |
           brew bundle cleanup --force
 
+      - name: Uninstall Homebrew
+        run: |
+          make uninstall-brew
+
       - name: Install Homebrew
         run: |
           make install-brew
