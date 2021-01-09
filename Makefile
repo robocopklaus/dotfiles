@@ -9,7 +9,7 @@ SHELL = /bin/bash
 .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
 
 # all: sudo brew packages system-preferences symlinks
-all: sudo install-brew
+all: install-brew
 
 sudo:
 ifndef GITHUB_ACTION
@@ -18,10 +18,10 @@ ifndef GITHUB_ACTION
 endif
 
 install-brew: sudo
-	@if ! command -v $1 >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash; fi
+	@if ! command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash; fi
 
 uninstall-brew: sudo
-	@if command -v $1 >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
+	@if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
 
 # install-packages: install-brew-packages
 
