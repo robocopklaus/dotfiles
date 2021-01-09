@@ -50,7 +50,7 @@ install-brew-packages: install-brew
 	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
 # Productivity
-	@$(call install_brew_cask,dockutil)
+	@$(call install_brew_package,dockutil)
 	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(shell which dockutil) && sudo chmod +x $(shell which dockutil)
 
 install-oh-my-zsh:
