@@ -9,10 +9,10 @@ OH_MY_ZSH_DIR := $(HOME)/.oh-my-zsh
 # FONTS_DIR := $(HOME)/Library/Fonts
 
 # Helper functions
-install_brew_package: brew list --versions $(1) > /dev/null || brew install $(1)
-install_brew_cask: brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1) 
-uninstall_brew_package: brew rm $$(brew deps $(1)) $(1)
-uninstall_brew_cask: brew rm $(1)
+install_brew_package = brew list --versions $(1) > /dev/null || brew install $(1)
+install_brew_cask = brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1) 
+uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
+uninstall_brew_cask = brew rm $(1)
 
 # Do not care about local files
 .PHONY: all sudo install-brew install-packages oh-my-zsh vs-code-extensions package-post-install-fixes meslo-nerd-font system-preferences symlinks test
