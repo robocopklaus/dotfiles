@@ -1,6 +1,4 @@
-![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
-
-# .files
+# .files ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
 
 ## :rocket: A hassle free development setup in just a few minutes without doing anything
 
@@ -29,6 +27,11 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main
 
 ### Homebrew
 
+[Homebrew](https://github.com/Homebrew/brew) is a package manager that simplifies the installation of software on Apple's macOS operating system and Linux.
+
+### Git
+
+Even though git is shipped with macOS, the shipped version might often not be the latest one.
 
 <!-- ### Terminal tools
 

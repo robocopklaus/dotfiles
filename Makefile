@@ -32,7 +32,7 @@ install-git: install-brew
 	$(call install_brew_package, git)
 
 uninstall-git:
-	brew rm $(brew deps git) git
+	brew rm $$(brew deps git) git
 # install-packages: install-brew-packages
 
 # install-brew-packages: install-brew
