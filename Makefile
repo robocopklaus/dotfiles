@@ -56,7 +56,7 @@ uninstall-oh-my-zsh:
 test:
 	@brew unlink bats
 	@$(call install_brew_package,bats-core)
-	@bats tests/brew-volta.bats
+	@bats tests
 	@$(call uninstall_brew_package,bats-core)
 # @brew rm bats-core
 	@brew cleanup
