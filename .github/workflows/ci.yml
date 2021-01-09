@@ -21,6 +21,10 @@ jobs:
       - name: Clone this repository
         uses: actions/checkout@v2
 
+      - name: Clean up
+        run: |
+          brew bundle cleanup
+
       - name: Install Homebrew
         run: |
           make install-brew
