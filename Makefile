@@ -25,7 +25,7 @@ uninstall_brew_cask = brew rm $(1)
 
 all: install
 
-install: brew-packages mas-apps addons macos-preferences link
+install: brew-packages addons macos-preferences link
 
 addons: vs-code-extensions meslo-nerd-font
 
