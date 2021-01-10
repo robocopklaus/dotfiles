@@ -2,6 +2,7 @@
     "editor.fontFamily": "MesloLGS NF, Menlo, Monaco, 'Courier New', monospace",
     "editor.fontSize": 13,
     "editor.minimap.enabled": false,
+    "explorer.confirmDelete": false,
     "explorer.openEditors.visible": 0,
     "git.autofetch": true,
     "telemetry.enableTelemetry": false,

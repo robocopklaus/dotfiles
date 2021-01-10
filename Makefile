@@ -16,29 +16,20 @@ FONTS_DIR := $(HOME)/Library/Fonts
 install_vscode_extension = code --install-extension $(1)
 install_brew_package = brew list --versions $(1) > /dev/null || brew install $(1)
 install_brew_cask = brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1) 
+install_mas_app = mas install $(1)
 uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
 uninstall_brew_cask = brew rm $(1)
 
 # Do not care about local files
-.PHONY: all sudo install-brew uninstall-brew install-packages install-brew-packages install-oh-my-zsh uninstall-oh-my-zsh install-addons install-vs-code-extensions install-meslo-nerd-font macos-preferences link unlink test
+.PHONY: all install sudo brew
 
-all: install-packages install-addons macos-preferences link
+all: install
 
-sudo:
-ifndef GITHUB_ACTION
-	@sudo -v
-	@while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-endif
+install: brew-packages mas-apps addons macos-preferences link
 
-install-brew: sudo
-	@if ! command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash; fi
+addons: vs-code-extensions meslo-nerd-font
 
-uninstall-brew: sudo
-	@if command -v brew >/dev/null; then curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash; fi
-
-install-packages: install-brew-packages install-oh-my-zsh
-
-install-brew-packages: install-brew
+brew-packages: brew-taps
 	@brew update --force	
 # Programming language prerequisites and package managers
 	@$(call install_brew_package,git)
@@ -53,27 +44,61 @@ install-brew-packages: install-brew
 	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
 # Productivity
-	@$(call install_brew_package,dockutil)
-	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(DOCKUTIL_PATH) && sudo chmod +x $(DOCKUTIL_PATH)
 	@$(call install_brew_cask,google-drive-file-stream)
 	@$(call install_brew_cask,1password)
 	@$(call install_brew_cask,notion)
+	@$(call install_brew_cask,slack)
+# Browsers
+	@$(call install_brew_cask,google-chrome)
+	@$(call install_brew_cask,firefox-developer-edition)
+# Audio & Video	
+	@$(call install_brew_cask,iina)
+	@$(call install_brew_cask,spotify)
+# macOS utils
+	@$(call install_brew_package,dockutil)
+	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(DOCKUTIL_PATH) && sudo chmod +x $(DOCKUTIL_PATH)
+	@$(call install_brew_cask,keka)
+	@$(call install_brew_cask,kekaexternalhelper)
+	@$(call install_brew_package,mas)
 
-install-oh-my-zsh:
-	@[[ ! -d $(OH_MY_ZSH_DIR) ]] && curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
+mas-apps: brew-packages
+ifndef GITHUB_ACTION
+# Keynote
+	@$(call install_mas_app,409183694)
+# Numbers	
+	@$(call install_mas_app,409203825)
+# Pages	
+	@$(call install_mas_app,409201541)
+endif
+
+sudo:
+ifndef GITHUB_ACTION
+	@sudo -v
+	@while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+endif
+
+brew: sudo
+	@[[ command -v brew >/dev/null ]] || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+
+uninstall-brew: sudo
+	@[[ ! command -v brew >/dev/null ]] || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash
+
+brew-taps: brew
+	@brew tap homebrew/cask-versions
+	@brew tap homebrew/command-not-found
+
+oh-my-zsh:
+	@[[ -d $(OH_MY_ZSH_DIR) ]] || curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
 uninstall-oh-my-zsh:
 # https://github.com/ohmyzsh/ohmyzsh/wiki/FAQ#how-do-i-uninstall-oh-my-zsh
 	#curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/uninstall.sh | bash
 
-install-addons: install-vs-code-extensions install-meslo-nerd-font
-
-install-vs-code-extensions:
+vs-code-extensions:
 	@$(call install_vscode_extension,bernardodsanderson.theme-material-neutral)
 	@$(call install_vscode_extension,PKief.material-icon-theme)
-	@$(call install_vscode_extension,sharat.vscode-brewfile)
 
-install-meslo-nerd-font:
+meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
 	@[[ -d $(FONTS_DIR) ]] || mkdir -p "$(FONTS_DIR)"
 	@curl -sL https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf -o "$(FONTS_DIR)/Meslo LGS NF Regular.ttf"
@@ -83,17 +108,17 @@ install-meslo-nerd-font:
 
 macos-preferences:
 	@$(SHELL) scripts/macos-system-preferences.sh
-#	@$(SHELL) scripts/dock-items.sh
+	@$(SHELL) scripts/dock-items.sh
 
 link: | $(DOTFILES)
 	@[[ -d "$(HOME)/Library/Application Support/Code/User" ]] || mkdir -p "$(HOME)/Library/Application Support/Code/User"
-	@ln -nsf $(DOTFILES_DIR)/files/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
+	@ln -sfv $(DOTFILES_DIR)/files/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
 
 # This will link all of our dot files into our files directory. The
 # magic happening in the first arg to ln is just grabbing the file name
 # and appending the path to dotfiles/home
 $(DOTFILES):
-	@ln -sv "$(PWD)/files/$(notdir $@)" $@
+	@ln -sfv "$(PWD)/files/$(notdir $@)" $@
 
 # Interactively delete symbolic links.
 unlink:
@@ -106,28 +131,3 @@ test:
 	@bats tests
 	@$(call uninstall_brew_package,bats-core)
 	@brew cleanup
-
-# Browsers
-# cask "google-chrome"
-# cask "firefox-developer-edition"
-
-# Productivity
-# mas 'Keynote', id: 409183694
-# mas 'Numbers', id: 409203825
-# mas "Pages", id: 409201541
-
-# Utils
-# cask "keka"
-# cask "kekaexternalhelper"
-
-# Communication
-# cask "slack"
-
-# Time Tracking
-# cask "clockify"
-
-# Music
-# cask "spotify"
-
-# Video
-# cask "iina"
