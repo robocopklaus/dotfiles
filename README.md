@@ -16,7 +16,7 @@ So you got a new :computer: or you just want to do a clean install of the latest
 After you've successfully installed macOS you can just copy & paste this line into the terminal:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh) | bash
+curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh | bash
 ```
 
 ## :turtle: Manual installation
