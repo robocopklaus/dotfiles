@@ -11,6 +11,8 @@ So you got a new :computer: or you just want to do a clean install of the latest
 
 ## :robot: Automated installation
 
+:warning: Please backup your current settings. They may very well be overwritten!
+
 After you've successfully installed macOS you can just copy & paste this line into the terminal:
 
 ```
@@ -19,9 +21,24 @@ curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/
 
 ## :turtle: Manual installation
 
+:warning: Please backup your current settings. They may very well be overwritten!
+
+:bulb: macOS Command Line Tools are **required**. You can install them with:
+
+```
+xcode-select --install
+```
 1. Clone this repo
 
-    ```git clone ```
+    ```
+    git clone git@github.com:robocopklaus/dotfiles.git
+    ```
+
+2. Install
+
+    ```
+    make install
+    ```
 
 ## :monocle_face: So what the hell is going on?
 
@@ -63,6 +80,10 @@ curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/
 ### IDE
 
 - [x] **[Visual Studio Code](https://github.com/microsoft/vscode)** was ranked the [most popular developer environment tool](https://insights.stackoverflow.com/survey/2019#technology-_-most-popular-development-environments) and that rightfully so.
+
+- [x] **[Material Neutral Theme](https://github.com/bernardodsanderson/material-neutral-theme)** is a theme for VS Code that is based on Google's Material Design Color Palette.
+
+- [x] **[Material Icon Theme](https://github.com/PKief/vscode-material-icon-theme)** gets the Material Design icons into VS Code.
 
 ### Productivity Tools
 
