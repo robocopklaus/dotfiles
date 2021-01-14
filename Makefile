@@ -113,6 +113,7 @@ macos-preferences:
 link: | $(DOTFILES)
 	@[[ -d "$(HOME)/Library/Application Support/Code/User" ]] || mkdir -p "$(HOME)/Library/Application Support/Code/User"
 	@ln -sfv $(DOTFILES_DIR)/files/vscode.settings.json "$(HOME)/Library/Application Support/Code/User/settings.json"
+	@ln -sfv $(DOTFILES_DIR)/files/com.colliderli.iina.plist $(HOME)/Library/Preferences/com.colliderli.iina.plist
 
 # This will link all of our dot files into our files directory. The
 # magic happening in the first arg to ln is just grabbing the file name
