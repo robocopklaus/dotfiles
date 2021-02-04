@@ -97,6 +97,10 @@ uninstall-oh-my-zsh:
 vs-code-extensions:
 	@$(call install_vscode_extension,bernardodsanderson.theme-material-neutral)
 	@$(call install_vscode_extension,PKief.material-icon-theme)
+	@$(call install_vscode_extension,graphql.vscode-graphql)
+	@$(call install_vscode_extension,ms-azuretools.vscode-docker)
+	@$(call install_vscode_extension,mechatroner.rainbow-csv)
+	@$(call install_vscode_extension,redhat.vscode-yaml)
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
