@@ -44,7 +44,7 @@ brew-packages: brew-taps
 	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
 # Productivity
-	@$(call install_brew_cask,google-drive-file-stream)
+	# @$(call install_brew_cask,google-drive-file-stream)
 	@$(call install_brew_cask,1password)
 	@$(call install_brew_cask,notion)
 	@$(call install_brew_cask,slack)
