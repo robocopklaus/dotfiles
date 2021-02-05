@@ -6,8 +6,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # Volta
-VOLTA_HOME=$HOME/.volta
-PATH=$VOLTA_HOME/bin:$PATH
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
 
 # Load Antigen
 source $(brew --prefix)/share/antigen/antigen.zsh
