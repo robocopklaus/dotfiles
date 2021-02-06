@@ -85,6 +85,14 @@ xcode-select --install
 
 - [x] **[Material Icon Theme](https://github.com/PKief/vscode-material-icon-theme)** gets the Material Design icons into VS Code.
 
+- [x] **[VSCode GraphQL](https://github.com/graphql/vscode-graphql)** aims to tightly integrate the GraphQL ecosystem with VSCode for an awesome developer experience.
+
+- [x] **[Docker for Visual Studio Code](https://github.com/microsoft/vscode-docker)** makes it easy to build, manage, and deploy containerized applications from Visual Studio Code.
+
+- [x] **[Rainbow CSV](https://github.com/mechatroner/vscode_rainbow_csv)** highlights CSV and TSV spreadsheet files in different rainbow colors.
+
+- [x] **[YAML Language Support by Red Hat](https://github.com/redhat-developer/vscode-yaml)** provides comprehensive YAML Language support to Visual Studio Code, via the yaml-language-server, with built-in Kubernetes syntax support.
+
 ### Productivity Tools
 
 - [x] **[1Password](https://1password.com)** provides a place for users to store various passwords, software licenses, and other sensitive information in a virtual vault that is locked with a PBKDF2-guarded master password.
