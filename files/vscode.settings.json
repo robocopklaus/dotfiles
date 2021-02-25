@@ -1,13 +1,30 @@
 {
-    "editor.fontFamily": "MesloLGS NF, Menlo, Monaco, 'Courier New', monospace",
-    "editor.fontSize": 13,
-    "editor.minimap.enabled": false,
-    "explorer.confirmDelete": false,
-    "explorer.openEditors.visible": 0,
-    "git.autofetch": true,
-    "telemetry.enableTelemetry": false,
-    "terminal.integrated.fontFamily": "MesloLGS NF",
-    "workbench.colorTheme": "Material Neutral",
-    "workbench.iconTheme": "material-icon-theme",
-    "workbench.startupEditor": "newUntitledFile"
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": false
+  },
+  "[typescript]": {
+    "editor.formatOnSave": false
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.fontFamily": "MesloLGS NF, Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontSize": 13,
+  "editor.formatOnSave": true,
+  "editor.minimap.enabled": false,
+  "editor.tabSize": 2,
+  "eslint.alwaysShowStatus": true,
+  "explorer.confirmDelete": false,
+  "explorer.openEditors.visible": 0,
+  "git.autofetch": true,
+  "telemetry.enableTelemetry": false,
+  "terminal.integrated.fontFamily": "MesloLGS NF",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "workbench.colorTheme": "Material Neutral",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.startupEditor": "newUntitledFile"
 }

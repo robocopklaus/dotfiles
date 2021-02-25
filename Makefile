@@ -44,7 +44,7 @@ brew-packages: brew-taps
 	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
 # Productivity
-	# @$(call install_brew_cask,google-drive-file-stream)
+	@$(call install_brew_cask,google-drive)
 	@$(call install_brew_cask,1password)
 	@$(call install_brew_cask,notion)
 	@$(call install_brew_cask,slack)
@@ -96,11 +96,17 @@ uninstall-oh-my-zsh:
 
 vs-code-extensions:
 	@$(call install_vscode_extension,bernardodsanderson.theme-material-neutral)
-	@$(call install_vscode_extension,PKief.material-icon-theme)
+	@$(call install_vscode_extension,pkief.material-icon-theme)
 	@$(call install_vscode_extension,graphql.vscode-graphql)
 	@$(call install_vscode_extension,ms-azuretools.vscode-docker)
 	@$(call install_vscode_extension,mechatroner.rainbow-csv)
 	@$(call install_vscode_extension,redhat.vscode-yaml)
+	@$(call install_vscode_extension,mikestead.dotenv)
+	@$(call install_vscode_extension,prisma.prisma)
+	@$(call install_vscode_extension,dbaeumer.vscode-eslint)
+	@$(call install_vscode_extension,ms-vsliveshare.vsliveshare)
+	@$(call install_vscode_extension,esbenp.prettier-vscode)
+	@$(call install_vscode_extension,richie5um2.vscode-sort-json)
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
