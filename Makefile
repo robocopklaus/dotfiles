@@ -43,6 +43,7 @@ brew-packages: brew-taps
 	@$(call install_brew_cask,docker)
 	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
+	@$(call install_brew_package,dokku/repo/dokku)
 # Productivity
 	@$(call install_brew_cask,google-drive)
 	@$(call install_brew_cask,1password)
