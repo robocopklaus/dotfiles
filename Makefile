@@ -108,6 +108,8 @@ vs-code-extensions:
 	@$(call install_vscode_extension,ms-vsliveshare.vsliveshare)
 	@$(call install_vscode_extension,esbenp.prettier-vscode)
 	@$(call install_vscode_extension,richie5um2.vscode-sort-json)
+	@$(call install_vscode_extension,stylelint.vscode-stylelint)
+	@$(call install_vscode_extension,vivaxy.vscode-conventional-commits)
 
 meslo-nerd-font:
 	@echo Installing Meslo LGS Nerd Font...
