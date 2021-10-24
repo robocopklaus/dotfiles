@@ -4,8 +4,7 @@
 
 So you got a new :computer: or you just want to do a clean install of the latest macOS but don't have much time setting everything up the way you like it? Well, meet **.files**!
 
-**.files** is a collection of configuration files (dotfiles *duh!*) plus an automated setup to install all the apps and tools to get running in no time.
-
+**.files** is a collection of configuration files (dotfiles _duh!_) plus an automated setup to install all the apps and tools to get running in no time.
 
 ![](https://raw.githubusercontent.com/robocopklaus/dotfiles/main/screenshot.png)
 
@@ -28,20 +27,20 @@ curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/
 ```
 xcode-select --install
 ```
+
 1. Clone this repo
 
-    ```
-    git clone git@github.com:robocopklaus/dotfiles.git
-    ```
+   ```
+   git clone git@github.com:robocopklaus/dotfiles.git
+   ```
 
 2. Install
 
-    ```
-    make install
-    ```
+   ```
+   make install
+   ```
 
 ## :monocle_face: So what the hell is going on?
-
 
 ### Programming language utilities and package managers
 
@@ -120,6 +119,8 @@ xcode-select --install
 - [x] **[Keka](https://github.com/aonez/Keka)** is a full featured file archiver.
 
 - [x] **[mas-cli](https://github.com/mas-cli/mas)** is simple command line interface for the Mac App Store that is designed for scripting and automation.
+
+- [x] **[Finicky](https://github.com/johnste/finicky)** is a macOS application that allows you to set up rules that decide which browser is opened for every link or url.
 
 ## References
 

@@ -33,10 +33,13 @@
   "explorer.confirmDelete": false,
   "explorer.openEditors.visible": 0,
   "git.autofetch": true,
+  "redhat.telemetry.enabled": false,
   "telemetry.enableTelemetry": false,
   "terminal.integrated.fontFamily": "MesloLGS NF",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "workbench.colorTheme": "Material Neutral",
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.startupEditor": "newUntitledFile"
+  "workbench.startupEditor": "newUntitledFile",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "docker.showStartPage": false
 }

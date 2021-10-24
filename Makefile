@@ -60,6 +60,7 @@ brew-packages: brew-taps
 	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(DOCKUTIL_PATH) && sudo chmod +x $(DOCKUTIL_PATH)
 	@$(call install_brew_cask,keka)
 	@$(call install_brew_cask,kekaexternalhelper)
+	@$(call install_brew_cask,finicky)
 	@$(call install_brew_package,mas)
 
 mas-apps: brew-packages
