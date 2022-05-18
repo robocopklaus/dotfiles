@@ -15,7 +15,7 @@ FONTS_DIR := $(HOME)/Library/Fonts
 # Helper functions
 install_vscode_extension = code --install-extension $(1)
 install_brew_package = brew list --versions $(1) > /dev/null || brew install $(1)
-install_brew_cask = brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1) 
+install_brew_cask = brew list --cask --versions $(1) > /dev/null || brew install --cask --no-quarantine  --force $(1)
 install_mas_app = mas install $(1)
 uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
 uninstall_brew_cask = brew rm $(1)
@@ -30,7 +30,7 @@ install: brew-packages addons macos-preferences link
 addons: vs-code-extensions meslo-nerd-font
 
 brew-packages: brew-taps
-	@brew update --force	
+	@brew update --force
 # Programming language prerequisites and package managers
 	@$(call install_brew_package,git)
 	@$(call install_brew_package,volta)
@@ -41,9 +41,7 @@ brew-packages: brew-taps
 	@defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
 # Dev tools
 	@$(call install_brew_cask,docker)
-	@$(call install_brew_cask,tableplus)
 	@$(call install_brew_cask,visual-studio-code)
-	@$(call install_brew_package,dokku/repo/dokku)
 # Productivity
 	@$(call install_brew_cask,google-drive)
 	@$(call install_brew_cask,1password)
@@ -52,7 +50,7 @@ brew-packages: brew-taps
 # Browsers
 	@$(call install_brew_cask,google-chrome)
 	@$(call install_brew_cask,firefox-developer-edition)
-# Audio & Video	
+# Audio & Video
 	@$(call install_brew_cask,iina)
 	@$(call install_brew_cask,spotify)
 # macOS utils
@@ -67,9 +65,9 @@ mas-apps: brew-packages
 ifndef GITHUB_ACTION
 # Keynote
 	@$(call install_mas_app,409183694)
-# Numbers	
+# Numbers
 	@$(call install_mas_app,409203825)
-# Pages	
+# Pages
 	@$(call install_mas_app,409201541)
 endif
 
