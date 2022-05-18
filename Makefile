@@ -54,7 +54,7 @@ brew-packages: brew-taps
 	@$(call install_brew_cask,iina)
 	@$(call install_brew_cask,spotify)
 # macOS utils
-	@$(call install_brew_package,dockutil)
+	@$(call install_brew_package,hpedrorodrigues/tools/dockutil)
 	@$(call install_brew_cask,keka)
 	@$(call install_brew_cask,kekaexternalhelper)
 	@$(call install_brew_cask,finicky)
