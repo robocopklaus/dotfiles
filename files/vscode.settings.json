@@ -20,6 +20,7 @@
   "[typescriptreact]": {
     "editor.formatOnSave": false
   },
+  "docker.showStartPage": false,
   "editor.codeActionsOnSave": {
     "source.fixAll": true
   },
@@ -33,13 +34,13 @@
   "explorer.confirmDelete": false,
   "explorer.openEditors.visible": 0,
   "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
   "redhat.telemetry.enabled": false,
   "telemetry.enableTelemetry": false,
   "terminal.integrated.fontFamily": "MesloLGS NF",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "workbench.colorTheme": "Material Neutral",
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.startupEditor": "newUntitledFile",
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "docker.showStartPage": false
+  "workbench.startupEditor": "newUntitledFile"
 }
