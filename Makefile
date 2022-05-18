@@ -55,7 +55,6 @@ brew-packages: brew-taps
 	@$(call install_brew_cask,spotify)
 # macOS utils
 	@$(call install_brew_package,dockutil)
-	@sudo curl -sL https://raw.githubusercontent.com/kcrawford/dockutil/master/scripts/dockutil -o $(DOCKUTIL_PATH) && sudo chmod +x $(DOCKUTIL_PATH)
 	@$(call install_brew_cask,keka)
 	@$(call install_brew_cask,kekaexternalhelper)
 	@$(call install_brew_cask,finicky)
