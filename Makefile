@@ -7,8 +7,6 @@ DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # List all dotfiles
 HOMEFILES := $(shell ls -A files | grep "^\.")
 DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
-# Path to dockutil script
-DOCKUTIL_PATH = /usr/local/bin/dockutil
 # Path to macOS user fonts
 FONTS_DIR := $(HOME)/Library/Fonts
 
@@ -54,7 +52,7 @@ brew-packages: brew-taps
 	@$(call install_brew_cask,iina)
 	@$(call install_brew_cask,spotify)
 # macOS utils
-	@$(call install_brew_package,hpedrorodrigues/tools/dockutil)
+	@$(call install_brew_cask,hpedrorodrigues/tools/dockutil)
 	@$(call install_brew_cask,keka)
 	@$(call install_brew_cask,kekaexternalhelper)
 	@$(call install_brew_cask,finicky)
