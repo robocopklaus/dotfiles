@@ -75,10 +75,10 @@ ifndef GITHUB_ACTION
 endif
 
 brew: sudo
-	@command -v brew >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+	@command -v brew >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 uninstall-brew: sudo
-	@! command -v brew >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh | bash
+	@! command -v brew >/dev/null 2>&1 || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh | bash
 
 brew-taps: brew
 	@brew tap homebrew/cask-versions
