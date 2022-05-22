@@ -2,6 +2,9 @@
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[helm]": {
+    "editor.formatOnSave": false
+  },
   "[javascript]": {
     "editor.formatOnSave": false
   },
