@@ -74,8 +74,6 @@ xcode-select --install
 
 - [x] **[Docker](https://www.docker.com)** allows you to build, test, and deploy applications quickly. It packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. You can quickly deploy and scale applications into any environment and know your code will run.
 
-- [x] **[TablePlus](https://tableplus.com)** is a GUI tool for several relational databases including MySQL, PostgreSQL, SQLite & more.
-
 ### IDE
 
 - [x] **[Visual Studio Code](https://github.com/microsoft/vscode)** was ranked the [most popular developer environment tool](https://insights.stackoverflow.com/survey/2019#technology-_-most-popular-development-environments) and that rightfully so.

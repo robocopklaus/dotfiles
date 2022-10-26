@@ -6,11 +6,16 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # Homebrew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# eval "$(pyenv init -)"
 
 # Volta
 export VOLTA_HOME="$HOME/.volta"
-export PATH="$VOLTA_HOME/bin:$PATH"
+export PATH="/usr/local/sbin:$VOLTA_HOME/bin:$PATH"
+
+# SOPS
+export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
 # Load Antigen
 source $(brew --prefix)/share/antigen/antigen.zsh
