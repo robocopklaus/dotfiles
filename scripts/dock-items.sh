@@ -31,7 +31,7 @@ dockutil --no-restart --add "/Applications/iTerm.app"
 dockutil --no-restart --add '' --type small-spacer --section apps
 
 # System preferences
-dockutil --no-restart --add "/System/Applications/System Preferences.app"
+dockutil --no-restart --add "/System/Applications/System Settings.app"
 
 # Folders
 dockutil --no-restart --add "/Applications" --view auto --display folder --sort name

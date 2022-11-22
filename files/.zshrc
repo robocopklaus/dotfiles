@@ -1,3 +1,6 @@
+#autoload -Uz compinit
+#compinit
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -5,13 +8,17 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Kubernetes
+#source <(kubectl completion zsh)
+
 # Homebrew
-# eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # eval "$(pyenv init -)"
 
 # Volta
 export VOLTA_HOME="$HOME/.volta"
+#export PATH="/opt/homebrew/opt/openjdk/bin:/usr/local/sbin:$VOLTA_HOME/bin:$PATH"
 export PATH="/usr/local/sbin:$VOLTA_HOME/bin:$PATH"
 
 # SOPS
