@@ -1,5 +1,8 @@
-# Set the default shell to bash for its compatibility and features.
+# The default shell is /bin/bash.
 SHELL = /bin/bash
+
+# Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
+export PATH := /opt/homebrew/bin:$(PATH)
 
 # Declare phony targets to ensure these rules run even if files with these names exist.
 .PHONY: sudo brew verify-brew uninstall-brew brew-packages brew-taps
@@ -40,6 +43,7 @@ brew: sudo
 		echo "Homebrew is already installed."; \
 	fi
 
+# verify-brew target checks for the presence of Homebrew.
 verify-brew:
 	@echo "Verifying Homebrew installation..."
 	@if [ -x "/opt/homebrew/bin/brew" ]; then \
