@@ -31,7 +31,7 @@ brew: sudo
 	@echo "Checking for Homebrew installation..."
 	@if ! command -v brew >/dev/null 2>&1; then \
 		echo "Installing Homebrew..."; \
-		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | zsh || { echo "Failed to install Homebrew"; exit 1; } \
+		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash || { echo "Failed to install Homebrew"; exit 1; } \
 	else \
 		echo "Homebrew is already installed."; \
 	fi
@@ -41,7 +41,7 @@ uninstall-brew: sudo
 	@echo "Checking for Homebrew installation..."
 	@if command -v brew >/dev/null 2>&1; then \
 		echo "Uninstalling Homebrew..."; \
-		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh | zsh || { echo "Failed to uninstall Homebrew"; exit 1; } \
+		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh | bash || { echo "Failed to uninstall Homebrew"; exit 1; } \
 	else \
 		echo "Homebrew is not installed."; \
 	fi
