@@ -4,6 +4,10 @@ SHELL = /bin/bash
 # Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
 export PATH := /opt/homebrew/bin:$(PATH)
 
+# Helper functions
+install_brew_package = brew list --versions $(1) > /dev/null || brew install $(1)
+uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
+
 # Declare phony targets to ensure these rules run even if files with these names exist.
 .PHONY: sudo brew brew-packages brew-taps
 
@@ -11,9 +15,13 @@ all: install
 
 install: brew-packages
 
-brew-packages: brew
+brew-packages: brew-taps
 	@echo "Updating Homebrew..."
 	@brew update --force || { echo "Failed to update Homebrew"; exit 1; }
+
+	# Programming language prerequisites and package managers
+	@$(call install_brew_package,git)
+	@$(call install_brew_package,volta)
 
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
@@ -39,7 +47,7 @@ brew: sudo
 	fi
 
 # brew-taps target can be defined here if you have additional taps to add.
-brew-taps:
+brew-taps: brew
 	# Add commands to tap additional repositories here, if necessary.
 
 # uninstall-brew target removes Homebrew if it's installed.
