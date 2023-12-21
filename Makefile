@@ -1,5 +1,5 @@
-# The default shell is /bin/sh. We use zsh for its advanced features.
-SHELL = /bin/zsh
+# Set the default shell to bash for its compatibility and features.
+SHELL = /bin/bash
 
 # Declare phony targets to ensure these rules run even if files with these names exist.
 .PHONY: sudo brew verify-brew uninstall-brew brew-packages brew-taps

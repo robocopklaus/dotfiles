@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Define the path to the dotfiles directory.
 DOTFILES_PATH="$HOME/.dotfiles"
