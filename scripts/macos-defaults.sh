@@ -43,7 +43,9 @@ fi
 echo "Configuring Accessibility settings..."
 
 # Enable three finger drag
+apply_default 'com.apple.AppleMultitouchTrackpad' 'Dragging' -bool true
 apply_default 'com.apple.AppleMultitouchTrackpad' 'TrackpadThreeFingerDrag' -bool true
+apply_default 'com.apple.driver.AppleBluetoothMultitouch.trackpad' 'Dragging' -bool true
 apply_default 'com.apple.driver.AppleBluetoothMultitouch.trackpad' 'TrackpadThreeFingerDrag' -bool true
 
 ###############################################################################
