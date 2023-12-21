@@ -1,6 +1,10 @@
 # The default shell is /bin/bash.
 SHELL = /bin/bash
 
+# List all dotfiles
+HOMEFILES := $(shell ls -A files | grep "^\.")
+DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
+
 # Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
 export PATH := /opt/homebrew/bin:$(PATH)
 
@@ -12,30 +16,45 @@ BREW_CASKS := iterm2 visual-studio-code docker google-drive \
               kap postman sketch tableplus whatsapp
 
 # List of VS Code extensions to install
-VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral pkief.material-icon-theme mechatroner.rainbow-csv mikestead.dotenv prisma.prisma dbaeumer.vscode-eslint vivaxy.vscode-conventional-commits bradlc.vscode-tailwindcss
+VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
+                      pkief.material-icon-theme mechatroner.rainbow-csv \
+                      mikestead.dotenv prisma.prisma dbaeumer.vscode-eslint \
+                      vivaxy.vscode-conventional-commits bradlc.vscode-tailwindcss
 
 .PHONY: sudo brew brew-packages brew-casks brew-taps \
-        uninstall-brew-packages uninstall-brew-casks uninstall-all vs-code-extensions
+        uninstall-brew-packages uninstall-brew-casks uninstall-all \
+        vs-code-extensions uninstall-vscode-extensions
 
 all: install
 
-install: brew-packages brew-casks addons
+# Installation of packages, casks, and additional software
+install: brew-packages brew-casks addons link
 
+# Homebrew package installation
 brew-packages: brew-taps
 	@echo "Updating Homebrew..."
-	@brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }
-	@echo "Installing Homebrew packages..."
-	@for package in $(BREW_PACKAGES); do \
-		echo "Installing $$package..."; \
-		brew list --versions $$package > /dev/null || brew install --quiet $$package; \
-	done
+	@if command -v brew >/dev/null 2>&1; then \
+		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
+		echo "Installing Homebrew packages..."; \
+		for package in $(BREW_PACKAGES); do \
+			echo "Installing $$package..."; \
+			brew list --versions $$package > /dev/null || brew install --quiet $$package; \
+		done; \
+	else \
+		echo "Homebrew is not installed."; \
+	fi
 
+# Homebrew cask installation
 brew-casks: brew-taps
 	@echo "Installing Homebrew casks..."
-	@for cask in $(BREW_CASKS); do \
-		echo "Installing $$cask..."; \
-		brew list --cask --versions $$cask > /dev/null || brew install --cask --quiet --no-quarantine --force $$cask; \
-	done
+	@if command -v brew >/dev/null 2>&1; then \
+		for cask in $(BREW_CASKS); do \
+			echo "Installing $$cask..."; \
+			brew list --cask --versions $$cask > /dev/null || brew install --cask --quiet --no-quarantine --force $$cask; \
+		done; \
+	else \
+		echo "Homebrew is not installed."; \
+	fi
 
 addons: vs-code-extensions
 
@@ -55,8 +74,20 @@ uninstall-brew-casks:
 		brew uninstall --cask $$cask || echo "Failed to uninstall $$cask"; \
 	done
 
-# Uninstall all Homebrew packages, casks, and Homebrew itself
-uninstall-all: uninstall-brew-packages uninstall-brew-casks uninstall-brew
+# Uninstall specified Visual Studio Code extensions
+uninstall-vscode-extensions:
+	@echo "Uninstalling specified Visual Studio Code extensions..."
+	@if command -v code >/dev/null 2>&1; then \
+		for extension in $(VS_CODE_EXTENSIONS); do \
+			echo "Uninstalling $$extension..."; \
+			code --uninstall-extension $$extension || echo "Failed to uninstall $$extension"; \
+		done; \
+	else \
+		echo "Visual Studio Code is not installed."; \
+	fi
+
+# Uninstall all Homebrew packages, casks, VS Code extensions, and Homebrew itself
+uninstall-all: uninstall-brew-packages uninstall-brew-casks uninstall-vscode-extensions uninstall-brew
 
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
@@ -94,7 +125,6 @@ vs-code-extensions:
 
 # brew-taps target for adding additional repositories.
 brew-taps: brew
-	# Add commands to tap additional repositories here, if necessary.
 
 # uninstall-brew target removes Homebrew if it's installed.
 uninstall-brew: sudo
@@ -105,3 +135,16 @@ uninstall-brew: sudo
 	else \
 		echo "Homebrew is not installed."; \
 	fi
+
+link: | $(DOTFILES)
+
+# This will link all of our dot files into our files directory. The
+# magic happening in the first arg to ln is just grabbing the file name
+# and appending the path to dotfiles/home
+$(DOTFILES):
+	@ln -sfv "$(PWD)/files/$(notdir $@)" $@
+
+# Interactively delete symbolic links.
+unlink:
+	@echo "Unlinking dotfiles"
+	@for f in $(DOTFILES); do if [ -h $$f ]; then rm -i $$f; fi ; done
