@@ -33,7 +33,7 @@ brew: sudo
 		echo "Installing Homebrew..."; \
 		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash || { echo "Failed to install Homebrew"; exit 1; } \
 		echo "Validating Homebrew installation..."; \
-		[ -x "/opt/homebrew/bin/brew" ] || [ -x "/usr/local/bin/brew" ] || { echo "Homebrew installation failed"; exit 1; } \
+		eval "$(/opt/homebrew/bin/brew shellenv)" \
 		echo "Homebrew installed successfully"; \
 	else \
 		echo "Homebrew is already installed."; \
