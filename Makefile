@@ -10,7 +10,7 @@ install: brew-packages
 
 brew-packages: brew
 	@echo "Updating Homebrew..."
-	@/opt/homebrew/bin/brew update --force || { echo "Failed to update Homebrew"; exit 1; }
+	@brew update --force || { echo "Failed to update Homebrew"; exit 1; }
 
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
