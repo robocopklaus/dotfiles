@@ -16,18 +16,18 @@ install: brew-packages brew-casks
 
 brew-packages: brew-taps
 	@echo "Updating Homebrew..."
-	@brew update --force || { echo "Failed to update Homebrew"; exit 1; }
+	@brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }
 	@echo "Installing Homebrew packages..."
 	@for package in $(BREW_PACKAGES); do \
 		echo "Installing $$package..."; \
-		brew list --versions $$package > /dev/null || brew install $$package; \
+		brew list --versions $$package > /dev/null || brew install --quiet $$package; \
 	done
 
 brew-casks: brew-taps
 	@echo "Installing Homebrew casks..."
 	@for cask in $(BREW_CASKS); do \
 		echo "Installing $$cask..."; \
-		brew list --cask --versions $$cask > /dev/null || brew install --cask --no-quarantine --force $$cask; \
+		brew list --cask --versions $$cask > /dev/null || brew install --cask --quiet --no-quarantine --force $$cask; \
 	done
 
 # Uninstall Homebrew packages
