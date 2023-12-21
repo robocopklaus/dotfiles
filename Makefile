@@ -5,6 +5,9 @@ SHELL = /bin/bash
 HOMEFILES := $(shell ls -A files | grep "^\.")
 DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
 
+# Path to macOS user fonts
+FONTS_DIR := $(HOME)/Library/Fonts
+
 # Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
 export PATH := /opt/homebrew/bin:$(PATH)
 
@@ -28,7 +31,7 @@ VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
 all: install
 
 # Installation of packages, casks, and additional software
-install: brew-packages brew-casks addons link
+install: brew-packages brew-casks addons macos-defaults link
 
 # Homebrew package installation
 brew-packages: brew-taps
@@ -56,7 +59,7 @@ brew-casks: brew-taps
 		echo "Homebrew is not installed."; \
 	fi
 
-addons: vs-code-extensions
+addons: vs-code-extensions meslo-nerd-font
 
 # Uninstall Homebrew packages
 uninstall-brew-packages:
@@ -123,6 +126,22 @@ vs-code-extensions:
 		echo "Visual Studio Code is not installed."; \
 	fi
 
+meslo-nerd-font:
+	@echo "Installing Meslo LGS Nerd Font..."
+	@[[ -d $(FONTS_DIR) ]] || mkdir -p "$(FONTS_DIR)"
+	@fonts=("Regular" "Bold" "Italic" "Bold Italic")
+	@for font in "$${fonts[@]}"; do \
+		font_file="MesloLGS NF $$font.ttf"; \
+		font_url="https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20$$font.ttf"; \
+		echo "Processing $$font_file..."; \
+		if [[ ! -f "$(FONTS_DIR)/$$font_file" ]]; then \
+			echo "Downloading $$font_file..."; \
+			curl -sL "$$font_url" -o "$(FONTS_DIR)/$$font_file" && echo "$$font_file downloaded." || { echo "Failed to download $$font_file"; exit 1; }; \
+		else \
+			echo "$$font_file already installed."; \
+		fi; \
+	done
+
 # brew-taps target for adding additional repositories.
 brew-taps: brew
 
@@ -161,16 +180,27 @@ unlink:
 		fi; \
 	done
 
+# Apply macOS defaults
+macos-defaults:
+	@echo "Applying macOS default settings..."
+	@if [ -f scripts/macos-defaults.sh ]; then \
+		$(SHELL) scripts/macos-defaults.sh || { echo "Failed to apply macOS defaults"; exit 1; }; \
+	else \
+		echo "macOS defaults script not found."; \
+	fi
+
 # Help target to display Makefile usage
 help:
 	@echo "Available targets:"
-	@echo "  install: Install Homebrew packages, casks, and addons"
+	@echo "  install: Install Homebrew packages, casks, addons, and link dotfiles"
+	@echo "  addons: Install addons like VS Code extensions and fonts"
 	@echo "  brew-packages: Install specified Homebrew packages"
 	@echo "  brew-casks: Install specified Homebrew casks"
-	@echo "  addons: Install additional software like VS Code extensions"
 	@echo "  link: Create symbolic links for dotfiles in the home directory"
+	@echo "  meslo-nerd-font: Install Meslo LGS Nerd Font"
+	@echo "  macos-defaults: Apply macOS default settings using a script"
 	@echo "  unlink: Remove symbolic links for dotfiles in the home directory"
-	@echo "  uninstall-all: Uninstall all packages, casks, and VS Code extensions"
+	@echo "  uninstall-all: Uninstall all packages, casks, VS Code extensions, and Homebrew"
 	@echo "  uninstall-brew-packages: Uninstall Homebrew packages"
 	@echo "  uninstall-brew-casks: Uninstall Homebrew casks"
 	@echo "  uninstall-vscode-extensions: Uninstall specified VS Code extensions"
