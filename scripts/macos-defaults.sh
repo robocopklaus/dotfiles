@@ -10,7 +10,7 @@ apply_default() {
     domain=$1
     key=$2
     type=$3
-    value=$3
+    value=$4
     if defaults read "$domain" "$key" &>/dev/null; then
         echo "Setting $domain $key to $value."
         defaults write "$domain" "$key" "$type" "$value"
