@@ -2,18 +2,15 @@
 SHELL = /bin/bash
 
 # Declare phony targets to ensure these rules run even if files with these names exist.
-.PHONY: sudo brew verify-brew uninstall-brew brew-packages brew-taps
+.PHONY: sudo brew brew-packages brew-taps
 
 all: install
 
 install: brew-packages
 
-brew-packages: brew brew-taps
+brew-packages: brew
 	@echo "Updating Homebrew..."
-	@brew update --force || { echo "Failed to update Homebrew"; exit 1; }
-
-brew-taps:
-	# Add commands to tap additional repositories here, if necessary.
+	@/opt/homebrew/bin/brew update --force || { echo "Failed to update Homebrew"; exit 1; }
 
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
@@ -35,10 +32,15 @@ brew: sudo
 		fi; \
 		echo "Configuring Homebrew for ARM-based Macs..."; \
 		eval "$$(/opt/homebrew/bin/brew shellenv)"; \
+		export PATH="/opt/homebrew/bin:$$PATH"; \
 		echo "Homebrew installed and configured successfully."; \
 	else \
 		echo "Homebrew is already installed."; \
 	fi
+
+# brew-taps target can be defined here if you have additional taps to add.
+brew-taps:
+	# Add commands to tap additional repositories here, if necessary.
 
 # uninstall-brew target removes Homebrew if it's installed.
 uninstall-brew: sudo
