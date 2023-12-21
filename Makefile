@@ -1,6 +1,9 @@
 # The default shell is /bin/bash.
 SHELL = /bin/bash
 
+# Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
+export PATH := /opt/homebrew/bin:$(PATH)
+
 # Declare phony targets to ensure these rules run even if files with these names exist.
 .PHONY: sudo brew brew-packages brew-taps
 
