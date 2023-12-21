@@ -4,24 +4,35 @@ SHELL = /bin/bash
 # Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
 export PATH := /opt/homebrew/bin:$(PATH)
 
-# Helper functions
-install_brew_package = brew list --versions $(1) > /dev/null || brew install $(1)
-uninstall_brew_package = brew rm $$(brew deps $(1)) $(1)
+# List of Homebrew packages to install
+BREW_PACKAGES := git volta antidote
+
+# List of Homebrew casks to install
+BREW_CASKS := iterm2 visual-studio-code
 
 # Declare phony targets to ensure these rules run even if files with these names exist.
-.PHONY: sudo brew brew-packages brew-taps
+.PHONY: sudo brew brew-packages brew-taps cleanup
 
 all: install
 
-install: brew-packages
+install: brew-casks brew-packages
 
 brew-packages: brew-taps
 	@echo "Updating Homebrew..."
 	@brew update --force || { echo "Failed to update Homebrew"; exit 1; }
 
-	# Programming language prerequisites and package managers
-	@$(call install_brew_package,git)
-	@$(call install_brew_package,volta)
+	# Install listed Homebrew packages
+	@for package in $(BREW_PACKAGES); do \
+		echo "Installing $$package..."; \
+		brew list --versions $$package > /dev/null || brew install $$package; \
+	done
+
+brew-casks: brew-taps
+	@echo "Installing Homebrew casks..."
+	@for cask in $(BREW_CASKS); do \
+		echo "Installing $$cask..."; \
+		brew list --cask --versions $$cask > /dev/null || brew install --cask --no-quarantine --force $$cask; \
+	done
 
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
@@ -46,9 +57,14 @@ brew: sudo
 		echo "Homebrew is already installed."; \
 	fi
 
-# brew-taps target can be defined here if you have additional taps to add.
+# brew-taps target for adding additional repositories.
 brew-taps: brew
 	# Add commands to tap additional repositories here, if necessary.
+
+# cleanup target for maintenance tasks.
+cleanup:
+	@echo "Running Homebrew cleanup..."
+	@brew cleanup
 
 # uninstall-brew target removes Homebrew if it's installed.
 uninstall-brew: sudo
