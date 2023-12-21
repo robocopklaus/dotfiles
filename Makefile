@@ -32,6 +32,9 @@ brew: sudo
 	@if ! command -v brew >/dev/null 2>&1; then \
 		echo "Installing Homebrew..."; \
 		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash || { echo "Failed to install Homebrew"; exit 1; } \
+		echo "Validating Homebrew installation..."; \
+		[ -x "/opt/homebrew/bin/brew" ] || [ -x "/usr/local/bin/brew" ] || { echo "Homebrew installation failed"; exit 1; } \
+		echo "Homebrew installed successfully"; \
 	else \
 		echo "Homebrew is already installed."; \
 	fi
