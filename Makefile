@@ -16,7 +16,7 @@ BREW_PACKAGES := git volta antidote mas
 BREW_CASKS := iterm2 visual-studio-code docker google-drive \
               1password notion slack google-chrome iina spotify \
               hpedrorodrigues/tools/dockutil finicky clockify fig \
-              kap postman sketch tableplus whatsapp
+              kap postman sketch tableplus whatsapp home-assistant
 
 # List of VS Code extensions to install
 VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
@@ -24,21 +24,22 @@ VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
                       mikestead.dotenv prisma.prisma dbaeumer.vscode-eslint \
                       vivaxy.vscode-conventional-commits bradlc.vscode-tailwindcss
 
-.PHONY: sudo brew brew-packages brew-casks brew-taps \
-        uninstall-brew-packages uninstall-brew-casks uninstall-all \
-        vs-code-extensions uninstall-vscode-extensions help link unlink
+.PHONY: all install brew-packages brew-casks addons \
+        uninstall-brew-packages uninstall-brew-casks \
+        vs-code-extensions uninstall-vscode-extensions \
+        help link unlink sudo brew meslo-nerd-font macos-defaults dock-items
 
 all: install
 
 # Installation of packages, casks, and additional software
-install: brew-packages brew-casks addons macos-defaults link
+install: brew-packages brew-casks addons macos-defaults dock-items link
+	@echo "Installation complete."
 
 # Homebrew package installation
 brew-packages: brew-taps
-	@echo "Updating Homebrew..."
+	@echo "Updating and installing Homebrew packages..."
 	@if command -v brew >/dev/null 2>&1; then \
 		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
-		echo "Installing Homebrew packages..."; \
 		for package in $(BREW_PACKAGES); do \
 			echo "Installing $$package..."; \
 			brew list --versions $$package > /dev/null || brew install --quiet $$package; \
@@ -49,7 +50,7 @@ brew-packages: brew-taps
 
 # Homebrew cask installation
 brew-casks: brew-taps
-	@echo "Installing Homebrew casks..."
+	@echo "Updating and installing Homebrew casks..."
 	@if command -v brew >/dev/null 2>&1; then \
 		for cask in $(BREW_CASKS); do \
 			echo "Installing $$cask..."; \
@@ -187,6 +188,15 @@ macos-defaults:
 		$(SHELL) scripts/macos-defaults.sh || { echo "Failed to apply macOS defaults"; exit 1; }; \
 	else \
 		echo "macOS defaults script not found."; \
+	fi
+
+# Customize Dock items
+dock-items:
+	@echo "Customizing Dock items..."
+	@if [ -f scripts/dock-items.sh ] && [ -x scripts/dock-items.sh ]; then \
+		$(SHELL) scripts/dock-items.sh; \
+	else \
+		echo "Dock items customization script not found or not executable."; \
 	fi
 
 # Help target to display Makefile usage
