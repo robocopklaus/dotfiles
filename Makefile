@@ -23,7 +23,7 @@ VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
 
 .PHONY: sudo brew brew-packages brew-casks brew-taps \
         uninstall-brew-packages uninstall-brew-casks uninstall-all \
-        vs-code-extensions uninstall-vscode-extensions
+        vs-code-extensions uninstall-vscode-extensions help link unlink
 
 all: install
 
@@ -137,6 +137,14 @@ uninstall-brew: sudo
 	fi
 
 link: | $(DOTFILES)
+	@echo "Linking dotfiles to the home directory..."
+	@for file in $(HOMEFILES); do \
+		if [ -f "files/$$file" ]; then \
+			ln -sfv "$(PWD)/files/$$file" "$(HOME)/$$file"; \
+		else \
+			echo "Warning: $$file not found in files directory"; \
+		fi; \
+	done
 
 # This will link all of our dot files into our files directory. The
 # magic happening in the first arg to ln is just grabbing the file name
@@ -144,7 +152,26 @@ link: | $(DOTFILES)
 $(DOTFILES):
 	@ln -sfv "$(PWD)/files/$(notdir $@)" $@
 
-# Interactively delete symbolic links.
 unlink:
-	@echo "Unlinking dotfiles"
-	@for f in $(DOTFILES); do if [ -h $$f ]; then rm -i $$f; fi ; done
+	@echo "Unlinking dotfiles from the home directory..."
+	@for f in $(DOTFILES); do \
+		if [ -h $$f ]; then \
+			echo "Removing link $$f"; \
+			rm -i $$f; \
+		fi; \
+	done
+
+# Help target to display Makefile usage
+help:
+	@echo "Available targets:"
+	@echo "  install: Install Homebrew packages, casks, and addons"
+	@echo "  brew-packages: Install specified Homebrew packages"
+	@echo "  brew-casks: Install specified Homebrew casks"
+	@echo "  addons: Install additional software like VS Code extensions"
+	@echo "  link: Create symbolic links for dotfiles in the home directory"
+	@echo "  unlink: Remove symbolic links for dotfiles in the home directory"
+	@echo "  uninstall-all: Uninstall all packages, casks, and VS Code extensions"
+	@echo "  uninstall-brew-packages: Uninstall Homebrew packages"
+	@echo "  uninstall-brew-casks: Uninstall Homebrew casks"
+	@echo "  uninstall-vscode-extensions: Uninstall specified VS Code extensions"
+	@echo "  uninstall-brew: Uninstall Homebrew"
