@@ -15,9 +15,6 @@ brew-packages: brew-taps
 brew-taps: verify-brew
 	# Add commands to tap additional repositories here, if necessary.
 
-verify-brew: brew
-	@command -v brew >/dev/null 2>&1 || { echo "Homebrew is not installed"; exit 1; }
-
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
 ifndef GITHUB_ACTION
@@ -41,6 +38,15 @@ brew: sudo
 		echo "Homebrew installed and configured successfully."; \
 	else \
 		echo "Homebrew is already installed."; \
+	fi
+
+verify-brew:
+	@echo "Verifying Homebrew installation..."
+	@if [ -x "/opt/homebrew/bin/brew" ]; then \
+		echo "Homebrew is installed"; \
+	else \
+		echo "Homebrew is not installed"; \
+		exit 1; \
 	fi
 
 # uninstall-brew target removes Homebrew if it's installed.
