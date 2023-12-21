@@ -155,15 +155,6 @@ fi
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
 
 ###############################################################################
-# Safari                                                                      #
-###############################################################################
-
-echo "Configuring Safari settings..."
-
-# Show full website address
-apply_default 'com.apple.Safari' 'ShowFullURLInSmartSearchField' -bool true
-
-###############################################################################
 # Calendar                                                                    #
 ###############################################################################
 
@@ -184,7 +175,7 @@ apply_default 'com.apple.Music' 'userWantsPlaybackNotifications' -bool false
 
 # Restart affected applications to apply changes
 echo "Restarting affected applications..."
-for app in "Music" "Calendar" "Dock" "Finder" "SystemUIServer" "Safari" "cfprefsd"; do
+for app in "Music" "Calendar" "Dock" "Finder" "SystemUIServer" "cfprefsd"; do
     if pgrep "$app" &>/dev/null; then
         killall "$app" &>/dev/null && echo "Restarted $app"
     else
