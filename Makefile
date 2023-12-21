@@ -33,9 +33,6 @@ brew: sudo
 			echo "Failed to install Homebrew"; \
 			exit 1; \
 		fi; \
-		echo "Configuring Homebrew for ARM-based Macs..."; \
-		eval "$$(/opt/homebrew/bin/brew shellenv)"; \
-		export PATH="/opt/homebrew/bin:$$PATH"; \
 		echo "Homebrew installed and configured successfully."; \
 	else \
 		echo "Homebrew is already installed."; \
