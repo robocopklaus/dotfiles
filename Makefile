@@ -5,14 +5,21 @@ SHELL = /bin/bash
 export PATH := /opt/homebrew/bin:$(PATH)
 
 # List of Homebrew packages and casks to install
-BREW_PACKAGES := git volta antidote
-BREW_CASKS := iterm2 visual-studio-code
+BREW_PACKAGES := git volta antidote mas
+BREW_CASKS := iterm2 visual-studio-code docker google-drive \
+              1password notion slack google-chrome iina spotify \
+              hpedrorodrigues/tools/dockutil finicky clockify fig \
+              kap postman sketch tableplus whatsapp
 
-.PHONY: sudo brew brew-packages brew-casks brew-taps uninstall-brew-packages uninstall-brew-casks uninstall-all
+# List of VS Code extensions to install
+VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral pkief.material-icon-theme mechatroner.rainbow-csv mikestead.dotenv prisma.prisma dbaeumer.vscode-eslint vivaxy.vscode-conventional-commits bradlc.vscode-tailwindcss
+
+.PHONY: sudo brew brew-packages brew-casks brew-taps \
+        uninstall-brew-packages uninstall-brew-casks uninstall-all vs-code-extensions
 
 all: install
 
-install: brew-packages brew-casks
+install: brew-packages brew-casks addons
 
 brew-packages: brew-taps
 	@echo "Updating Homebrew..."
@@ -29,6 +36,8 @@ brew-casks: brew-taps
 		echo "Installing $$cask..."; \
 		brew list --cask --versions $$cask > /dev/null || brew install --cask --quiet --no-quarantine --force $$cask; \
 	done
+
+addons: vs-code-extensions
 
 # Uninstall Homebrew packages
 uninstall-brew-packages:
@@ -70,6 +79,17 @@ brew: sudo
 		echo "Homebrew installed and configured successfully."; \
 	else \
 		echo "Homebrew is already installed."; \
+	fi
+
+vs-code-extensions:
+	@echo "Installing Visual Studio Code extensions..."
+	@if command -v code >/dev/null 2>&1; then \
+		for extension in $(VS_CODE_EXTENSIONS); do \
+			echo "Installing $$extension..."; \
+			code --install-extension $$extension || echo "Failed to install $$extension"; \
+		done; \
+	else \
+		echo "Visual Studio Code is not installed."; \
 	fi
 
 # brew-taps target for adding additional repositories.
