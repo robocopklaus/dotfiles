@@ -4,24 +4,20 @@ SHELL = /bin/bash
 # Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
 export PATH := /opt/homebrew/bin:$(PATH)
 
-# List of Homebrew packages to install
+# List of Homebrew packages and casks to install
 BREW_PACKAGES := git volta antidote
-
-# List of Homebrew casks to install
 BREW_CASKS := iterm2 visual-studio-code
 
-# Declare phony targets to ensure these rules run even if files with these names exist.
-.PHONY: sudo brew brew-packages brew-taps cleanup
+.PHONY: sudo brew brew-packages brew-casks brew-taps uninstall-brew-packages uninstall-brew-casks uninstall-all
 
 all: install
 
-install: brew-casks brew-packages
+install: brew-packages brew-casks
 
 brew-packages: brew-taps
 	@echo "Updating Homebrew..."
 	@brew update --force || { echo "Failed to update Homebrew"; exit 1; }
-
-	# Install listed Homebrew packages
+	@echo "Installing Homebrew packages..."
 	@for package in $(BREW_PACKAGES); do \
 		echo "Installing $$package..."; \
 		brew list --versions $$package > /dev/null || brew install $$package; \
@@ -33,6 +29,25 @@ brew-casks: brew-taps
 		echo "Installing $$cask..."; \
 		brew list --cask --versions $$cask > /dev/null || brew install --cask --no-quarantine --force $$cask; \
 	done
+
+# Uninstall Homebrew packages
+uninstall-brew-packages:
+	@echo "Uninstalling Homebrew packages..."
+	@for package in $(BREW_PACKAGES); do \
+		echo "Uninstalling $$package..."; \
+		brew uninstall $$package || echo "Failed to uninstall $$package"; \
+	done
+
+# Uninstall Homebrew casks
+uninstall-brew-casks:
+	@echo "Uninstalling Homebrew casks..."
+	@for cask in $(BREW_CASKS); do \
+		echo "Uninstalling $$cask..."; \
+		brew uninstall --cask $$cask || echo "Failed to uninstall $$cask"; \
+	done
+
+# Uninstall all Homebrew packages, casks, and Homebrew itself
+uninstall-all: uninstall-brew-packages uninstall-brew-casks uninstall-brew
 
 # sudo target keeps the sudo session alive for the duration of the make process.
 sudo:
@@ -60,11 +75,6 @@ brew: sudo
 # brew-taps target for adding additional repositories.
 brew-taps: brew
 	# Add commands to tap additional repositories here, if necessary.
-
-# cleanup target for maintenance tasks.
-cleanup:
-	@echo "Running Homebrew cleanup..."
-	@brew cleanup
 
 # uninstall-brew target removes Homebrew if it's installed.
 uninstall-brew: sudo
