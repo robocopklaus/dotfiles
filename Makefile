@@ -28,7 +28,11 @@ brew: sudo
 	@echo "Checking for Homebrew installation..."
 	@if ! command -v brew >/dev/null 2>&1; then \
 		echo "Installing Homebrew..."; \
-		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash || { echo "Failed to install Homebrew"; exit 1; } \
+		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash; \
+		if [ $$? -ne 0 ]; then \
+			echo "Failed to install Homebrew"; \
+			exit 1; \
+		fi; \
 		echo "Configuring Homebrew for ARM-based Macs..."; \
 		eval "$$(/opt/homebrew/bin/brew shellenv)"; \
 		echo "Homebrew installed and configured successfully."; \
