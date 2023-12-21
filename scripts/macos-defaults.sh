@@ -9,10 +9,11 @@ osascript -e 'tell application "System Preferences" to quit'
 apply_default() {
     domain=$1
     key=$2
+    type=$3
     value=$3
     if defaults read "$domain" "$key" &>/dev/null; then
         echo "Setting $domain $key to $value."
-        defaults write "$domain" "$key" "$value"
+        defaults write "$domain" "$key" "$type" "$value"
     else
         echo "Setting for $domain $key not found."
     fi
