@@ -16,7 +16,8 @@ BREW_PACKAGES := git volta antidote mas
 BREW_CASKS := iterm2 visual-studio-code docker google-drive \
               1password notion slack google-chrome iina spotify \
               hpedrorodrigues/tools/dockutil finicky clockify fig \
-              kap postman sketch tableplus whatsapp home-assistant
+              kap postman sketch tableplus whatsapp home-assistant \
+							mimestream
 
 # List of VS Code extensions to install
 VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
