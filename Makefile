@@ -131,8 +131,7 @@ vs-code-extensions:
 meslo-nerd-font:
 	@echo "Installing Meslo LGS Nerd Font..."
 	@[[ -d $(FONTS_DIR) ]] || mkdir -p "$(FONTS_DIR)"
-	@fonts=("Regular" "Bold" "Italic" "Bold Italic")
-	@for font in "$${fonts[@]}"; do \
+	@for font in "Regular" "Bold" "Italic" "Bold%20Italic"; do \
 		font_file="MesloLGS NF $$font.ttf"; \
 		font_url="https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20$$font.ttf"; \
 		echo "Processing $$font_file..."; \
