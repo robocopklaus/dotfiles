@@ -9,6 +9,10 @@ DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
 # Path to macOS user fonts
 FONTS_DIR := $(HOME)/Library/Fonts
 
+# SSH configuration
+SSH_DIR := $(HOME)/.ssh
+SSH_CONFIG := files/ssh/config
+
 # Add Homebrew path for ARM-based Macs to PATH. Adjust this if using a different path.
 export PATH := /opt/homebrew/bin:$(PATH)
 
@@ -169,6 +173,16 @@ uninstall-brew: sudo
 	else \
 		echo "Homebrew is not installed."; \
 	fi
+
+sync-ssh-config:
+	@echo "Setting up SSH config symlink..."
+	@mkdir -p $(SSH_DIR) && chmod 700 $(SSH_DIR)
+	@if [ -f $(SSH_CONFIG) ]; then \
+			ln -sfv "$(PWD)/$(SSH_CONFIG)" "$(SSH_DIR)/config"; \
+		else \
+			echo "Warning: $(SSH_CONFIG) not found"; \
+		fi;
+	@echo "SSH config symlink created successfully."
 
 link: | $(DOTFILES)
 	@echo "Linking dotfiles to the home directory..."
