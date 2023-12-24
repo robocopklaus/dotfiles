@@ -43,25 +43,17 @@ define brew_install
     brew list --versions $(1) > /dev/null || brew install --quiet $(1);
 endef
 
-# Function to install Homebrew casks
-define brew_cask_install
-	@echo "Installing $(1)..."
-	@brew list --cask --versions $(1) > /dev/null || brew install --cask --quiet --no-quarantine --force $(1);
-endef
-
-# Function to configure iTerm2 if it's installed
-define configure_iterm2
-	@echo "Configuring iTerm2 with custom settings..."
-	@defaults write com.googlecode.iterm2 PrefsCustomFolder $(DOTFILES_DIR)/files
-	@defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
-endef
-
-# Homebrew package installation
-brew-packages: brew-taps
-	@echo "Updating and installing Homebrew packages..."
-	@if command -v brew >/dev/null 2>&1; then \
-		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
-		$(foreach package, $(BREW_PACKAGES), $(call brew_install,$(package))) \
+# Homebrew cask installation
+brew-casks: brew-taps
+	echo "Updating and installing Homebrew casks..."
+	if command -v brew >/dev/null 2>&1; then \
+		$(foreach cask, $(BREW_CASKS), echo "Installing $(cask)..."; \
+		brew list --cask --versions $(cask) > /dev/null || brew install --cask --quiet --no-quarantine --force $(cask);) \
+		if echo "$(BREW_CASKS)" | grep -q "iterm2"; then \
+			echo "Configuring iTerm2 with custom settings..."; \
+			defaults write com.googlecode.iterm2 PrefsCustomFolder $(DOTFILES_DIR)/files; \
+			defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true; \
+		fi \
 	else \
 		echo "Homebrew is not installed."; \
 	fi
