@@ -38,7 +38,19 @@
 
 [user]
   name = Fabian Pahl
+  signingkey = ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwBP0io8zsB529if2kjPzPMy2uBPvalFU3cYAK/0Yj011lxb5wgbrxih7HKhud+gFTl9ts6nr80yXtediVdHcxQCicRqyMkahusa+pQ2SPDwCKPY0E6qtGUs37iu/uBP+wVjJAfqTPbb8r9Ff+FRtpKLCZ5FI8Mied/+7HarNYG9L0T34HVeAbS0F1AQLDf8mtBXqW1Ujyx5VBZpEEBSYIzP6EZn6q30LU5fMZ6U2SGOhi3ryv3NZclNit/RBivce1gpkKH1IxId+xgqcb8UZtP7cfk1PLwym4ypqIlco0Udal7MNCvZSZKudp6I+3ChRwL2bF/9VTT3jMPiMp44Lp
 
-# Credential helper (uncomment and configure if needed)
+# GPG Configuration
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+
+[commit]
+  gpgsign = true
+  # Comment: Enable GPG signing for commits using SSH format
+
+# Credential helper configuration (uncomment and configure if needed)
 # [credential]
-#   helper = osxkeychain (for macOS) or use appropriate helper for your OS
+#   helper = osxkeychain (for macOS) or use the appropriate helper for your OS

@@ -1,0 +1,17 @@
+root = true
+
+[*]
+# General settings for all file types
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Default width for tabs, used for visualization
+tab_width = 4
+
+[Makefile]
+# Makefiles require tabs for indentation
+indent_style = tab
