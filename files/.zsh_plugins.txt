@@ -2,12 +2,12 @@
 rupa/z
 
 # oh-my-zsh
-ohmyzsh/ohmyzsh path:lib
+ohmyzsh/ohmyzsh
 ohmyzsh/ohmyzsh path:plugins/colored-man-pages
 ohmyzsh/ohmyzsh path:plugins/command-not-found
 
 # prompts
-romkatv/powerlevel10k kind:fpath
+romkatv/powerlevel10k
 
 # Extra zsh completions
 zsh-users/zsh-completions
