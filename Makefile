@@ -55,8 +55,8 @@ brew-packages: brew-taps
 
 # Homebrew cask installation
 brew-casks: brew-taps
-	echo "Updating and installing Homebrew casks..."
-	if command -v brew >/dev/null 2>&1; then \
+	@echo "Updating and installing Homebrew casks..."
+	@if command -v brew >/dev/null 2>&1; then \
 		$(foreach cask, $(BREW_CASKS), echo "Installing $(cask)..."; \
 		brew list --cask --versions $(cask) > /dev/null || brew install --cask --quiet --no-quarantine --force $(cask);) \
 		if echo "$(BREW_CASKS)" | grep -q "iterm2"; then \
