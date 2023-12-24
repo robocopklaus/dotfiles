@@ -1,21 +1,32 @@
-# Volta
+# Fig pre block. Keep at the top of this file.
+[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
+
+# Setting up PATH and other environment variables
+
+# Volta: JavaScript toolchains manager
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+# Homebrew environment setup
+if command -v brew >/dev/null 2>&1; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Powerlevel10k: A fast Zsh prompt
+# Enable instant prompt, should be near the top of the file
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Homebrew
-eval $(/opt/homebrew/bin/brew shellenv)
+# Antidote: A plugin manager for Zsh
+# Loads Antidote and its plugins
+if command -v antidote >/dev/null 2>&1; then
+    source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
+    antidote load
+fi
 
-# Antidote
-source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
-# Initialize Antidote plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
-antidote load
+# Load Powerlevel10k theme configuration if available
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
-# Powerlevel10k
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# Fig post block. Keep at the bottom of this file.
+[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
