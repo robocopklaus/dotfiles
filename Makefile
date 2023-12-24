@@ -37,18 +37,17 @@ all: install
 install: brew-packages brew-casks addons macos-defaults dock-items link
 	@echo "Installation complete."
 
-# Function to install Homebrew packages
-define brew_install
-    @echo "Installing $(1)..."
-    brew list --versions $(1) > /dev/null || brew install --quiet $(1);
-endef
-
 # Homebrew package installation
 brew-packages: brew-taps
 	@echo "Updating and installing Homebrew packages..."
 	@if command -v brew >/dev/null 2>&1; then \
 		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
-		$(foreach package, $(BREW_PACKAGES), $(call brew_install,$(package))) \
+		for package in $(BREW_PACKAGES); do \
+			echo "Installing $$package..."; \
+			if ! brew list --versions $$package > /dev/null; then \
+				brew install --quiet $$package || { echo "Failed to install $$package"; exit 1; }; \
+			fi; \
+		done; \
 	else \
 		echo "Homebrew is not installed."; \
 	fi
