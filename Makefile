@@ -43,6 +43,16 @@ define brew_install
     brew list --versions $(1) > /dev/null || brew install --quiet $(1);
 endef
 
+# Homebrew package installation
+brew-packages: brew-taps
+	@echo "Updating and installing Homebrew packages..."
+	@if command -v brew >/dev/null 2>&1; then \
+		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
+		$(foreach package, $(BREW_PACKAGES), $(call brew_install,$(package))) \
+	else \
+		echo "Homebrew is not installed."; \
+	fi
+
 # Homebrew cask installation
 brew-casks: brew-taps
 	echo "Updating and installing Homebrew casks..."
@@ -54,16 +64,6 @@ brew-casks: brew-taps
 			defaults write com.googlecode.iterm2 PrefsCustomFolder $(DOTFILES_DIR)/files; \
 			defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true; \
 		fi \
-	else \
-		echo "Homebrew is not installed."; \
-	fi
-
-# Homebrew cask installation
-brew-casks: brew-taps
-	@echo "Updating and installing Homebrew casks..."
-	@if command -v brew >/dev/null 2>&1; then \
-		$(foreach cask, $(BREW_CASKS), $(call brew_cask_install,$(cask));) \
-		$(if $(filter iterm2,$(BREW_CASKS)), $(call configure_iterm2)) \
 	else \
 		echo "Homebrew is not installed."; \
 	fi
