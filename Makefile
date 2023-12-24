@@ -45,8 +45,8 @@ endef
 
 # Function to install Homebrew casks
 define brew_cask_install
-    @echo "Installing $(1)..."
-    brew list --cask --versions $(1) > /dev/null || brew install --cask --quiet --no-quarantine --force $(1);
+	@echo "Installing $(1)..."
+	@brew list --cask --versions $(1) > /dev/null || brew install --cask --quiet --no-quarantine --force $(1);
 endef
 
 # Function to configure iTerm2 if it's installed
@@ -70,7 +70,7 @@ brew-packages: brew-taps
 brew-casks: brew-taps
 	@echo "Updating and installing Homebrew casks..."
 	@if command -v brew >/dev/null 2>&1; then \
-		$(foreach cask, $(BREW_CASKS), $(call brew_cask_install,$(cask))); \
+		$(foreach cask, $(BREW_CASKS), $(call brew_cask_install,$(cask));) \
 		$(if $(filter iterm2,$(BREW_CASKS)), $(call configure_iterm2)) \
 	else \
 		echo "Homebrew is not installed."; \
