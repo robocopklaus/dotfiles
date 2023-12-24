@@ -1,21 +1,26 @@
-# Tracks your most visited directories and allows you to quickly access them
-rupa/z
-
-# oh-my-zsh
+# oh-my-zsh: Framework for managing your Zsh configuration
 ohmyzsh/ohmyzsh
+
+# Colored man pages
 ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+
+# Handling command not found situations
 ohmyzsh/ohmyzsh path:plugins/command-not-found
 
-# prompts
+# Powerlevel10k: A fast and feature-rich Zsh prompt
 romkatv/powerlevel10k
 
-# Extra zsh completions
+# z: Tracks your most visited directories for quick access
+rupa/z
+
+# zsh-completions: Additional completion definitions for Zsh
 zsh-users/zsh-completions
 
-# Fish-like auto suggestions
+# zsh-autosuggestions: Fish-like fast/unobtrusive autosuggestions for Zsh
 zsh-users/zsh-autosuggestions
 
-# Feature-rich syntax highlighting for Zsh
+# fast-syntax-highlighting: Feature-rich syntax highlighting for Zsh (deferred loading)
 zdharma-continuum/fast-syntax-highlighting kind:defer
 
+# zsh-history-substring-search: Substring history searching
 zsh-users/zsh-history-substring-search
