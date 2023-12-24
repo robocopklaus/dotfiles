@@ -1,0 +1,21 @@
+# Tracks your most visited directories and allows you to quickly access them
+rupa/z
+
+# oh-my-zsh
+ohmyzsh/ohmyzsh path:lib
+ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+ohmyzsh/ohmyzsh path:plugins/command-not-found
+
+# prompts
+romkatv/powerlevel10k kind:fpath
+
+# Extra zsh completions
+zsh-users/zsh-completions
+
+# Fish-like auto suggestions
+zsh-users/zsh-autosuggestions
+
+# Feature-rich syntax highlighting for Zsh
+zdharma-continuum/fast-syntax-highlighting kind:defer
+
+zsh-users/zsh-history-substring-search
