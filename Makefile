@@ -1,6 +1,7 @@
 # The default shell is /bin/bash.
 SHELL = /bin/bash
-
+# Path to .dotfiles
+DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # List all dotfiles
 HOMEFILES := $(shell ls -A files | grep "^\.")
 DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
@@ -17,7 +18,7 @@ BREW_CASKS := iterm2 visual-studio-code docker google-drive \
               1password notion slack google-chrome iina spotify \
               hpedrorodrigues/tools/dockutil finicky clockify fig \
               kap postman sketch tableplus whatsapp home-assistant \
-							mimestream
+              mimestream
 
 # List of VS Code extensions to install
 VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
@@ -36,15 +37,31 @@ all: install
 install: brew-packages brew-casks addons macos-defaults dock-items link
 	@echo "Installation complete."
 
+# Function to install Homebrew packages
+define brew_install
+    @echo "Installing $(1)..."
+    brew list --versions $(1) > /dev/null || brew install --quiet $(1);
+endef
+
+# Function to install Homebrew casks
+define brew_cask_install
+    @echo "Installing $(1)..."
+    brew list --cask --versions $(1) > /dev/null || brew install --cask --quiet --no-quarantine --force $(1);
+endef
+
+# Function to configure iTerm2 if it's installed
+define configure_iterm2
+	@echo "Configuring iTerm2 with custom settings..."
+	@defaults write com.googlecode.iterm2 PrefsCustomFolder $(DOTFILES_DIR)/files
+	@defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+endef
+
 # Homebrew package installation
 brew-packages: brew-taps
 	@echo "Updating and installing Homebrew packages..."
 	@if command -v brew >/dev/null 2>&1; then \
 		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
-		for package in $(BREW_PACKAGES); do \
-			echo "Installing $$package..."; \
-			brew list --versions $$package > /dev/null || brew install --quiet $$package; \
-		done; \
+		$(foreach package, $(BREW_PACKAGES), $(call brew_install,$(package))) \
 	else \
 		echo "Homebrew is not installed."; \
 	fi
@@ -53,10 +70,8 @@ brew-packages: brew-taps
 brew-casks: brew-taps
 	@echo "Updating and installing Homebrew casks..."
 	@if command -v brew >/dev/null 2>&1; then \
-		for cask in $(BREW_CASKS); do \
-			echo "Installing $$cask..."; \
-			brew list --cask --versions $$cask > /dev/null || brew install --cask --quiet --no-quarantine --force $$cask; \
-		done; \
+		$(foreach cask, $(BREW_CASKS), $(call brew_cask_install,$(cask))); \
+		$(if $(filter iterm2,$(BREW_CASKS)), $(call configure_iterm2)) \
 	else \
 		echo "Homebrew is not installed."; \
 	fi
@@ -128,20 +143,28 @@ vs-code-extensions:
 		echo "Visual Studio Code is not installed."; \
 	fi
 
+# Function to download and install Meslo Nerd Font
+define download_font
+	@font_name="MesloLGS NF $(1)"; \
+	font_url="https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20$(1).ttf"; \
+	font_url=$$(echo "$$font_url" | sed 's/ /%20/g'); \
+	font_file="$${font_name}.ttf"; \
+	echo "Processing $$font_file..."; \
+	if [[ ! -f "$(FONTS_DIR)/$$font_file" ]]; then \
+		echo "Downloading $$font_file..."; \
+		curl -sL "$$font_url" -o "$(FONTS_DIR)/$$font_file" && echo "$$font_file downloaded." || { echo "Failed to download $$font_file"; exit 1; }; \
+	else \
+		echo "$$font_file already installed."; \
+	fi;
+endef
+
 meslo-nerd-font:
 	@echo "Installing Meslo LGS Nerd Font..."
 	@[[ -d $(FONTS_DIR) ]] || mkdir -p "$(FONTS_DIR)"
-	@for font in "Regular" "Bold" "Italic" "Bold%20Italic"; do \
-		font_file="MesloLGS NF $$font.ttf"; \
-		font_url="https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20$$font.ttf"; \
-		echo "Processing $$font_file..."; \
-		if [[ ! -f "$(FONTS_DIR)/$$font_file" ]]; then \
-			echo "Downloading $$font_file..."; \
-			curl -sL "$$font_url" -o "$(FONTS_DIR)/$$font_file" && echo "$$font_file downloaded." || { echo "Failed to download $$font_file"; exit 1; }; \
-		else \
-			echo "$$font_file already installed."; \
-		fi; \
-	done
+	@$(call download_font,Regular)
+	@$(call download_font,Bold)
+	@$(call download_font,Italic)
+	@$(call download_font,Bold Italic)
 
 # brew-taps target for adding additional repositories.
 brew-taps: brew
