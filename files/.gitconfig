@@ -1,0 +1,44 @@
+[core]
+  editor = code --wait
+
+[alias]
+  # Viewing logs and statuses
+  l = log --pretty=oneline -n 20 --graph --abbrev-commit
+  s = status -s
+
+[branch]
+  # Automatically set up rebase for pull operations (uncomment if desired)
+  # autoSetupRebase = always
+
+[diff]
+  # Diff tool settings
+  renames = copies
+  tool = vscode
+
+[difftool "vscode"]
+  cmd = code --wait --diff $LOCAL $REMOTE
+
+[merge]
+  tool = vscode
+
+[mergetool "vscode"]
+  cmd = code --wait $MERGED
+
+[init]
+  # Set default branch name for new repositories
+  defaultBranch = main
+
+[push]
+  # Automatically set up remote tracking branches
+  autoSetupRemote = true
+
+[pull]
+  # Rebase instead of merge on pull (uncomment if desired)
+  # rebase = true
+
+[user]
+  name = Fabian Pahl
+
+# Credential helper (uncomment and configure if needed)
+# [credential]
+#   helper = osxkeychain (for macOS) or use appropriate helper for your OS
