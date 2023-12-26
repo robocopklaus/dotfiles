@@ -21,7 +21,7 @@ dockutil --no-restart --add '' --type small-spacer --section apps
 # Browser applications
 echo "Adding Browser applications to Dock..."
 
-dockutil --no-restart --add "/Applications/Safari.app"
+dockutil --no-restart --add "/System/Cryptexes/App/System/Applications/Safari.app"
 dockutil --no-restart --add "/Applications/Google Chrome.app"
 dockutil --no-restart --add '' --type small-spacer --section apps
 
