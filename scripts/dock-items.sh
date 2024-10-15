@@ -8,62 +8,73 @@ if ! command -v dockutil &> /dev/null; then
     exit 1
 fi
 
+# Function to add applications to the Dock
+add_apps_to_dock() {
+    local category=$1
+    shift
+    local apps=("$@")
+
+    echo "Adding $category applications to Dock..."
+    for app in "${apps[@]}"; do
+        if ! dockutil --no-restart --add "$app"; then
+            echo "Failed to add $app to Dock."
+        fi
+    done
+    dockutil --no-restart --add '' --type small-spacer --section apps
+}
+
 # Clear existing Dock items
 dockutil --no-restart --remove all
 
-# Music applications
-echo "Adding Music applications to Dock..."
+# Define application categories and their paths
+music_apps=(
+    "/System/Applications/Music.app"
+    "/Applications/Spotify.app"
+)
 
-dockutil --no-restart --add "/System/Applications/Music.app"
-dockutil --no-restart --add "/Applications/Spotify.app"
-dockutil --no-restart --add '' --type small-spacer --section apps
+browser_apps=(
+    "/System/Cryptexes/App/System/Applications/Safari.app"
+    "/Applications/Google Chrome.app"
+)
 
-# Browser applications
-echo "Adding Browser applications to Dock..."
+communication_apps=(
+    "/System/Applications/Mail.app"
+    "/Applications/Mimestream.app"
+    "/Applications/Slack.app"
+    "/System/Applications/Messages.app"
+)
 
-dockutil --no-restart --add "/System/Cryptexes/App/System/Applications/Safari.app"
-dockutil --no-restart --add "/Applications/Google Chrome.app"
-dockutil --no-restart --add '' --type small-spacer --section apps
+productivity_apps=(
+    "/Applications/ChatGPT.app"
+    "/Applications/Notion.app"
+    "/System/Applications/GCal for Google Calendar.app"
+    "/System/Applications/Calendar.app"
+)
 
-# Communication applications
-echo "Adding Communication applications to Dock..."
+development_tools=(
+    "/Applications/Visual Studio Code.app"
+    "/Applications/iTerm.app"
+)
 
-dockutil --no-restart --add "/System/Applications/Mail.app"
-dockutil --no-restart --add "/Applications/Mimestream.app"
-dockutil --no-restart --add "/Applications/ChatGPT.app"
-dockutil --no-restart --add "/Applications/Slack.app"
-dockutil --no-restart --add "/System/Applications/Messages.app"
-dockutil --no-restart --add '' --type small-spacer --section apps
+system_preferences=(
+    "/System/Applications/System Settings.app"
+)
 
-# Productivity applications
-echo "Adding Productivity applications to Dock..."
+# Add applications to the Dock
+add_apps_to_dock "Music" "${music_apps[@]}"
+add_apps_to_dock "Browser" "${browser_apps[@]}"
+add_apps_to_dock "Communication" "${communication_apps[@]}"
+add_apps_to_dock "Productivity" "${productivity_apps[@]}"
+add_apps_to_dock "Development" "${development_tools[@]}"
+add_apps_to_dock "System Preferences" "${system_preferences[@]}"
 
-dockutil --no-restart --add "/Applications/Notion.app"
-dockutil --no-restart --add "/System/Applications/GCal for Google Calendar.app"
-dockutil --no-restart --add "/System/Applications/Calendar.app"
-dockutil --no-restart --add '' --type small-spacer --section apps
-
-# Development tools
-echo "Adding Development tools to Dock..."
-
-dockutil --no-restart --add "/Applications/Visual Studio Code.app"
-dockutil --no-restart --add "/Applications/iTerm.app"
-dockutil --no-restart --add '' --type small-spacer --section apps
-
-# System Preferences
-echo "Adding System Preferences to Dock..."
-
-dockutil --no-restart --add "/System/Applications/System Settings.app"
-
-# Dock folders
+# Add folders to the Dock
 echo "Adding Folders to Dock..."
-
 dockutil --no-restart --add "/Applications" --view auto --display folder --sort name
 dockutil --no-restart --add '~/Downloads' --view auto --display folder --sort dateadded
 
 # Restart Dock to apply changes
 echo "Restarting Dock to apply changes..."
-
 killall Dock
 
 echo "Dock customization complete. 🚀"

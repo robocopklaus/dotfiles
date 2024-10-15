@@ -7,7 +7,9 @@ export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
 # Homebrew environment setup
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if command -v brew &> /dev/null; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 # ------------------------------
 # Zsh Customizations
@@ -21,8 +23,10 @@ fi
 
 # Antidote: A plugin manager for Zsh
 # Loads Antidote and its plugins
-source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
-antidote load
+if command -v brew &> /dev/null; then
+  source "$(brew --prefix)/opt/antidote/share/antidote/antidote.zsh"
+  antidote load
+fi
 
 # Load Powerlevel10k theme configuration if available
 [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"

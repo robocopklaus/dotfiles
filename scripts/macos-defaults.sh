@@ -5,15 +5,19 @@
 
 # Function to safely apply defaults
 apply_default() {
-    domain=$1
-    key=$2
-    type=$3
-    value=$4
+    local domain=$1
+    local key=$2
+    local type=$3
+    local value=$4
 
     # Check if the key already exists
     if defaults read "$domain" "$key" &>/dev/null; then
         echo "Setting $domain $key to $value."
-        defaults write "$domain" "$key" "$type" "$value" && echo "Successfully set $key." || echo "Failed to set $key."
+        if defaults write "$domain" "$key" "$type" "$value"; then
+            echo "Successfully set $key."
+        else
+            echo "Failed to set $key."
+        fi
     else
         # Key does not exist - decide to create or skip
         echo "Key $key not found in $domain."
@@ -21,7 +25,11 @@ apply_default() {
         case "$response" in
             [Yy]*)
                 echo "Creating $key and setting to $value."
-                defaults write "$domain" "$key" "$type" "$value" && echo "Successfully created and set $key." || echo "Failed to create $key."
+                if defaults write "$domain" "$key" "$type" "$value"; then
+                    echo "Successfully created and set $key."
+                else
+                    echo "Failed to create $key."
+                fi
                 ;;
             *)
                 echo "Skipped setting $key."
@@ -54,6 +62,8 @@ fi
 # Appearance                                                                  #
 ###############################################################################
 
+echo "Configuring Appearance settings..."
+
 apply_default 'NSGlobalDomain' 'AppleInterfaceStyleSwitchesAutomatically' -bool true
 
 ###############################################################################
@@ -71,6 +81,8 @@ apply_default 'com.apple.driver.AppleBluetoothMultitouch.trackpad' 'TrackpadThre
 ###############################################################################
 # Control Center                                                              #
 ###############################################################################
+
+echo "Configuring Control Center settings..."
 
 # Bluetooth
 apply_default 'com.apple.controlcenter' 'NSStatusItem Visible Bluetooth' -bool true
@@ -105,6 +117,8 @@ apply_default 'NSGlobalDomain' 'AppleKeyboardUIMode' -int 2
 ###############################################################################
 # Trackpad                                                                    #
 ###############################################################################
+
+echo "Configuring Trackpad settings..."
 
 # Enable Tap to click and set tracking speed
 apply_default 'com.apple.AppleMultitouchTrackpad' 'Clicking' -bool true
@@ -171,13 +185,18 @@ echo "Configuring Music settings..."
 
 apply_default 'com.apple.Music' 'userWantsPlaybackNotifications' -bool false
 
+###############################################################################
+# Restart affected applications                                               #
+###############################################################################
 
-
-# Restart affected applications to apply changes
 echo "Restarting affected applications..."
 for app in "Music" "Calendar" "Dock" "Finder" "SystemUIServer" "cfprefsd"; do
     if pgrep "$app" &>/dev/null; then
-        killall "$app" &>/dev/null && echo "Restarted $app"
+        if killall "$app" &>/dev/null; then
+            echo "Restarted $app"
+        else
+            echo "Failed to restart $app"
+        fi
     else
         echo "$app is not running, no need to restart."
     fi

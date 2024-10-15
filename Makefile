@@ -3,8 +3,8 @@ SHELL = /bin/bash
 # Path to .dotfiles
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # List all dotfiles
-HOMEFILES := $(shell ls -A files | grep "^\.")
-DOTFILES := $(addprefix $(HOME)/,$(HOMEFILES))
+HOMEFILES := $(wildcard files/.*)
+DOTFILES := $(addprefix $(HOME)/,$(notdir $(HOMEFILES)))
 
 # Path to macOS user fonts
 FONTS_DIR := $(HOME)/Library/Fonts
@@ -19,31 +19,38 @@ export PATH := /opt/homebrew/bin:$(PATH)
 # List of Homebrew packages and casks to install
 BREW_PACKAGES := git volta antidote mas
 BREW_CASKS := iterm2 visual-studio-code docker google-drive \
-              1password notion slack google-chrome iina spotify \
-              dockutil finicky clockify herd \
-              kap postman sketch tableplus whatsapp home-assistant \
-              mimestream chatgpt
+			  1password notion slack google-chrome iina spotify \
+			  dockutil finicky clockify herd \
+			  kap postman sketch tableplus whatsapp home-assistant \
+			  mimestream chatgpt
 
 # List of VS Code extensions to install
 VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
-                      pkief.material-icon-theme mechatroner.rainbow-csv \
-                      mikestead.dotenv github.copilot github.copilot-chat \
+					  pkief.material-icon-theme mechatroner.rainbow-csv \
+					  mikestead.dotenv github.copilot github.copilot-chat \
 					  oderwat.indent-rainbow
 
-.PHONY: all install brew-packages brew-casks addons \
-        uninstall-brew-packages uninstall-brew-casks \
-        vs-code-extensions uninstall-vscode-extensions \
-        help link unlink sync-ssh-config sudo brew meslo-nerd-font macos-defaults dock-items
+# List of macOS App Store apps to install
+MAS_APPS := 1568262835  # Super Agent
+MAS_APPS += 1569813296  # 1Password for Safari
+MAS_APPS += 1107163858  # GCal for Google Calendar
+MAS_APPS += 409203825  # Numbers
+MAS_APPS += 409201541  # Pages
+
+.PHONY: all install brew-packages-casks mas-apps addons \
+		uninstall-brew-packages uninstall-brew-casks \
+		vs-code-extensions uninstall-vscode-extensions \
+		help link unlink sync-ssh-config sudo brew meslo-nerd-font macos-defaults dock-items
 
 all: install
 
 # Installation of packages, casks, and additional software
-install: brew-packages brew-casks addons macos-defaults dock-items sync-ssh-config link
+install: brew-packages-casks mas-apps addons macos-defaults dock-items sync-ssh-config link
 	@echo "Installation complete."
 
-# Homebrew package installation
-brew-packages: brew-taps
-	@echo "Updating and installing Homebrew packages..."
+# Homebrew package and cask installation
+brew-packages-casks: brew-taps
+	@echo "Updating and installing Homebrew packages and casks..."
 	@if command -v brew >/dev/null 2>&1; then \
 		brew update --quiet --force || { echo "Failed to update Homebrew"; exit 1; }; \
 		for package in $(BREW_PACKAGES); do \
@@ -52,16 +59,10 @@ brew-packages: brew-taps
 				brew install --quiet $$package || { echo "Failed to install $$package"; exit 1; }; \
 			fi; \
 		done; \
-	else \
-		echo "Homebrew is not installed."; \
-	fi
-
-# Homebrew cask installation
-brew-casks: brew-taps
-	@echo "Updating and installing Homebrew casks..."
-	@if command -v brew >/dev/null 2>&1; then \
-		$(foreach cask, $(BREW_CASKS), echo "Installing $(cask)..."; \
-		brew list --cask --versions $(cask) > /dev/null || brew install --cask --quiet --no-quarantine --force $(cask);) \
+		for cask in $(BREW_CASKS); do \
+			echo "Installing $$cask..."; \
+			brew list --cask --versions $$cask > /dev/null || brew install --cask --quiet --no-quarantine --force $$cask; \
+		done; \
 		if echo "$(BREW_CASKS)" | grep -q "iterm2"; then \
 			echo "Configuring iTerm2 with custom settings..."; \
 			defaults write com.googlecode.iterm2 PrefsCustomFolder $(DOTFILES_DIR)/files; \
@@ -69,6 +70,18 @@ brew-casks: brew-taps
 		fi \
 	else \
 		echo "Homebrew is not installed."; \
+	fi
+
+# Install macOS App Store apps
+mas-apps:
+	@echo "Installing macOS App Store apps..."
+	@if command -v mas >/dev/null 2>&1; then \
+		for app in $(MAS_APPS); do \
+			echo "Installing app ID $$app..."; \
+			mas install $$app || echo "Failed to install app ID $$app"; \
+		done; \
+	else \
+		echo "mas is not installed."; \
 	fi
 
 addons: vs-code-extensions meslo-nerd-font
@@ -186,7 +199,7 @@ sync-ssh-config:
 
 link: | $(DOTFILES)
 	@echo "Linking dotfiles to the home directory..."
-	@for file in $(HOMEFILES); do \
+	@for file in $(notdir $(HOMEFILES)); do \
 		if [ -f "files/$$file" ]; then \
 			ln -sfv "$(PWD)/files/$$file" "$(HOME)/$$file"; \
 		else \
@@ -232,8 +245,8 @@ help:
 	@echo "Available targets:"
 	@echo "  install: Install Homebrew packages, casks, addons, and link dotfiles"
 	@echo "  addons: Install addons like VS Code extensions and fonts"
-	@echo "  brew-packages: Install specified Homebrew packages"
-	@echo "  brew-casks: Install specified Homebrew casks"
+	@echo "  brew-packages-casks: Install specified Homebrew packages and casks"
+	@echo "  mas-apps: Install specified macOS App Store apps"
 	@echo "  link: Create symbolic links for dotfiles in the home directory"
 	@echo "  meslo-nerd-font: Install Meslo LGS Nerd Font"
 	@echo "  macos-defaults: Apply macOS default settings using a script"
