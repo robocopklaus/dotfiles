@@ -1,9 +1,4 @@
 # ------------------------------
-# Fig Pre Block
-# ------------------------------
-[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
-
-# ------------------------------
 # Environment Setup
 # ------------------------------
 
@@ -31,8 +26,3 @@ antidote load
 
 # Load Powerlevel10k theme configuration if available
 [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
-
-# ------------------------------
-# Fig Post Block
-# ------------------------------
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"

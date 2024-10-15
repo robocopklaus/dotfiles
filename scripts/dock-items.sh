@@ -30,6 +30,7 @@ echo "Adding Communication applications to Dock..."
 
 dockutil --no-restart --add "/System/Applications/Mail.app"
 dockutil --no-restart --add "/Applications/Mimestream.app"
+dockutil --no-restart --add "/Applications/ChatGPT.app"
 dockutil --no-restart --add "/Applications/Slack.app"
 dockutil --no-restart --add "/System/Applications/Messages.app"
 dockutil --no-restart --add '' --type small-spacer --section apps
@@ -38,6 +39,7 @@ dockutil --no-restart --add '' --type small-spacer --section apps
 echo "Adding Productivity applications to Dock..."
 
 dockutil --no-restart --add "/Applications/Notion.app"
+dockutil --no-restart --add "/System/Applications/GCal for Google Calendar.app"
 dockutil --no-restart --add "/System/Applications/Calendar.app"
 dockutil --no-restart --add '' --type small-spacer --section apps
 

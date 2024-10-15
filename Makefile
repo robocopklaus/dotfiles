@@ -20,25 +20,25 @@ export PATH := /opt/homebrew/bin:$(PATH)
 BREW_PACKAGES := git volta antidote mas
 BREW_CASKS := iterm2 visual-studio-code docker google-drive \
               1password notion slack google-chrome iina spotify \
-              hpedrorodrigues/tools/dockutil finicky clockify fig \
+              dockutil finicky clockify herd \
               kap postman sketch tableplus whatsapp home-assistant \
-              mimestream
+              mimestream chatgpt
 
 # List of VS Code extensions to install
 VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
                       pkief.material-icon-theme mechatroner.rainbow-csv \
-                      mikestead.dotenv prisma.prisma dbaeumer.vscode-eslint \
-                      vivaxy.vscode-conventional-commits bradlc.vscode-tailwindcss
+                      mikestead.dotenv github.copilot github.copilot-chat \
+					  oderwat.indent-rainbow
 
 .PHONY: all install brew-packages brew-casks addons \
         uninstall-brew-packages uninstall-brew-casks \
         vs-code-extensions uninstall-vscode-extensions \
-        help link unlink sudo brew meslo-nerd-font macos-defaults dock-items
+        help link unlink sync-ssh-config sudo brew meslo-nerd-font macos-defaults dock-items
 
 all: install
 
 # Installation of packages, casks, and additional software
-install: brew-packages brew-casks addons macos-defaults dock-items link
+install: brew-packages brew-casks addons macos-defaults dock-items sync-ssh-config link
 	@echo "Installation complete."
 
 # Homebrew package installation

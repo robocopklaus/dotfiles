@@ -10,7 +10,7 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 # Default width for tabs, used for visualization
-tab_width = 4
+tab_width = 2
 
 [Makefile]
 # Makefiles require tabs for indentation
