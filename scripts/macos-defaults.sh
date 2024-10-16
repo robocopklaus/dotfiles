@@ -10,31 +10,11 @@ apply_default() {
     local type=$3
     local value=$4
 
-    # Check if the key already exists
-    if defaults read "$domain" "$key" &>/dev/null; then
-        echo "Setting $domain $key to $value."
-        if defaults write "$domain" "$key" "$type" "$value"; then
-            echo "Successfully set $key."
-        else
-            echo "Failed to set $key."
-        fi
+    echo "Setting $domain $key to $value."
+    if defaults write "$domain" "$key" "$type" "$value"; then
+        echo "Successfully set $key."
     else
-        # Key does not exist - decide to create or skip
-        echo "Key $key not found in $domain."
-        read -p "Do you want to create it? [y/N] " response
-        case "$response" in
-            [Yy]*)
-                echo "Creating $key and setting to $value."
-                if defaults write "$domain" "$key" "$type" "$value"; then
-                    echo "Successfully created and set $key."
-                else
-                    echo "Failed to create $key."
-                fi
-                ;;
-            *)
-                echo "Skipped setting $key."
-                ;;
-        esac
+        echo "Failed to set $key."
     fi
 }
 
@@ -101,6 +81,8 @@ apply_default 'com.apple.dock' 'tilesize' -int 36
 apply_default 'com.apple.dock' 'magnification' -bool true
 apply_default 'com.apple.dock' 'largesize' -int 100
 apply_default 'com.apple.dock' 'show-recents' -bool false
+
+apply_default 'com.apple.WindowManager' 'EnableTilingByEdgeDrag' -bool false
 
 ###############################################################################
 # Keyboard                                                                    #
