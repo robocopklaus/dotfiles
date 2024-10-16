@@ -47,7 +47,7 @@ communication_apps=(
 productivity_apps=(
     "/Applications/ChatGPT.app"
     "/Applications/Notion.app"
-    "/System/Applications/GCal for Google Calendar.app"
+    "/Applications/GCal for Google Calendar.app"
     "/System/Applications/Calendar.app"
 )
 

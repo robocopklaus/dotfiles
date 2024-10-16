@@ -17,12 +17,11 @@ SSH_CONFIG := files/ssh/config
 export PATH := /opt/homebrew/bin:$(PATH)
 
 # List of Homebrew packages and casks to install
-BREW_PACKAGES := git volta antidote mas
+BREW_PACKAGES := git volta antidote mas dockutil
 BREW_CASKS := iterm2 visual-studio-code docker google-drive \
-			  1password notion slack google-chrome iina spotify \
-			  dockutil finicky clockify herd \
-			  kap postman sketch tableplus whatsapp home-assistant \
-			  mimestream chatgpt
+              1password notion slack google-chrome iina spotify \
+			  finicky clockify herd mimestream chatgpt \
+			  kap postman sketch tableplus whatsapp home-assistant
 
 # List of VS Code extensions to install
 VS_CODE_EXTENSIONS := bernardodsanderson.theme-material-neutral \
