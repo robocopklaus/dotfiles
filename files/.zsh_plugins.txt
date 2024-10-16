@@ -1,0 +1,26 @@
+# oh-my-zsh: Framework for managing your Zsh configuration
+ohmyzsh/ohmyzsh
+
+# Colored man pages
+ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+
+# Handling command not found situations
+ohmyzsh/ohmyzsh path:plugins/command-not-found
+
+# Powerlevel10k: A fast and feature-rich Zsh prompt
+romkatv/powerlevel10k
+
+# z: Tracks your most visited directories for quick access
+rupa/z
+
+# zsh-completions: Additional completion definitions for Zsh
+zsh-users/zsh-completions
+
+# zsh-autosuggestions: Fish-like fast/unobtrusive autosuggestions for Zsh
+zsh-users/zsh-autosuggestions
+
+# fast-syntax-highlighting: Feature-rich syntax highlighting for Zsh (deferred loading)
+zdharma-continuum/fast-syntax-highlighting kind:defer
+
+# zsh-history-substring-search: Substring history searching
+zsh-users/zsh-history-substring-search

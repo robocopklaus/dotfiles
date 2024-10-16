@@ -1,34 +1,30 @@
-#autoload -Uz compinit
-#compinit
+# ------------------------------
+# Environment Setup
+# ------------------------------
 
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+# Volta: JavaScript toolchains manager
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+
+# Homebrew environment setup
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# ------------------------------
+# Zsh Customizations
+# ------------------------------
+
+# Powerlevel10k: A fast Zsh prompt
+# Enable instant prompt, should be near the top of the file
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Kubernetes
-#source <(kubectl completion zsh)
+# Antidote: A plugin manager for Zsh
+# Loads Antidote and its plugins
+if command -v brew &> /dev/null; then
+  source "$(brew --prefix)/opt/antidote/share/antidote/antidote.zsh"
+  antidote load
+fi
 
-# Homebrew
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# eval "$(pyenv init -)"
-
-# Volta
-export VOLTA_HOME="$HOME/.volta"
-#export PATH="/opt/homebrew/opt/openjdk/bin:/usr/local/sbin:$VOLTA_HOME/bin:$PATH"
-export PATH="/usr/local/sbin:$VOLTA_HOME/bin:$PATH"
-
-# SOPS
-export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-
-# Load Antigen
-source $(brew --prefix)/share/antigen/antigen.zsh
-
-# Load Antigen configurations
-antigen init $HOME/.antigenrc
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# Load Powerlevel10k theme configuration if available
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"

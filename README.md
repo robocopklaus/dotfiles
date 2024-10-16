@@ -1,124 +1,111 @@
-# .files ![CI](https://github.com/robocopklaus/dotfiles/workflows/CI/badge.svg)
+# .files
 
-## :rocket: A development setup in just a few minutes without the hassle
+## 🚀 A development setup in just a few minutes without the hassle
 
-So you got a new :computer: or you just want to do a clean install of the latest macOS but don't have much time setting everything up the way you like it? Well, meet **.files**!
+Got a new 💻 or planning a clean install of the latest macOS but short on time to set everything up? Meet **.files**!
 
-**.files** is a collection of configuration files (dotfiles _duh!_) plus an automated setup to install all the apps and tools to get running in no time.
+**.files** is a collection of configuration files (dotfiles) plus an automated setup to install all the apps and tools you need in no time.
 
-![](https://raw.githubusercontent.com/robocopklaus/dotfiles/main/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/robocopklaus/dotfiles/main/screenshot.png)
 
-## :robot: Automated installation
+## 🤖 Automated installation
 
-:warning: Please backup your current settings. They may very well be overwritten!
+⚠️ Please backup your current settings. They may be overwritten!
 
-After you've successfully installed macOS you can just copy & paste this line into the terminal:
+After installing macOS, copy & paste this line into the terminal:
 
-```
+```sh
 curl -fsSL https://raw.githubusercontent.com/robocopklaus/dotfiles/main/scripts/remote-install.sh | bash
 ```
 
-## :turtle: Manual installation
+## 🐢 Manual installation
 
-:warning: Please backup your current settings. They may very well be overwritten!
+⚠️ Please backup your current settings. They may be overwritten!
 
-:bulb: macOS Command Line Tools are **required**. You can install them with:
+💡 macOS Command Line Tools are **required**. Install them with:
 
-```
+```sh
 xcode-select --install
 ```
 
-1. Clone this repo
+1. Clone this repo:
 
-   ```
-   git clone git@github.com:robocopklaus/dotfiles.git
-   ```
+  ```sh
+  git clone git@github.com:robocopklaus/dotfiles.git
+  ```
 
-2. Install
+2. Install:
 
-   ```
-   make install
-   ```
+  ```sh
+  make install
+  ```
 
-## :monocle_face: So what the hell is going on?
+## 🧐 What's included?
 
 ### Programming language utilities and package managers
 
-- [x] **[Homebrew](https://github.com/Homebrew/brew)** is a package manager that simplifies the installation of software on Apple's macOS operating system and Linux
-- [x] **[Git](https://github.com/git/git)** - Even though it is shipped with macOS, the shipped version is often not up to date.
-- [x] **[Volta](https://github.com/volta-cli/volta)**'s job is to manage your JavaScript command-line tools, such as `node`, `npm`, `yarn`, or executables shipped as part of JavaScript packages. It is similar to [NVM](https://github.com/nvm-sh/nvm) but faster.
+- **[Homebrew](https://github.com/Homebrew/brew)**: Simplifies software installation on macOS and Linux.
+- **[Git](https://github.com/git/git)**: Often more up-to-date than the version shipped with macOS.
+- **[Volta](https://github.com/volta-cli/volta)**: Manages JavaScript command-line tools like `node`, `npm`, and `yarn`.
 
 ### Terminal Tools
 
-- [x] **[iTerm2](https://github.com/gnachman/iTerm2)** is a replacement for Terminal. It is super fast and looks great.
+- **[iTerm2](https://github.com/gnachman/iTerm2)**: A fast and visually appealing Terminal replacement.
+- **[Antidote](https://github.com/mattmc3/antidote)**: A faster and simpler Zsh plugin manager.
+- **[Command Not Found](https://github.com/Homebrew/homebrew-command-not-found)**: Suggests commands to install missing packages.
+- **[z - jump around](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/z)**: Tracks and quickly accesses your most visited directories.
+- **[zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)**: Suggests commands as you type.
+- **[zsh-completions](https://github.com/zsh-users/zsh-completions)**: Additional completion definitions for Zsh.
+- **[zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)**: Syntax highlighting for Zsh.
 
-- [x] **[iTerm2 Material Design](https://github.com/MartinSeeler/iterm2-material-design)** is an iTerm2 color scheme based on Google's Material Design Color Palette.
+### DevOps
 
-- [x] **[Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)** is a framework for managing your Zsh configuration.
-
-- [x] **[Powerlevel10k](https://github.com/romkatv/powerlevel10k)** is a theme for Zsh. It emphasizes speed, flexibility and out-of-the-box experience.
-
-- [x] **[Antigen](https://github.com/zsh-users/antigen)** is a small set of functions that help you easily manage your shell (zsh) plugins. It makes installing and integrating zsh plugins super easy.
-
-- [x] **[Command Not Found](https://github.com/Homebrew/homebrew-command-not-found)** reproduces Ubuntu’s command-not-found for Homebrew users on macOS. When you try to use a command that doesn’t exist locally but is available through a package, it will suggest you a command to install it.
-
-- [x] **[z - jump around](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/z)** defines the z command that tracks your most visited directories and allows you to access them with very few keystrokes.
-
-- [x] **[zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)** suggests commands as you type based on history and completions.
-
-- [x] **[zsh-completions](https://github.com/zsh-users/zsh-completions)** are additional completion definitions for Zsh.
-
-- [x] **[zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)** provides syntax highlighting for the shell zsh. It enables highlighting of commands whilst they are typed at a zsh prompt into an interactive terminal.
-
-### Dev Ops
-
-- [x] **[Docker](https://www.docker.com)** allows you to build, test, and deploy applications quickly. It packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. You can quickly deploy and scale applications into any environment and know your code will run.
+- **[Docker](https://www.docker.com)**: Packages software into containers for quick deployment and scaling.
 
 ### IDE
 
-- [x] **[Visual Studio Code](https://github.com/microsoft/vscode)** was ranked the [most popular developer environment tool](https://insights.stackoverflow.com/survey/2019#technology-_-most-popular-development-environments) and that rightfully so.
-
-- [x] **[Material Neutral Theme](https://github.com/bernardodsanderson/material-neutral-theme)** is a theme for VS Code that is based on Google's Material Design Color Palette.
-
-- [x] **[Material Icon Theme](https://github.com/PKief/vscode-material-icon-theme)** gets the Material Design icons into VS Code.
-
-- [x] **[VSCode GraphQL](https://github.com/graphql/vscode-graphql)** aims to tightly integrate the GraphQL ecosystem with VSCode for an awesome developer experience.
-
-- [x] **[Docker for Visual Studio Code](https://github.com/microsoft/vscode-docker)** makes it easy to build, manage, and deploy containerized applications from Visual Studio Code.
-
-- [x] **[Rainbow CSV](https://github.com/mechatroner/vscode_rainbow_csv)** highlights CSV and TSV spreadsheet files in different rainbow colors.
-
-- [x] **[YAML Language Support by Red Hat](https://github.com/redhat-developer/vscode-yaml)** provides comprehensive YAML Language support to Visual Studio Code, via the yaml-language-server, with built-in Kubernetes syntax support.
+- **[Visual Studio Code](https://github.com/microsoft/vscode)**: Popular developer environment tool.
+- **[Material Neutral Theme](https://github.com/bernardodsanderson/material-neutral-theme)**: VS Code theme based on Material Design.
+- **[Material Icon Theme](https://github.com/PKief/vscode-material-icon-theme)**: Brings Material Design icons to VS Code.
+- **[Docker for Visual Studio Code](https://github.com/microsoft/vscode-docker)**: Manages containerized applications from VS Code.
+- **[Rainbow CSV](https://github.com/mechatroner/vscode_rainbow_csv)**: Highlights CSV and TSV files in different colors.
+- **[Dotenv](https://github.com/mikestead/vscode-dotenv)**: Support for `.env` files.
+- **[GitHub Copilot](https://github.com/github/copilot)**: AI pair programmer.
+- **[GitHub Copilot Chat](https://github.com/github/copilot-chat)**: Chat with GitHub Copilot.
+- **[Indent Rainbow](https://github.com/oderwat/vscode-indent-rainbow)**: Makes indentation more readable.
 
 ### Productivity Tools
 
-- [x] **[1Password](https://1password.com)** provides a place for users to store various passwords, software licenses, and other sensitive information in a virtual vault that is locked with a PBKDF2-guarded master password.
-
-- [x] **[Google Drive File Stream](https://www.google.com/drive/download/)** allows easy access to Google Drive files and folders without using a web browser.
-
-- [x] **[Notion](https://www.notion.so)** is an all-in-one workspace application that provides components such as databases, kanban boards, wikis, calendars and reminders for the whole team.
-
-- [x] **[Slack](https://slack.com)** is a channel-based messaging platform.
+- **[1Password](https://1password.com)**: Securely stores passwords and sensitive information.
+- **[Google Drive](https://www.google.com/drive/download/)**: Access Google Drive files without a web browser.
+- **[Notion](https://www.notion.so)**: All-in-one workspace for databases, kanban boards, wikis, and more.
+- **[Slack](https://slack.com)**: Channel-based messaging platform.
+- **[Clockify](https://clockify.me)**: Time tracking software.
+- **[Herd](https://herd.laravel.com)**: A one-click PHP development environment with zero dependencies and zero headaches.
+- **[Kap](https://getkap.co)**: Open-source screen recorder.
+- **[Postman](https://www.postman.com)**: API development environment.
+- **[Sketch](https://www.sketch.com)**: Digital design toolkit.
+- **[TablePlus](https://tableplus.com)**: Modern, native tool for database management.
+- **[WhatsApp](https://www.whatsapp.com)**: Messaging app.
+- **[Home Assistant](https://www.home-assistant.io)**: Open-source home automation platform.
+- **[Mimestream](https://mimestream.com)**: Native macOS email client for Gmail.
+- **[ChatGPT](https://chat.openai.com)**: AI chatbot.
 
 ### Browsers
 
-- [x] **[Chrome]()** is most likely the browser with the [highest market share](https://netmarketshare.com/?options=%7B%22filter%22%3A%7B%22%24and%22%3A%5B%7B%22deviceType%22%3A%7B%22%24in%22%3A%5B%22Desktop%2Flaptop%22%5D%7D%7D%5D%7D%2C%22dateLabel%22%3A%22Trend%22%2C%22attributes%22%3A%22share%22%2C%22group%22%3A%22browser%22%2C%22sort%22%3A%7B%22share%22%3A-1%7D%2C%22id%22%3A%22browsersDesktop%22%2C%22dateInterval%22%3A%22Monthly%22%2C%22dateStart%22%3A%222019-11%22%2C%22dateEnd%22%3A%222020-10%22%2C%22segments%22%3A%22-1000%22%7D) world wide across all platforms.
-
-- [x] **[Firefox Developer Edition](https://www.mozilla.org/firefox/developer/)** is tailored for web developers.
+- **[Chrome](https://www.google.com/chrome/)**: Browser with the highest market share worldwide.
+- **[Firefox Developer Edition](https://www.mozilla.org/firefox/developer/)**: Tailored for web developers.
 
 ### Audio & Video
 
-- [x] **[IINA](https://github.com/iina/iina)** is a lightweight media player based on [mpv](https://github.com/mpv-player/mpv) and designed with modern versions of macOS in mind.
+- **[IINA](https://github.com/iina/iina)**: Lightweight media player based on mpv.
+- **[Spotify](https://www.spotify.com)**: Digital music service.
 
 ### macOS utilities
 
-- [x] **[Dockutil](https://github.com/kcrawford/dockutil)** is a command line utility for managing macOS dock items.
-
-- [x] **[Keka](https://github.com/aonez/Keka)** is a full featured file archiver.
-
-- [x] **[mas-cli](https://github.com/mas-cli/mas)** is simple command line interface for the Mac App Store that is designed for scripting and automation.
-
-- [x] **[Finicky](https://github.com/johnste/finicky)** is a macOS application that allows you to set up rules that decide which browser is opened for every link or url.
+- **[Dockutil](https://github.com/kcrawford/dockutil)**: Command line utility for managing macOS dock items.
+- **[mas-cli](https://github.com/mas-cli/mas)**: Command line interface for the Mac App Store.
+- **[Finicky](https://github.com/johnste/finicky)**: Sets up rules to decide which browser opens for each link.
 
 ## References
 
@@ -128,3 +115,4 @@ xcode-select --install
 - [Dotfiles](https://github.com/martijngastkemper/dotfiles) - Martijn Gastkemper
 - [Matt's MacOS dotfiles](https://github.com/mattorb/dotfiles) - Matt Smith
 - [macOS defaults list](https://macos-defaults.com) - Yann Bertrand
+
