@@ -31,7 +31,7 @@ install_xcode_cli_tools() {
 update_dotfiles_repo() {
   if [ ! -d "$DOTFILES_DIR" ]; then
     echo "Cloning dotfiles..."
-    git clone -b next https://github.com/robocopklaus/dotfiles.git "$DOTFILES_DIR" || { echo "Failed to clone dotfiles."; exit 1; }
+    git clone https://github.com/robocopklaus/dotfiles.git "$DOTFILES_DIR" || { echo "Failed to clone dotfiles."; exit 1; }
   else
     echo "Updating dotfiles..."
     git -C "$DOTFILES_DIR" pull --rebase || { echo "Failed to update dotfiles."; exit 1; }
