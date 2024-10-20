@@ -1,32 +1,50 @@
-[alias]
-	# View abbreviated SHA, description, and history graph of the latest 20 commits
-	l = log --pretty=oneline -n 20 --graph --abbrev-commit
+[core]
+  editor = code --wait  # Set Visual Studio Code as the default editor
 
-	# View the current working tree status using the short format
-	s = status -s
+[alias]
+  l = log --pretty=oneline -n 20 --graph --abbrev-commit  # Alias for viewing logs
+  s = status -s  # Alias for viewing status
 
 [branch]
-	# Tells Git to set up pull to rebase instead of merge
-	autoSetupRebase	= always
+  # Uncomment to automatically set up rebase for pull operations
+  # autoSetupRebase = always
 
 [diff]
-	# Detect copies as well as renames
-	renames = copies
-    tool = vscode
+  renames = copies  # Treat renames as copies in diffs
+  tool = vscode  # Set Visual Studio Code as the diff tool
 
 [difftool "vscode"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+  cmd = code --wait --diff $LOCAL $REMOTE  # Command to use VS Code for diffs
 
 [merge]
-    tool = vscode
+  tool = vscode  # Set Visual Studio Code as the merge tool
 
 [mergetool "vscode"]
-    cmd = code --wait $MERGED	
+  cmd = code --wait $MERGED  # Command to use VS Code for merges
 
 [init]
-	# Default branch name e.g. when initializing a new repository or when cloning an empty repository
-	defaultBranch = main
+  defaultBranch = main  # Set default branch name for new repositories
+
+[push]
+  autoSetupRemote = true  # Automatically set up remote tracking branches
 
 [pull]
-	# Rebase branches on top of the fetched branch when "git pull" is run
-	rebase = true
+  # Uncomment to rebase instead of merge on pull
+  # rebase = true
+
+[user]
+  name = Fabian Pahl  # User name
+  signingkey = ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwBP0io8zsB529if2kjPzPMy2uBPvalFU3cYAK/0Yj011lxb5wgbrxih7HKhud+gFTl9ts6nr80yXtediVdHcxQCicRqyMkahusa+pQ2SPDwCKPY0E6qtGUs37iu/uBP+wVjJAfqTPbb8r9Ff+FRtpKLCZ5FI8Mied/+7HarNYG9L0T34HVeAbS0F1AQLDf8mtBXqW1Ujyx5VBZpEEBSYIzP6EZn6q30LU5fMZ6U2SGOhi3ryv3NZclNit/RBivce1gpkKH1IxId+xgqcb8UZtP7cfk1PLwym4ypqIlco0Udal7MNCvZSZKudp6I+3ChRwL2bF/9VTT3jMPiMp44Lp  # SSH signing key
+
+[gpg]
+  format = ssh  # Use SSH format for GPG
+
+[gpg "ssh"]
+  program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign  # GPG program
+
+[commit]
+  gpgsign = true  # Enable GPG signing for commits using SSH format
+
+# Uncomment and configure the credential helper if needed
+# [credential]
+#   helper = osxkeychain  # For macOS, or use the appropriate helper for your OS

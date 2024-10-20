@@ -1,25 +1,17 @@
 root = true
 
 [*]
-# Set to tab or space to use hard tabs or soft tabs respectively
-indent_style = space
+# General settings for all file types
+indent_style = space        # Use spaces for indentation
+indent_size = 2             # Set the number of spaces per indentation level
+end_of_line = lf            # Use LF for line endings
+charset = utf-8             # Set the character encoding to UTF-8
+insert_final_newline = true # Ensure files end with a newline
+trim_trailing_whitespace = true # Remove any trailing whitespace
 
-# Number of columns used for each indentation level and the width of soft tabs (when supported)
-# When set to tab, the value of tab_width (if specified) will be used
-indent_size = 2
-
-# Line ending file format (Unix, DOS, Mac)
-end_of_line = lf
-
-# File character encoding
-charset = utf-8
-
-# Denotes whether file should end with a newline
-insert_final_newline = true
-
-# Denotes whether whitespace is removed from the end of lines
-trim_trailing_whitespace = true
+# Default width for tabs, used for visualization
+tab_width = 2               # Set the width of a tab character to 2 spaces
 
 [Makefile]
-# Use tabs for indentation (Makefiles require tabs)
-indent_style = tab
+# Makefiles require tabs for indentation
+indent_style = tab          # Use tabs for indentation in Makefiles
