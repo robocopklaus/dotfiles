@@ -10,6 +10,12 @@ export PATH="$VOLTA_HOME/bin:$PATH"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # ------------------------------
+# Aliases
+# ------------------------------
+alias git-prune-branches="npx -y git-removed-branches -p --force"
+alias npm-check-updates="npx -y npm-check-updates -i --format group"
+
+# ------------------------------
 # Zsh Customizations
 # ------------------------------
 
@@ -22,7 +28,9 @@ fi
 # Antidote: A plugin manager for Zsh
 # Loads Antidote and its plugins
 if command -v brew &> /dev/null; then
+  # source antidote
   source "$(brew --prefix)/opt/antidote/share/antidote/antidote.zsh"
+  # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
   antidote load
 fi
 
