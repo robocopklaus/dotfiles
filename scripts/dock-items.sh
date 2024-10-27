@@ -26,6 +26,10 @@ add_apps_to_dock() {
 # Clear existing Dock items
 dockutil --no-restart --remove all
 
+smart_home_apps=(
+    "/Applications/Home Assistant.app"
+)
+
 # Define application categories and their paths
 music_apps=(
     "/System/Applications/Music.app"
@@ -61,6 +65,7 @@ system_preferences=(
 )
 
 # Add applications to the Dock
+add_apps_to_dock "Smart Home" "${smart_home_apps[@]}"
 add_apps_to_dock "Music" "${music_apps[@]}"
 add_apps_to_dock "Browser" "${browser_apps[@]}"
 add_apps_to_dock "Communication" "${communication_apps[@]}"
