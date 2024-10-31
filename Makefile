@@ -17,7 +17,7 @@ SSH_CONFIG := files/ssh/config
 export PATH := /opt/homebrew/bin:$(PATH)
 
 # List of Homebrew packages and casks to install
-BREW_PACKAGES := git volta antidote mas dockutil
+BREW_PACKAGES := git volta antidote mas dockutil 1password-cli
 BREW_CASKS := iterm2 visual-studio-code docker google-drive \
               1password notion slack google-chrome iina spotify \
 			  finicky clockify herd mimestream chatgpt \
