@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install validation tools
         run: brew install chezmoi shellcheck
@@ -26,20 +26,17 @@ jobs:
             chezmoi --source "$PWD" execute-template --file "$script" > "$rendered"
           done
 
+      - name: Validate chezmoi apply
+        run: chezmoi --source "$PWD" --destination "$RUNNER_TEMP/chezmoi-dest" apply --dry-run --verbose
+
       - name: Bash syntax
         run: |
-          find .chezmoiscripts -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
-            bash -n "$script"
-          done
           find "$RUNNER_TEMP/chezmoi-rendered-scripts" -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
             bash -n "$script"
           done
 
       - name: ShellCheck
         run: |
-          find .chezmoiscripts -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
-            shellcheck -x "$script"
-          done
           find "$RUNNER_TEMP/chezmoi-rendered-scripts" -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
             shellcheck -x "$script"
           done

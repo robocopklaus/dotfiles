@@ -3,8 +3,7 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Keep a large shared history across terminal windows.
-export HISTFILE="$HOME/.zsh_history"
+# Keep a large command history across terminal windows.
 HISTSIZE=50000
 SAVEHIST=50000
 
