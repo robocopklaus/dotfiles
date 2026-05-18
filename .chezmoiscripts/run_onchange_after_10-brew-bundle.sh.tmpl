@@ -39,7 +39,12 @@ install_homebrew() {
 
   homebrew_installer="$(mktemp "${TMPDIR:-/tmp}/homebrew-install.XXXXXX")"
   curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$homebrew_installer"
-  NONINTERACTIVE=1 /bin/bash "$homebrew_installer"
+
+  if [[ -t 0 && -t 1 ]]; then
+    /bin/bash "$homebrew_installer"
+  else
+    NONINTERACTIVE=1 /bin/bash "$homebrew_installer"
+  fi
 }
 
 if ! load_homebrew; then
