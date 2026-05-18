@@ -1,6 +1,3 @@
-# Install GUI apps in /Applications for predictable Dock paths.
-cask_args appdir: "/Applications"
-
 # Core tooling
 brew "chezmoi"
 brew "git"

@@ -39,7 +39,7 @@ install_homebrew() {
 
   homebrew_installer="$(mktemp "${TMPDIR:-/tmp}/homebrew-install.XXXXXX")"
   curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$homebrew_installer"
-  /bin/bash "$homebrew_installer"
+  NONINTERACTIVE=1 /bin/bash "$homebrew_installer"
 }
 
 if ! load_homebrew; then
@@ -65,7 +65,7 @@ if [[ ! -f "$brewfile" ]]; then
   exit 0
 fi
 
-if brew bundle check --file "$brewfile" >/dev/null 2>&1; then
+if brew bundle check --file "$brewfile" >/dev/null; then
   echo "Homebrew bundle already satisfied."
   exit 0
 fi

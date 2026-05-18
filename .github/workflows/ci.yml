@@ -8,20 +8,48 @@ on:
 
 jobs:
   lint:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install validation tools
+        run: brew install chezmoi shellcheck
+
+      - name: Render chezmoi scripts
+        run: |
+          mkdir -p "$RUNNER_TEMP/chezmoi-rendered-scripts"
+          find .chezmoiscripts -type f -name '*.tmpl' -print0 | while IFS= read -r -d '' script; do
+            rendered="$RUNNER_TEMP/chezmoi-rendered-scripts/${script#./}"
+            rendered="${rendered%.tmpl}"
+            mkdir -p "$(dirname "$rendered")"
+            chezmoi --source "$PWD" execute-template --file "$script" > "$rendered"
+          done
+
       - name: Bash syntax
         run: |
-          find .chezmoiscripts -type f \( -name '*.sh' -o -name '*.sh.tmpl' \) -print0 | xargs -0 -n1 bash -n
-
-      - name: Install ShellCheck
-        run: brew install shellcheck
+          find .chezmoiscripts -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
+            bash -n "$script"
+          done
+          find "$RUNNER_TEMP/chezmoi-rendered-scripts" -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
+            bash -n "$script"
+          done
 
       - name: ShellCheck
-        run: find .chezmoiscripts -type f \( -name '*.sh' -o -name '*.sh.tmpl' \) -print0 | xargs -0 shellcheck -x
+        run: |
+          find .chezmoiscripts -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
+            shellcheck -x "$script"
+          done
+          find "$RUNNER_TEMP/chezmoi-rendered-scripts" -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
+            shellcheck -x "$script"
+          done
 
-      - name: Validate Brewfile syntax
-        run: brew bundle list --file Brewfile >/dev/null
+      - name: Validate Brewfile
+        run: |
+          brew bundle list --file Brewfile >/dev/null
+          brew bundle list --file Brewfile --formula | while IFS= read -r formula; do
+            [[ -n "$formula" ]] && brew info --formula "$formula" >/dev/null
+          done
+          brew bundle list --file Brewfile --cask | while IFS= read -r cask; do
+            [[ -n "$cask" ]] && brew info --cask "$cask" >/dev/null
+          done

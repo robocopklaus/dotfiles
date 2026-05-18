@@ -56,9 +56,5 @@ Secrets are not stored in Git. Use 1Password for tokens and keys.
 
 ## Validation
 
-```bash
-find .chezmoiscripts -type f \( -name '*.sh' -o -name '*.sh.tmpl' \) -print0 | xargs -0 -n1 bash -n
-find .chezmoiscripts -type f \( -name '*.sh' -o -name '*.sh.tmpl' \) -print0 | xargs -0 shellcheck -x
-brew bundle list --file Brewfile >/dev/null
-chezmoi diff
-```
+CI is the source of truth for repository validation. See
+[.github/workflows/ci.yml](.github/workflows/ci.yml).
