@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bash syntax
+        run: |
+          find .chezmoiscripts -type f \( -name '*.sh' -o -name '*.sh.tmpl' \) -print0 | xargs -0 -n1 bash -n
+
+      - name: Install ShellCheck
+        run: brew install shellcheck
+
+      - name: ShellCheck
+        run: find .chezmoiscripts -type f \( -name '*.sh' -o -name '*.sh.tmpl' \) -print0 | xargs -0 shellcheck -x
+
+      - name: Validate Brewfile syntax
+        run: brew bundle list --file Brewfile >/dev/null

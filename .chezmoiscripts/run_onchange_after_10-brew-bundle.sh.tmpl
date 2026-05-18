@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# Re-run this script when Brewfile changes.
+# Brewfile sha256: {{ include "Brewfile" | sha256sum }}
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  exit 0
+fi
+
+homebrew_installer=""
+
+cleanup() {
+  if [[ -n "$homebrew_installer" && -f "$homebrew_installer" ]]; then
+    rm -f "$homebrew_installer"
+  fi
+}
+trap cleanup EXIT
+
+load_homebrew() {
+  local brew_path
+
+  if command -v brew >/dev/null 2>&1; then
+    return 0
+  fi
+
+  for brew_path in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    if [[ -x "$brew_path" ]]; then
+      eval "$("$brew_path" shellenv)"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+install_homebrew() {
+  echo "Homebrew not found; installing Homebrew."
+
+  homebrew_installer="$(mktemp "${TMPDIR:-/tmp}/homebrew-install.XXXXXX")"
+  curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$homebrew_installer"
+  /bin/bash "$homebrew_installer"
+}
+
+if ! load_homebrew; then
+  install_homebrew
+fi
+
+if ! load_homebrew; then
+  echo "Homebrew installation completed, but brew is not on PATH." >&2
+  exit 1
+fi
+
+source_dir="${CHEZMOI_SOURCE_DIR:-}"
+if [[ -z "$source_dir" ]] && command -v chezmoi >/dev/null 2>&1; then
+  source_dir="$(chezmoi source-path)"
+fi
+if [[ -z "$source_dir" ]]; then
+  source_dir="$HOME/.local/share/chezmoi"
+fi
+
+brewfile="$source_dir/Brewfile"
+if [[ ! -f "$brewfile" ]]; then
+  echo "Brewfile not found at $brewfile; skipping brew bundle." >&2
+  exit 0
+fi
+
+if brew bundle check --file "$brewfile" >/dev/null 2>&1; then
+  echo "Homebrew bundle already satisfied."
+  exit 0
+fi
+
+brew bundle --file "$brewfile"

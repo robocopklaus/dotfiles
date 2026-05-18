@@ -1,0 +1,23 @@
+# Environment
+export PATH="$HOME/.local/bin:$PATH"
+
+# Keep a large shared history across terminal windows.
+export HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+
+# Append incrementally so parallel shells do not overwrite each other.
+setopt APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+setopt INC_APPEND_HISTORY
+
+# Aliases
+alias ll='ls -lah'
+alias la='ls -A'
+alias gs='git status -sb'
+alias gd='git diff'
+alias gco='git checkout'
+alias cdm='chezmoi'

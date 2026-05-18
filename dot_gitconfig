@@ -1,0 +1,30 @@
+[core]
+	editor = code --wait
+	excludesfile = ~/.gitignore
+
+[alias]
+	l = log --pretty=oneline -n 20 --graph --abbrev-commit
+	s = status -s
+
+[diff]
+	renames = copies
+	tool = vscode
+
+[difftool "vscode"]
+	cmd = code --wait --diff "$LOCAL" "$REMOTE"
+
+[merge]
+	tool = vscode
+
+[mergetool "vscode"]
+	cmd = code --wait "$MERGED"
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
+
+[user]
+	name = Fabian Pahl
+	email = 7754932+robocopklaus@users.noreply.github.com
