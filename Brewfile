@@ -22,6 +22,7 @@ cask "1password-cli"
 
 # Daily tools
 cask "chatgpt"
+cask "claude"
 cask "clockify"
 cask "cursor"
 cask "finicky"
