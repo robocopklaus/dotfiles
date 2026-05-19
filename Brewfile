@@ -3,6 +3,7 @@ brew "chezmoi"
 brew "git"
 brew "gh"
 brew "jq"
+brew "mise"
 
 # Shell
 brew "antidote"
