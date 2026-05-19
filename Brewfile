@@ -17,6 +17,7 @@ cask "1password"
 cask "1password-cli"
 
 # Daily tools
+cask "finicky"
 cask "visual-studio-code"
 cask "ghostty"
 cask "font-meslo-lg-nerd-font"
