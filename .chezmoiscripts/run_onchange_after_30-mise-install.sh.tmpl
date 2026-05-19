@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Installs the toolchains declared in dot_config/mise/config.toml.
+# Skipped when mise is not on PATH (the Brewfile is responsible for it).
+#
 # Re-run this script when the mise config changes.
 # mise config sha256: {{ include "dot_config/mise/config.toml" | sha256sum }}
 

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Installs Homebrew packages, casks, and Mac App Store apps from Brewfile.
+# Ensures Xcode CLT and Homebrew exist first; MAS apps run in a separate
+# pass so an unauthenticated App Store fails only the MAS step.
+#
 # Re-run this script when Brewfile changes.
 # Brewfile sha256: {{ include "Brewfile" | sha256sum }}
 
@@ -61,6 +65,9 @@ ensure_command_line_tools() {
   echo "Xcode Command Line Tools are installed."
 }
 
+# Cask installers prompt for sudo at unpredictable points during a single
+# bundle run. Refreshing the timestamp in the background avoids stalls in
+# the middle of a non-interactive install.
 start_sudo_keepalive() {
   if [[ -n "$sudo_keepalive_pid" ]]; then
     return 0
@@ -135,6 +142,10 @@ run_with_timeout() {
   wait "$command_pid"
 }
 
+# Install MAS entries against a stripped-down Brewfile under a timeout so
+# a missing App Store login (or a flaky `mas` call) does not block the
+# rest of the bundle. The main `brew bundle` call uses
+# HOMEBREW_BUNDLE_MAS_SKIP=1 to defer to this function.
 install_mas_apps() {
   local brewfile="$1"
 

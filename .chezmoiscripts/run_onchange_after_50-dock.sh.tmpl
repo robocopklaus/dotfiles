@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Rebuilds the Dock from scratch via dockutil: clears all items, then
+# re-adds the configured app categories and folders. Apps that are not
+# installed are skipped without failing the script. The Dock plist is
+# backed up before clearing; the most recent BACKUP_RETENTION backups
+# are kept.
+
 if [[ "$(uname)" != "Darwin" ]]; then
   exit 0
 fi

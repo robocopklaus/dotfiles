@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Applies opt-in Dock, Finder, Trackpad, and Keyboard defaults.
+# Gated by CHEZMOI_APPLY_MACOS_DEFAULTS so a normal `chezmoi apply`
+# leaves these settings untouched. MACOS_DEFAULTS_DRY_RUN previews
+# without writing. Affected domains are exported to
+# ~/.macos-defaults-backup-<timestamp> before any change; the most
+# recent BACKUP_RETENTION backups are kept.
+
 readonly BACKUP_RETENTION=5
 
 if [[ "$(uname)" != "Darwin" ]]; then

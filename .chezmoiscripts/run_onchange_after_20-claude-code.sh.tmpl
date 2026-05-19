@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Installs Claude Code via the upstream native installer when no `claude`
+# CLI is found. No-op once installed; the CLI self-updates from there.
+
 if [[ "$(uname)" != "Darwin" ]]; then
   exit 0
 fi

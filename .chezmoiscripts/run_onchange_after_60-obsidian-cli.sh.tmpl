@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Symlinks the Obsidian-bundled CLI into ~/.local/bin so `obsidian` works
+# from any shell. Requires Obsidian >= 1.12.7 (which ships obsidian-cli
+# inside the .app). Refuses to overwrite an existing non-symlink target.
+
 if [[ "$(uname)" != "Darwin" ]]; then
   exit 0
 fi
