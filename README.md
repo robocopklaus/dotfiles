@@ -8,7 +8,7 @@ MacBook Pro and Mac Studio.
 ## Install
 
 ```bash
-sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- --use-builtin-git=true init --apply robocopklaus/dotfiles
+sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- -- --use-builtin-git=true init --apply robocopklaus/dotfiles
 ```
 
 This installs `chezmoi` into `~/.local/bin`, clones this repository into the
