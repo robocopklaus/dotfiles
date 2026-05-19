@@ -6,9 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
 jobs:
   lint:
     runs-on: macos-15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
