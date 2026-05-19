@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+input="$(cat)"
+[[ -z "$input" ]] && input='{}'
+
+if ! command -v jq >/dev/null 2>&1; then
+  printf '%s' "$input"
+  exit 0
+fi
+
+printf '%s' "$input" | jq '. + {
+  statusLine: {
+    type: "command",
+    command: "bunx -y ccstatusline@latest",
+    padding: 0,
+    refreshInterval: 10
+  }
+}'

@@ -1,0 +1,57 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "cyan"
+      },
+      {
+        "id": "3",
+        "type": "context-percentage",
+        "color": "brightBlack"
+      },
+      {
+        "id": "5",
+        "type": "session-cost",
+        "color": "magenta"
+      },
+      {
+        "id": "7",
+        "type": "session-clock",
+        "color": "yellow"
+      },
+      {
+        "id": "77b45754-5c94-470c-bef0-4d73c29ae8b9",
+        "type": "block-timer",
+        "backgroundColor": "bgBrightGreen"
+      }
+    ],
+    [],
+    []
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "powerline": {
+    "enabled": true,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [
+      ""
+    ],
+    "endCaps": [
+      ""
+    ],
+    "autoAlign": true,
+    "theme": "onedark"
+  },
+  "defaultPadding": " "
+}

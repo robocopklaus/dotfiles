@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# Re-run this script when the mise config changes.
+# mise config sha256: {{ include "dot_config/mise/config.toml" | sha256sum }}
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  exit 0
+fi
+
+if ! command -v mise >/dev/null 2>&1; then
+  echo "mise not found; skipping mise install." >&2
+  exit 0
+fi
+
+mise install
