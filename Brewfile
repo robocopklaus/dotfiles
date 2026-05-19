@@ -6,6 +6,7 @@ brew "gh"
 brew "jq"
 brew "mas"
 brew "mise"
+brew "uv"
 
 # Shell
 brew "antidote"
