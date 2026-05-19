@@ -20,6 +20,10 @@ first apply opens the Command Line Tools installer when needed, waits for it to
 finish, installs Homebrew when needed, applies the `Brewfile` including Codex
 CLI, and installs Claude Code with its native installer when needed.
 
+Zsh plugins are managed with Antidote via `~/.zsh_plugins.txt`, with zoxide
+handling directory jumps. Only selected Oh My Zsh plugins are loaded, not the
+full Oh My Zsh framework.
+
 If `chezmoi` is already installed:
 
 ```bash

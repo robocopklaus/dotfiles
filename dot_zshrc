@@ -1,7 +1,13 @@
 # Environment
-if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
+typeset -gU path fpath
+path=("$HOME/.local/bin" $path)
+
+for brew_prefix in /opt/homebrew /usr/local; do
+  if [[ -d "$brew_prefix/share/zsh/site-functions" ]]; then
+    fpath=("$brew_prefix/share/zsh/site-functions" $fpath)
+  fi
+done
+unset brew_prefix
 
 # Keep a large command history across terminal windows.
 HISTSIZE=50000
@@ -14,6 +20,36 @@ setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 setopt HIST_REDUCE_BLANKS
 setopt INC_APPEND_HISTORY
+
+# Plugins
+autoload -Uz colors && colors
+zstyle ':plugin:ez-compinit' use-cache on
+
+bind_history_substring_search() {
+  zmodload zsh/terminfo 2>/dev/null || return 0
+
+  local keymap
+  for keymap in main emacs viins; do
+    [[ -n "${terminfo[kcuu1]:-}" ]] && bindkey -M "$keymap" "$terminfo[kcuu1]" history-substring-search-up
+    [[ -n "${terminfo[kcud1]:-}" ]] && bindkey -M "$keymap" "$terminfo[kcud1]" history-substring-search-down
+  done
+}
+
+for antidote_source in \
+  /opt/homebrew/opt/antidote/share/antidote/antidote.zsh \
+  /usr/local/opt/antidote/share/antidote/antidote.zsh; do
+  if [[ -r "$antidote_source" && -f "${ZDOTDIR:-$HOME}/.zsh_plugins.txt" ]]; then
+    source "$antidote_source"
+    antidote load "${ZDOTDIR:-$HOME}/.zsh_plugins.txt"
+    break
+  fi
+done
+unset antidote_source
+
+# Directory jumping
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
 
 # Aliases
 alias ll='ls -lah'

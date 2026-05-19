@@ -4,6 +4,10 @@ brew "git"
 brew "gh"
 brew "jq"
 
+# Shell
+brew "antidote"
+brew "zoxide"
+
 # AI coding agents
 cask "codex"
 
