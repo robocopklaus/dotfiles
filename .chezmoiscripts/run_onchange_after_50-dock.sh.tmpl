@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  exit 0
+fi
+
+readonly BACKUP_RETENTION=5
+
+log() {
+  printf '%s\n' "$*"
+}
+
+warn() {
+  printf 'Warning: %s\n' "$*" >&2
+}
+
+ensure_brew_path() {
+  local candidate
+  for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    if [[ -x "$candidate" ]]; then
+      eval "$("$candidate" shellenv)" >/dev/null
+      return 0
+    fi
+  done
+  return 1
+}
+
+ensure_brew_path || true
+
+if ! command -v dockutil >/dev/null 2>&1; then
+  warn "dockutil not found; skipping Dock configuration."
+  exit 0
+fi
+
+resolve_app_path() {
+  local app="$1"
+  local name candidate
+
+  if [[ "$app" == /* && -d "$app" ]]; then
+    printf '%s\n' "$app"
+    return 0
+  fi
+
+  name="$(basename "$app")"
+
+  for candidate in \
+    "/Applications/$name" \
+    "$HOME/Applications/$name" \
+    "/System/Applications/$name" \
+    "/System/Cryptexes/App/System/Applications/$name"; do
+    if [[ -d "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+add_category() {
+  local category="$1"
+  shift
+  local apps=("$@")
+  local app resolved
+  local added=0
+
+  log "Adding $category apps."
+  for app in "${apps[@]}"; do
+    if ! resolved="$(resolve_app_path "$app")"; then
+      log "  Skipping $app (not installed)."
+      continue
+    fi
+
+    if dockutil --no-restart --add "$resolved" >/dev/null 2>&1; then
+      log "  Added $resolved."
+      added=$((added + 1))
+    else
+      warn "  Failed to add $resolved."
+    fi
+  done
+
+  if (( added > 0 )); then
+    dockutil --no-restart --add '' --type small-spacer --section apps >/dev/null 2>&1 || true
+  fi
+}
+
+backup_dock_plist() {
+  local plist="$HOME/Library/Preferences/com.apple.dock.plist"
+  local backup_dir backup stale
+
+  if [[ ! -f "$plist" ]]; then
+    return 0
+  fi
+
+  backup_dir="$HOME/Library/Preferences"
+  backup="$backup_dir/com.apple.dock.plist.backup.$(date +%Y%m%d-%H%M%S)"
+
+  if ! cp "$plist" "$backup"; then
+    warn "Failed to back up Dock plist."
+    return 0
+  fi
+  log "Backed up Dock plist to $backup."
+
+  while IFS= read -r stale; do
+    [[ -n "$stale" ]] && rm -f "$stale"
+  done < <(
+    find "$backup_dir" -maxdepth 1 -name 'com.apple.dock.plist.backup.*' -type f \
+      | sort -r \
+      | tail -n +$((BACKUP_RETENTION + 1))
+  )
+}
+
+backup_dock_plist
+
+log "Clearing existing Dock items."
+dockutil --no-restart --remove all >/dev/null 2>&1 || warn "Failed to clear Dock items."
+
+add_category "Music" \
+  "Music.app"
+
+add_category "Browser" \
+  "Safari.app" \
+  "Google Chrome.app" \
+  "Zen.app"
+
+add_category "Communication" \
+  "Mail.app" \
+  "Mimestream.app" \
+  "Slack.app" \
+  "Messages.app" \
+  "WhatsApp.app"
+
+add_category "Productivity" \
+  "ChatGPT.app" \
+  "GCal for Google Calendar.app" \
+  "Calendar.app" \
+  "Obsidian.app"
+
+add_category "Development" \
+  "Cursor.app" \
+  "Ghostty.app"
+
+add_category "System" \
+  "System Settings.app"
+
+log "Adding folders."
+dockutil --no-restart --add "/Applications" --view auto --display folder --sort name >/dev/null 2>&1 \
+  || warn "Failed to add Applications folder."
+dockutil --no-restart --add "$HOME/Downloads" --view auto --display folder --sort dateadded >/dev/null 2>&1 \
+  || warn "Failed to add Downloads folder."
+
+log "Restarting Dock."
+killall Dock 2>/dev/null || true
+
+log "Dock configuration completed."
