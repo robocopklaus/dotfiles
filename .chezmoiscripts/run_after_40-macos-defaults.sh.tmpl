@@ -188,7 +188,6 @@ configure_finder() {
   set_bool "com.apple.finder" "ShowPathbar" "true" "Finder path bar"
   set_bool "com.apple.finder" "ShowStatusBar" "true" "Finder status bar"
   set_string "com.apple.finder" "FXPreferredViewStyle" "clmv" "Finder column view"
-  set_bool "NSGlobalDomain" "AppleShowAllExtensions" "true" "all file extensions"
 
   if [[ ! -f "$finder_plist" && "$dry_run" != true ]]; then
     warn "Finder plist not found at $finder_plist; skipping desktop icon view settings."
