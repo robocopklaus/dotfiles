@@ -25,9 +25,12 @@ handling directory jumps. Only selected Oh My Zsh plugins are loaded, not the
 full Oh My Zsh framework.
 
 Git commits and tags are configured for SSH signing with 1Password. On a fresh
-Mac, sign in to 1Password, enable the 1Password SSH agent, and register the
-public key in GitHub as a signing key before creating commits. Local signature
-verification uses `~/.config/git/allowed_signers` and can be checked with:
+Mac, sign in to 1Password and enable the 1Password SSH agent (Settings →
+Developer → "Use the SSH agent"). Register the public key in GitHub twice —
+under **SSH keys** (for `git push` over SSH) and under **SSH signing keys** (for
+commit verification). The `~/.ssh/config` that points `ssh` at the 1Password
+agent socket is managed by chezmoi. Local signature verification uses
+`~/.config/git/allowed_signers` and can be checked with:
 
 ```bash
 git log --show-signature
