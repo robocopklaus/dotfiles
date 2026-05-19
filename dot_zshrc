@@ -51,6 +51,17 @@ if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
 
+# Prompt
+if [[ "$TERM_PROGRAM" != "Apple_Terminal" ]] && command -v oh-my-posh >/dev/null 2>&1; then
+  oh_my_posh_config="${XDG_CONFIG_HOME:-$HOME/.config}/oh-my-posh/config.omp.json"
+  if [[ -r "$oh_my_posh_config" ]]; then
+    eval "$(oh-my-posh init zsh --config "$oh_my_posh_config")"
+  else
+    eval "$(oh-my-posh init zsh)"
+  fi
+  unset oh_my_posh_config
+fi
+
 # Aliases
 alias ll='ls -lah'
 alias la='ls -A'

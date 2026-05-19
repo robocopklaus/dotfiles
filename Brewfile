@@ -6,6 +6,7 @@ brew "jq"
 
 # Shell
 brew "antidote"
+brew "oh-my-posh"
 brew "zoxide"
 
 # AI coding agents
