@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+readonly BACKUP_RETENTION=5
+
 if [[ "$(uname)" != "Darwin" ]]; then
   exit 0
 fi
@@ -88,6 +90,20 @@ set_currenthost() {
   run_or_print defaults -currentHost write "$domain" "$key" "-$type" "$value"
 }
 
+prune_old_backups() {
+  local parent="$1"
+  local pattern="$2"
+  local stale
+
+  while IFS= read -r stale; do
+    [[ -n "$stale" ]] && rm -rf "$stale"
+  done < <(
+    find "$parent" -maxdepth 1 -name "$pattern" -type d \
+      | sort -r \
+      | tail -n +$((BACKUP_RETENTION + 1))
+  )
+}
+
 backup_defaults() {
   local timestamp
   local backup_dir
@@ -105,6 +121,7 @@ backup_defaults() {
 
   if [[ "$dry_run" == true ]]; then
     log "[dry-run] Would back up macOS defaults to $backup_dir."
+    log "[dry-run] Would prune backups in $HOME beyond the most recent $BACKUP_RETENTION."
     return 0
   fi
 
@@ -119,6 +136,10 @@ backup_defaults() {
   done
 
   log "macOS defaults backup saved to $backup_dir."
+
+  if [[ -z "${MACOS_DEFAULTS_BACKUP_DIR:-}" ]]; then
+    prune_old_backups "$HOME" '.macos-defaults-backup-*'
+  fi
 }
 
 ensure_plist_dict() {
