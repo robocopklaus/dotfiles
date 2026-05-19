@@ -58,6 +58,26 @@ The chezmoi source directory uses the default path:
 ~/.local/share/chezmoi
 ```
 
+## macOS Defaults
+
+Dock, Finder, Trackpad, and Keyboard defaults are available as an explicit
+opt-in step. A normal `chezmoi apply` does not change these settings.
+
+Preview the defaults script:
+
+```bash
+MACOS_DEFAULTS_DRY_RUN=true CHEZMOI_APPLY_MACOS_DEFAULTS=true chezmoi apply
+```
+
+Apply the defaults:
+
+```bash
+CHEZMOI_APPLY_MACOS_DEFAULTS=true chezmoi apply
+```
+
+The script backs up the affected defaults domains to
+`~/.macos-defaults-backup-*` before changing settings.
+
 ## Iteration
 
 Start with the minimum setup, adjust the Mac normally, then add files back to

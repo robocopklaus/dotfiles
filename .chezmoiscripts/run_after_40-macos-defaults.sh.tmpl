@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  exit 0
+fi
+
+is_enabled() {
+  case "${1:-}" in
+    1 | true | TRUE | yes | YES | y | Y) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+log() {
+  printf '%s\n' "$*"
+}
+
+warn() {
+  printf 'Warning: %s\n' "$*" >&2
+}
+
+fail() {
+  printf 'Error: %s\n' "$*" >&2
+  exit 1
+}
+
+if ! is_enabled "${CHEZMOI_APPLY_MACOS_DEFAULTS:-${MACOS_DEFAULTS_ENABLED:-}}"; then
+  log "macOS defaults skipped. Set CHEZMOI_APPLY_MACOS_DEFAULTS=true to apply them."
+  exit 0
+fi
+
+if [[ "$EUID" -eq 0 ]]; then
+  fail "Do not run macOS defaults as root."
+fi
+
+dry_run=false
+if is_enabled "${MACOS_DEFAULTS_DRY_RUN:-${DRY_RUN:-}}"; then
+  dry_run=true
+fi
+
+run_or_print() {
+  if [[ "$dry_run" == true ]]; then
+    printf '[dry-run]'
+    printf ' %q' "$@"
+    printf '\n'
+    return 0
+  fi
+
+  "$@"
+}
+
+set_default() {
+  local domain="$1"
+  local key="$2"
+  local type="$3"
+  local value="$4"
+  local description="$5"
+
+  log "Setting ${description}."
+  run_or_print defaults write "$domain" "$key" "-$type" "$value"
+}
+
+set_bool() {
+  set_default "$1" "$2" bool "$3" "$4"
+}
+
+set_int() {
+  set_default "$1" "$2" int "$3" "$4"
+}
+
+set_string() {
+  set_default "$1" "$2" string "$3" "$4"
+}
+
+backup_defaults() {
+  local timestamp
+  local backup_dir
+  local domain
+  local domains=(
+    "com.apple.dock"
+    "com.apple.finder"
+    "NSGlobalDomain"
+    "com.apple.AppleMultitouchTrackpad"
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad"
+  )
+
+  timestamp="$(date +%Y%m%d-%H%M%S)"
+  backup_dir="${MACOS_DEFAULTS_BACKUP_DIR:-$HOME/.macos-defaults-backup-$timestamp}"
+
+  if [[ "$dry_run" == true ]]; then
+    log "[dry-run] Would back up macOS defaults to $backup_dir."
+    return 0
+  fi
+
+  mkdir -p "$backup_dir"
+
+  for domain in "${domains[@]}"; do
+    if defaults export "$domain" "$backup_dir/$domain.plist" >/dev/null 2>&1; then
+      log "Backed up $domain."
+    else
+      warn "Could not export $domain; continuing."
+    fi
+  done
+
+  log "macOS defaults backup saved to $backup_dir."
+}
+
+ensure_plist_dict() {
+  local plist="$1"
+  local key_path="$2"
+
+  if /usr/libexec/PlistBuddy -c "Print :$key_path" "$plist" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  run_or_print /usr/libexec/PlistBuddy -c "Add :$key_path dict" "$plist"
+}
+
+set_plist_bool() {
+  local plist="$1"
+  local key_path="$2"
+  local value="$3"
+
+  if [[ "$dry_run" == true ]]; then
+    run_or_print /usr/libexec/PlistBuddy -c "Set :$key_path $value" "$plist"
+    return 0
+  fi
+
+  if ! /usr/libexec/PlistBuddy -c "Set :$key_path $value" "$plist" >/dev/null 2>&1; then
+    /usr/libexec/PlistBuddy -c "Add :$key_path bool $value" "$plist"
+  fi
+}
+
+set_plist_string() {
+  local plist="$1"
+  local key_path="$2"
+  local value="$3"
+
+  if [[ "$dry_run" == true ]]; then
+    run_or_print /usr/libexec/PlistBuddy -c "Set :$key_path $value" "$plist"
+    return 0
+  fi
+
+  if ! /usr/libexec/PlistBuddy -c "Set :$key_path $value" "$plist" >/dev/null 2>&1; then
+    /usr/libexec/PlistBuddy -c "Add :$key_path string $value" "$plist"
+  fi
+}
+
+configure_dock() {
+  log "Configuring Dock."
+
+  set_int "com.apple.dock" "tilesize" "36" "Dock tile size"
+  set_int "com.apple.dock" "largesize" "100" "Dock magnification size"
+  set_bool "com.apple.dock" "magnification" "true" "Dock magnification"
+  set_bool "com.apple.dock" "show-recents" "false" "recent applications in Dock"
+}
+
+configure_finder() {
+  local finder_plist="$HOME/Library/Preferences/com.apple.finder.plist"
+
+  log "Configuring Finder."
+
+  set_bool "com.apple.finder" "_FXSortFoldersFirst" "true" "folders first"
+  set_string "com.apple.finder" "NewWindowTarget" "PfHm" "new Finder windows to home"
+  set_string "com.apple.finder" "NewWindowTargetPath" "file://${HOME}" "new Finder window path"
+  set_bool "com.apple.finder" "ShowExternalHardDrivesOnDesktop" "false" "external drives on desktop"
+  set_bool "com.apple.finder" "ShowRecentTags" "false" "recent tags"
+  set_string "com.apple.finder" "FXDefaultSearchScope" "SCcf" "Finder search scope to current folder"
+  set_bool "com.apple.finder" "ShowPathbar" "true" "Finder path bar"
+  set_bool "com.apple.finder" "ShowStatusBar" "true" "Finder status bar"
+  set_string "com.apple.finder" "FXPreferredViewStyle" "clmv" "Finder column view"
+
+  if [[ ! -f "$finder_plist" && "$dry_run" != true ]]; then
+    warn "Finder plist not found at $finder_plist; skipping desktop icon view settings."
+    return 0
+  fi
+
+  ensure_plist_dict "$finder_plist" "DesktopViewSettings"
+  ensure_plist_dict "$finder_plist" "DesktopViewSettings:IconViewSettings"
+  set_plist_bool "$finder_plist" "DesktopViewSettings:IconViewSettings:showItemInfo" "true"
+  set_plist_string "$finder_plist" "DesktopViewSettings:IconViewSettings:arrangeBy" "name"
+}
+
+configure_trackpad() {
+  log "Configuring Trackpad."
+
+  set_int "NSGlobalDomain" "com.apple.mouse.tapBehavior" "1" "tap to click"
+
+  set_bool "com.apple.AppleMultitouchTrackpad" "Clicking" "true" "built-in trackpad tap to click"
+  set_bool "com.apple.AppleMultitouchTrackpad" "Dragging" "true" "built-in trackpad dragging"
+  set_bool "com.apple.AppleMultitouchTrackpad" "TrackpadThreeFingerDrag" "true" "built-in trackpad three-finger drag"
+
+  set_bool "com.apple.driver.AppleBluetoothMultitouch.trackpad" "Clicking" "true" "Bluetooth trackpad tap to click"
+  set_bool "com.apple.driver.AppleBluetoothMultitouch.trackpad" "Dragging" "true" "Bluetooth trackpad dragging"
+  set_bool "com.apple.driver.AppleBluetoothMultitouch.trackpad" "TrackpadThreeFingerDrag" "true" "Bluetooth trackpad three-finger drag"
+}
+
+configure_keyboard() {
+  log "Configuring Keyboard."
+
+  set_int "NSGlobalDomain" "KeyRepeat" "2" "keyboard repeat rate"
+  set_int "NSGlobalDomain" "InitialKeyRepeat" "15" "initial keyboard repeat delay"
+}
+
+restart_affected_apps() {
+  log "Restarting affected applications."
+
+  if [[ "$dry_run" == true ]]; then
+    log "[dry-run] Would restart Dock, Finder, and SystemUIServer."
+    return 0
+  fi
+
+  killall Dock 2>/dev/null || true
+  killall Finder 2>/dev/null || true
+  killall SystemUIServer 2>/dev/null || true
+}
+
+backup_defaults
+configure_dock
+configure_finder
+configure_trackpad
+configure_keyboard
+restart_affected_apps
+
+log "macOS defaults configuration completed."

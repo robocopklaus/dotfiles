@@ -37,8 +37,9 @@ cask "whatsapp"
 cask "zen"
 
 # Mac App Store
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
+mas "Keynote", id: 361285480
+mas "Numbers", id: 361304891
+mas "Pages", id: 361309726
 mas "Super Agent", id: 1568262835
 mas "1Password for Safari", id: 1569813296
 mas "GCal for Google Calendar", id: 1107163858
