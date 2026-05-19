@@ -17,8 +17,8 @@ default source directory, and applies the managed files.
 The install command uses chezmoi's built-in Git support so a fresh macOS system
 can clone this repository before Xcode Command Line Tools are installed. The
 first apply opens the Command Line Tools installer when needed, waits for it to
-finish, installs Homebrew when needed, applies the `Brewfile`, and installs
-Claude Code with its native installer when needed.
+finish, installs Homebrew when needed, applies the `Brewfile` including Codex
+CLI, and installs Claude Code with its native installer when needed.
 
 If `chezmoi` is already installed:
 

@@ -4,6 +4,9 @@ brew "git"
 brew "gh"
 brew "jq"
 
+# AI coding agents
+cask "codex"
+
 # Security
 cask "1password"
 cask "1password-cli"
