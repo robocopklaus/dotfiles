@@ -3,7 +3,7 @@
   "skipAutoPermissionPrompt": true,
   "statusLine": {
     "type": "command",
-    "command": "bunx -y ccstatusline@latest",
+    "command": "mise exec -- bunx -y ccstatusline@latest",
     "padding": 0,
     "refreshInterval": 10
   }
