@@ -8,19 +8,21 @@ MacBook Pro and Mac Studio.
 ## Install
 
 ```bash
-sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply robocopklaus/dotfiles
+sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- --use-builtin-git=true init --apply robocopklaus/dotfiles
 ```
 
 This installs `chezmoi` into `~/.local/bin`, clones this repository into the
 default source directory, and applies the managed files.
 
-The first apply also installs Homebrew when needed and then applies the
-`Brewfile`.
+The install command uses chezmoi's built-in Git support so a fresh macOS system
+can clone this repository before Xcode Command Line Tools are installed. The
+first apply opens the Command Line Tools installer when needed, waits for it to
+finish, installs Homebrew when needed, and then applies the `Brewfile`.
 
 If `chezmoi` is already installed:
 
 ```bash
-chezmoi init --apply robocopklaus/dotfiles
+chezmoi --use-builtin-git=true init --apply robocopklaus/dotfiles
 ```
 
 ## Daily Use

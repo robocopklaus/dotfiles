@@ -9,13 +9,71 @@ if [[ "$(uname)" != "Darwin" ]]; then
 fi
 
 homebrew_installer=""
+sudo_keepalive_pid=""
 
 cleanup() {
+  if [[ -n "$sudo_keepalive_pid" ]]; then
+    kill "$sudo_keepalive_pid" 2>/dev/null || true
+  fi
+
   if [[ -n "$homebrew_installer" && -f "$homebrew_installer" ]]; then
     rm -f "$homebrew_installer"
   fi
 }
 trap cleanup EXIT
+
+have_command_line_tools() {
+  xcode-select -p >/dev/null 2>&1
+}
+
+ensure_command_line_tools() {
+  local install_output
+  local timeout_seconds=3600
+  local waited_seconds=0
+
+  if have_command_line_tools; then
+    return 0
+  fi
+
+  echo "Xcode Command Line Tools not found; opening installer."
+  install_output="$(xcode-select --install 2>&1)" || true
+  if [[ -n "$install_output" ]]; then
+    echo "$install_output"
+  fi
+
+  echo "Waiting for Xcode Command Line Tools installation to finish."
+  until have_command_line_tools; do
+    sleep 10
+    waited_seconds=$((waited_seconds + 10))
+
+    if (( waited_seconds >= timeout_seconds )); then
+      echo "Timed out waiting for Xcode Command Line Tools installation." >&2
+      echo "Finish the installation, then run chezmoi apply again." >&2
+      exit 1
+    fi
+  done
+
+  echo "Xcode Command Line Tools are installed."
+}
+
+start_sudo_keepalive() {
+  if [[ -n "$sudo_keepalive_pid" ]]; then
+    return 0
+  fi
+
+  if [[ ! -t 0 || ! -t 1 ]] || ! command -v sudo >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "Refreshing sudo credentials for Homebrew setup."
+  sudo -v
+
+  while true; do
+    sudo -n true
+    sleep 60
+  done 2>/dev/null &
+  sudo_keepalive_pid="$!"
+}
 
 load_homebrew() {
   local brew_path
@@ -47,7 +105,10 @@ install_homebrew() {
   fi
 }
 
+ensure_command_line_tools
+
 if ! load_homebrew; then
+  start_sudo_keepalive
   install_homebrew
 fi
 
@@ -75,4 +136,5 @@ if brew bundle check --file "$brewfile" >/dev/null; then
   exit 0
 fi
 
+start_sudo_keepalive
 brew bundle --file "$brewfile"
