@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [[ "$(uname)" != "Darwin" ]]; then
+  exit 0
+fi
+
+readonly OBSIDIAN_CLI="/Applications/Obsidian.app/Contents/MacOS/obsidian-cli"
+readonly TARGET="$HOME/.local/bin/obsidian"
+
+log() {
+  printf '%s\n' "$*"
+}
+
+warn() {
+  printf 'Warning: %s\n' "$*" >&2
+}
+
+if [[ ! -x "$OBSIDIAN_CLI" ]]; then
+  warn "Obsidian CLI binary not found at $OBSIDIAN_CLI; install/upgrade Obsidian to 1.12.7 or later."
+  exit 0
+fi
+
+mkdir -p "$(dirname "$TARGET")"
+
+if [[ -L "$TARGET" && "$(readlink "$TARGET")" == "$OBSIDIAN_CLI" ]]; then
+  log "Obsidian CLI symlink already in place at $TARGET."
+  exit 0
+fi
+
+if [[ -e "$TARGET" && ! -L "$TARGET" ]]; then
+  warn "$TARGET exists and is not a symlink; refusing to overwrite."
+  exit 1
+fi
+
+ln -sf "$OBSIDIAN_CLI" "$TARGET"
+log "Linked Obsidian CLI: $TARGET -> $OBSIDIAN_CLI"
