@@ -1,10 +1,11 @@
 {
-  "theme": "auto",
-  "skipAutoPermissionPrompt": true,
   "statusLine": {
     "type": "command",
     "command": "mise exec -- bunx -y ccstatusline@latest",
     "padding": 0,
     "refreshInterval": 10
-  }
+  },
+  "theme": "auto",
+  "skipAutoPermissionPrompt": true,
+  "autoMemoryEnabled": false
 }
