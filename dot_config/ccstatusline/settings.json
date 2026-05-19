@@ -39,16 +39,16 @@
   "powerline": {
     "enabled": true,
     "separators": [
-      ""
+      ""
     ],
     "separatorInvertBackground": [
       false
     ],
     "startCaps": [
-      ""
+      ""
     ],
     "endCaps": [
-      ""
+      ""
     ],
     "autoAlign": true,
     "theme": "onedark"
