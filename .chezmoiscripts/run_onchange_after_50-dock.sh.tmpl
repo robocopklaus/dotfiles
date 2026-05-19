@@ -79,7 +79,7 @@ add_category() {
     fi
   done
 
-  if (( added > 0 )); then
+  if ((added > 0)); then
     dockutil --no-restart --add '' --type small-spacer --section apps >/dev/null 2>&1 || true
   fi
 }

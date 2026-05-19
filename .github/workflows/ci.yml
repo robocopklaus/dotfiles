@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install validation tools
-        run: brew install chezmoi shellcheck
+        run: brew install chezmoi shellcheck shfmt
 
       - name: Render chezmoi scripts
         run: |
@@ -43,11 +43,25 @@ jobs:
             bash -n "$script"
           done
 
+      - name: shfmt
+        run: shfmt -i 2 -bn -ci -d "$RUNNER_TEMP/chezmoi-rendered-scripts"
+
       - name: ShellCheck
         run: |
           find "$RUNNER_TEMP/chezmoi-rendered-scripts" -type f -name '*.sh' -print0 | while IFS= read -r -d '' script; do
-            shellcheck -x "$script"
+            shellcheck --severity=style -x "$script"
           done
+
+      - name: Safety prologue
+        run: |
+          missing=0
+          while IFS= read -r -d '' script; do
+            if ! head -n 5 "$script" | grep -qE '^set -Eeuo pipefail$'; then
+              echo "::error file=$script::missing 'set -Eeuo pipefail' in first 5 lines"
+              missing=1
+            fi
+          done < <(find "$RUNNER_TEMP/chezmoi-rendered-scripts" -type f -name '*.sh' -print0)
+          exit "$missing"
 
       - name: Validate Brewfile
         run: |

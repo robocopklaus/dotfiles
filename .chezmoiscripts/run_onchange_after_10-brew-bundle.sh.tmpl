@@ -51,7 +51,7 @@ ensure_command_line_tools() {
     sleep 10
     waited_seconds=$((waited_seconds + 10))
 
-    if (( waited_seconds >= timeout_seconds )); then
+    if ((waited_seconds >= timeout_seconds)); then
       echo "Timed out waiting for Xcode Command Line Tools installation." >&2
       echo "Finish the installation, then run chezmoi apply again." >&2
       exit 1
@@ -121,7 +121,7 @@ run_with_timeout() {
   command_pid="$!"
 
   while kill -0 "$command_pid" 2>/dev/null; do
-    if (( waited_seconds >= timeout_seconds )); then
+    if ((waited_seconds >= timeout_seconds)); then
       pkill -TERM -P "$command_pid" 2>/dev/null || true
       kill "$command_pid" 2>/dev/null || true
       wait "$command_pid" 2>/dev/null || true
@@ -139,7 +139,7 @@ install_mas_apps() {
   local brewfile="$1"
 
   mas_brewfile="$(mktemp "${TMPDIR:-/tmp}/mas-brewfile.XXXXXX")"
-  awk '/^[[:space:]]*mas[[:space:]]+"/ { print }' "$brewfile" > "$mas_brewfile"
+  awk '/^[[:space:]]*mas[[:space:]]+"/ { print }' "$brewfile" >"$mas_brewfile"
 
   if [[ ! -s "$mas_brewfile" ]]; then
     return 0
