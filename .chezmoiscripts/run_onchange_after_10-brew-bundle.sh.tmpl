@@ -9,6 +9,7 @@ if [[ "$(uname)" != "Darwin" ]]; then
 fi
 
 homebrew_installer=""
+mas_brewfile=""
 sudo_keepalive_pid=""
 
 cleanup() {
@@ -18,6 +19,10 @@ cleanup() {
 
   if [[ -n "$homebrew_installer" && -f "$homebrew_installer" ]]; then
     rm -f "$homebrew_installer"
+  fi
+
+  if [[ -n "$mas_brewfile" && -f "$mas_brewfile" ]]; then
+    rm -f "$mas_brewfile"
   fi
 }
 trap cleanup EXIT
@@ -105,6 +110,55 @@ install_homebrew() {
   fi
 }
 
+run_with_timeout() {
+  local timeout_seconds="$1"
+  shift
+
+  local command_pid=""
+  local waited_seconds=0
+
+  "$@" &
+  command_pid="$!"
+
+  while kill -0 "$command_pid" 2>/dev/null; do
+    if (( waited_seconds >= timeout_seconds )); then
+      pkill -TERM -P "$command_pid" 2>/dev/null || true
+      kill "$command_pid" 2>/dev/null || true
+      wait "$command_pid" 2>/dev/null || true
+      return 124
+    fi
+
+    sleep 1
+    waited_seconds=$((waited_seconds + 1))
+  done
+
+  wait "$command_pid"
+}
+
+install_mas_apps() {
+  local brewfile="$1"
+
+  mas_brewfile="$(mktemp "${TMPDIR:-/tmp}/mas-brewfile.XXXXXX")"
+  awk '/^[[:space:]]*mas[[:space:]]+"/ { print }' "$brewfile" > "$mas_brewfile"
+
+  if [[ ! -s "$mas_brewfile" ]]; then
+    return 0
+  fi
+
+  if ! command -v mas >/dev/null 2>&1; then
+    echo "mas not found; skipping Mac App Store apps." >&2
+    return 0
+  fi
+
+  echo "Installing Mac App Store apps when App Store is ready."
+  if run_with_timeout 900 brew bundle --file "$mas_brewfile"; then
+    echo "Mac App Store apps are installed."
+  else
+    echo "Mac App Store apps could not be installed automatically." >&2
+    echo "Sign in to the App Store, then run chezmoi apply again." >&2
+  fi
+}
+
 ensure_command_line_tools
 
 if ! load_homebrew; then
@@ -131,10 +185,11 @@ if [[ ! -f "$brewfile" ]]; then
   exit 0
 fi
 
-if brew bundle check --file "$brewfile" >/dev/null; then
+if HOMEBREW_BUNDLE_MAS_SKIP=1 brew bundle check --file "$brewfile" >/dev/null; then
   echo "Homebrew bundle already satisfied."
-  exit 0
+else
+  start_sudo_keepalive
+  HOMEBREW_BUNDLE_MAS_SKIP=1 brew bundle --file "$brewfile"
 fi
 
-start_sudo_keepalive
-brew bundle --file "$brewfile"
+install_mas_apps "$brewfile"
