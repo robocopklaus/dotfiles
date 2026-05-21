@@ -2,8 +2,9 @@
 set -Eeuo pipefail
 
 # Installs Homebrew packages, casks, and Mac App Store apps from Brewfile.
-# Ensures Xcode CLT and Homebrew exist first; MAS apps run in a separate
-# pass so an unauthenticated App Store fails only the MAS step.
+# Ensures Xcode CLT and Homebrew exist first. Formulae are installed as the
+# blocking base step; casks and MAS apps run separately so optional app failures
+# do not abort the rest of chezmoi apply.
 #
 # Re-run this script when Brewfile changes.
 # Brewfile sha256: {{ include "Brewfile" | sha256sum }}
@@ -142,10 +143,59 @@ run_with_timeout() {
   wait "$command_pid"
 }
 
+# Install Homebrew formulae as the blocking base dependency step. Casks and
+# MAS apps are handled separately below so GUI/App Store failures stay isolated.
+install_homebrew_formulae() {
+  local brewfile="$1"
+
+  if HOMEBREW_BUNDLE_CASK_SKIP=1 HOMEBREW_BUNDLE_MAS_SKIP=1 brew bundle check --file "$brewfile" >/dev/null; then
+    echo "Homebrew formulae already satisfied."
+  else
+    HOMEBREW_BUNDLE_CASK_SKIP=1 HOMEBREW_BUNDLE_MAS_SKIP=1 brew bundle --file "$brewfile"
+  fi
+}
+
+# Install casks one by one. A single failed GUI app install should not make a
+# fresh machine bootstrap unusable; re-running chezmoi apply retries failures.
+install_cask_apps() {
+  local brewfile="$1"
+  local cask_app
+  local cask_apps=()
+  local failed_apps=()
+
+  while IFS= read -r cask_app; do
+    [[ -n "$cask_app" ]] && cask_apps+=("$cask_app")
+  done < <(HOMEBREW_NO_AUTO_UPDATE=1 brew bundle list --cask --file "$brewfile" 2>/dev/null || true)
+
+  if ((${#cask_apps[@]} == 0)); then
+    return 0
+  fi
+
+  start_sudo_keepalive
+
+  for cask_app in "${cask_apps[@]}"; do
+    if brew list --cask "$cask_app" >/dev/null 2>&1; then
+      echo "Cask already installed: $cask_app"
+      continue
+    fi
+
+    if HOMEBREW_NO_AUTO_UPDATE=1 brew install --cask "$cask_app"; then
+      echo "Installed cask: $cask_app"
+    else
+      echo "Could not install optional cask: $cask_app" >&2
+      failed_apps+=("$cask_app")
+    fi
+  done
+
+  if ((${#failed_apps[@]} > 0)); then
+    echo "Some optional casks could not be installed: ${failed_apps[*]}" >&2
+    echo "Run chezmoi apply again later to retry them." >&2
+  fi
+}
+
 # Install MAS entries against a stripped-down Brewfile under a timeout so
 # a missing App Store login (or a flaky `mas` call) does not block the
-# rest of the bundle. The main `brew bundle` call uses
-# HOMEBREW_BUNDLE_MAS_SKIP=1 to defer to this function.
+# rest of the bundle.
 install_mas_apps() {
   local brewfile="$1"
 
@@ -196,11 +246,7 @@ if [[ ! -f "$brewfile" ]]; then
   exit 0
 fi
 
-if HOMEBREW_BUNDLE_MAS_SKIP=1 brew bundle check --file "$brewfile" >/dev/null; then
-  echo "Homebrew bundle already satisfied."
-else
-  start_sudo_keepalive
-  HOMEBREW_BUNDLE_MAS_SKIP=1 brew bundle --file "$brewfile"
-fi
-
+start_sudo_keepalive
+install_homebrew_formulae "$brewfile"
+install_cask_apps "$brewfile"
 install_mas_apps "$brewfile"
