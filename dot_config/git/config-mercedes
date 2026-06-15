@@ -1,0 +1,7 @@
+# Mercedes-Benz GHE identity — included by ~/.gitconfig via includeIf
+# (hasconfig match on the mercedes-benz.ghe.com remote URL).
+# Only [user] differs from the global config; signing setup is inherited.
+[user]
+	name = Fabian Pahl
+	email = 21st.pahl@extaccount.com
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBYaDHJmp6aLjVv0RaK5CyD4Oo3XUt4MB8TDpVE7dYSM

@@ -1,2 +1,11 @@
+# Mercedes-Benz GHE: force the dedicated key. Without IdentitiesOnly the
+# 1Password agent offers every key and the server may reject with
+# "too many authentication failures". The .pub only selects which key the
+# agent signs with — the private key never leaves 1Password.
+Host mercedes-benz.ghe.com
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_mercedes.pub
+
+# All hosts route SSH auth through the 1Password agent.
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

@@ -42,3 +42,10 @@
 
 [tag]
 	gpgSign = true
+
+# WHY: per-account identity. Any repo whose remote points at the Mercedes-Benz
+# GHE host transparently switches name/email/signing key. Everything else
+# (gpg.format, op-ssh-sign program, commit.gpgsign) is inherited from above —
+# only [user] is overridden. Requires git >= 2.36 (hasconfig).
+[includeIf "hasconfig:remote.*.url:*@mercedes-benz.ghe.com:**/**"]
+	path = ~/.config/git/config-mercedes
