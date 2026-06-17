@@ -70,6 +70,15 @@ fi
 # Aliases
 alias ll='ls -lah'
 alias la='ls -A'
+
+# Parent-directory shortcuts (replaces Oh My Zsh's lib/directories.zsh).
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Create a directory and enter it (replaces Oh My Zsh's `take`).
+take() { mkdir -p -- "$1" && cd -- "$1"; }
+
 alias gs='git status -sb'
 alias gd='git diff'
 alias gco='git checkout'
