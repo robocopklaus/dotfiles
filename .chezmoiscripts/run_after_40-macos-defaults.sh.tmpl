@@ -121,6 +121,7 @@ backup_defaults() {
     "NSGlobalDomain"
     "com.apple.AppleMultitouchTrackpad"
     "com.apple.driver.AppleBluetoothMultitouch.trackpad"
+    "com.apple.screencapture"
   )
 
   timestamp="$(date +%Y%m%d-%H%M%S)"
@@ -250,6 +251,18 @@ configure_keyboard() {
   set_bool "NSGlobalDomain" "ApplePressAndHoldEnabled" "false" "press-and-hold accent menu"
 }
 
+configure_screencapture() {
+  local location="$HOME/Downloads"
+
+  log "Configuring Screenshots."
+
+  if [[ ! -d "$location" && "$dry_run" != true ]]; then
+    run_or_print mkdir -p "$location"
+  fi
+
+  set_string "com.apple.screencapture" "location" "$location" "screenshot save location"
+}
+
 restart_affected_apps() {
   log "Restarting affected applications."
 
@@ -268,6 +281,7 @@ configure_dock
 configure_finder
 configure_trackpad
 configure_keyboard
+configure_screencapture
 restart_affected_apps
 
 log "macOS defaults configuration completed."
