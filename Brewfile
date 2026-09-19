@@ -13,7 +13,6 @@ brew "oh-my-posh"          # Prompt, rendered by every shell
 brew "zoxide"              # z — directory jumping
 brew "cloudflare-cli4"     # Personal infrastructure
 brew "gogcli"              # GOG library management
-brew "nmap"                # Network inspection
 brew "homeassistant-cli"   # Home automation
 
 cask "1password"                 # Password manager; root of the bootstrap trust chain

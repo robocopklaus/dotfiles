@@ -341,7 +341,7 @@ App Store"; it asks only whether a cask has appeared since. Where both exist, Ho
 wins — the reason that matters here is that every App Store entry widens the Apple ID gap,
 which is the one precondition the gate cannot verify and CI must degrade under.
 
-#### Base — CLI (15)
+#### Base — CLI (14)
 
 | Entry | Role |
 | --- | --- |
@@ -358,7 +358,6 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `zoxide` | `z` — directory jumping |
 | `cloudflare-cli4` | Personal infrastructure |
 | `gogcli` | GOG library management |
-| `nmap` | Network inspection |
 | `homeassistant-cli` | Home automation |
 
 #### Base — applications (17 casks, 4 App Store)
@@ -511,7 +510,7 @@ nothing. Only the recorded reason differs.**
   them. Their *paths* appear in the closing report's static tail; their values never leave
   1Password.
 - **No user-facing configuration at all** — `chezmoi`, `gh`, `jq`, `mas`, `dockutil`,
-  `uv`, `zoxide`, `gogcli`, `nmap`, `cloudflare-cli4`, `homeassistant-cli`,
+  `uv`, `zoxide`, `gogcli`, `cloudflare-cli4`, `homeassistant-cli`,
   `1password-cli`, `font-meslo-lg-nerd-font`, Pages, Numbers, 1Password for Safari. Named
   so the omission is a stated choice. The work group manages no configuration today
   either: those tools keep machine-written auth caches, which fail clause 2.
