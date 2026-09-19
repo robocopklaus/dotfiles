@@ -869,6 +869,22 @@ flag, because on a fresh machine the *Not in the repository* section is empty an
 therefore not printed. **No schedule and no login hook:** a recurring prompt on a machine
 reviewed once a year trains you to dismiss it.
 
+**Scripts are excluded from the managed-file check.** `chezmoi status` covers managed
+files completely, but a `run_after_` script is pending by design on every run (§4), so
+including scripts would report the bootstrap's own epilogue as drift, permanently.
+
+**A sweep that could not run is said out loud**, under a closing *This report is
+incomplete* — not a fourth section, because the three are findings and this is the
+report's own reach. An inventory nobody could read and an empty inventory look identical
+afterwards and mean opposite things, so an unanswered question takes its comparison out of
+the run rather than reporting the whole inventory as missing. It exits 1 on its own: a
+report that did not look cannot say the machine is clean.
+
+**It carries no `# Phase:` header**, unlike every script under `.chezmoiscripts/` (§4). It
+is a command rather than a phase — there is no order for a precondition to justify — so
+the field it would carry has nothing to say, and CI's header check reads the phase scripts
+only.
+
 **Exit 0 clean, 1 on any drift**, matching `chezmoi verify`.
 
 ---
@@ -894,9 +910,10 @@ changes nothing, which is the convergence invariant.
 **The drift report is the oracle, not a bats expectation file.** A second set of
 expectations beside it would be the two-lists-one-truth failure again, inside the very
 tool built to detect it. `tests/drift.sh` is not that second list: it stubs the machine
-and asks which section an entry lands in and how a bundle's provenance is decided, and it
-reads the declarations it bends out of the Brewfile itself. Reusing it pays twice: the detector, which otherwise runs a
-handful of times a year, becomes continuously tested.
+and asks which section an entry lands in and how a bundle's provenance is decided, and the
+entries it bends are *read out of* the Brewfile rather than named, so editing the inventory
+cannot quietly turn a check into a no-op. Reusing it pays twice: the detector, which
+otherwise runs a handful of times a year, becomes continuously tested.
 
 **The gate reads `CI`.** Under it, the 1Password and Apple ID preconditions degrade from
 refusing to reporting; everything else still refuses. Deriving CI from `op`'s *absence*

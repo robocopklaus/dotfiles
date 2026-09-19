@@ -5,8 +5,13 @@
 #
 # What this holds is drift's own logic — which section an entry lands in, and how a
 # bundle's provenance is decided — never a second list of what this machine should have.
-# That list is the Brewfile, and the declarations below are read out of it, so the two
-# cannot disagree. The report itself is the oracle for machine state (§8).
+# That list is the Brewfile: the entries bent below are *read out of it* rather than named
+# here, so editing the inventory can never quietly turn a check into a no-op. The report
+# itself stays the oracle for machine state (§8).
+#
+# The one place this does reach into its subject is the prefix cascade, which it rewrites
+# out of the rendered script so the stubs are not shadowed. That couples the test to the
+# literal text of `lib/homebrew.sh` — loudly, since every case fails at once if it changes.
 
 set -uo pipefail
 
@@ -26,7 +31,12 @@ check() {
 
 says() {
   grep -q -- "$2" <<<"$1"
-  check "$?" "$3" "$4"
+  check "$?" 0 "$3"
+}
+
+silent() {
+  grep -q -- "$2" <<<"$1"
+  check "$?" 1 "$3"
 }
 
 # A machine, built from the repository's own declarations and then bent away from them
@@ -36,6 +46,7 @@ machine=$(mktemp -d)
 trap 'rm -rf "$machine"' EXIT
 mkdir -p "$machine/bin" "$machine/Applications"
 
+sed -n 's/^tap "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/taps"
 sed -n 's/^brew "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/formulae"
 sed -n 's/^cask "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/casks"
 sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p' "$repo/Brewfile" >"$machine/mas"
@@ -47,6 +58,7 @@ printf '{"casks":[]}\n' >"$machine/cask-info.json"
 cat >"$machine/bin/brew" <<EOF
 #!/bin/bash
 case "\$*" in
+  "tap") cat "$machine/taps" ;;
   "list --formula -1") cat "$machine/formulae" ;;
   "list --cask -1") cat "$machine/casks" ;;
   "leaves") cat "$machine/leaves" ;;
@@ -95,40 +107,49 @@ drift() {
 printf 'A converged machine\n'
 report=$(drift)
 check "$?" 0 'exits 0'
-says "$report" '^No drift' 0 'says so'
-says "$report" 'Missing on the machine' 1 'prints no missing section'
-says "$report" 'Not in the repository' 1 'prints no unmanaged section'
-says "$report" 'Diverged value' 1 'prints no diverged section'
+says "$report" '^No drift' 'says so'
+silent "$report" 'Missing on the machine' 'prints no missing section'
+silent "$report" 'Not in the repository' 'prints no unmanaged section'
+silent "$report" 'Diverged value' 'prints no diverged section'
+silent "$report" 'incomplete' 'claims no gap in its own reach'
 
 printf '\nA machine the repository declares more than it has\n'
-grep -v '^chezmoi$' "$machine/formulae" >"$machine/formulae.kept"
-mv "$machine/formulae.kept" "$machine/formulae"
-grep -v '^ghostty$' "$machine/casks" >"$machine/casks.kept"
-mv "$machine/casks.kept" "$machine/casks"
-grep -v '^361309726 ' "$machine/mas" >"$machine/mas.kept"
-mv "$machine/mas.kept" "$machine/mas"
+# The entries taken away are whichever the Brewfile declares first, so this stays a test
+# of drift rather than a second copy of the inventory.
+tap=$(head -1 "$machine/taps")
+formula=$(head -1 "$machine/formulae")
+cask=$(head -1 "$machine/casks")
+app_id=$(head -1 "$machine/mas" | awk '{print $1}')
+app_name=$(head -1 "$machine/mas" | cut -d' ' -f2-)
+for inventory in taps formulae casks mas; do
+  tail -n +2 "$machine/$inventory" >"$machine/$inventory.kept"
+  mv "$machine/$inventory.kept" "$machine/$inventory"
+done
+cp "$machine/formulae" "$machine/leaves"
 report=$(drift)
 check "$?" 1 'exits 1'
-says "$report" '^Missing on the machine' 0 'prints the missing section'
-says "$report" 'Formula chezmoi' 0 'names the missing formula'
-says "$report" 'Cask ghostty' 0 'names the missing cask'
-says "$report" 'App Store Pages (361309726)' 0 'names the missing App Store entry with its id'
-says "$report" 'Not in the repository' 1 'prints no unmanaged section'
+says "$report" '^Missing on the machine' 'prints the missing section'
+says "$report" "Tap $tap" 'names the missing tap'
+says "$report" "Formula $formula" 'names the missing formula'
+says "$report" "Cask $cask" 'names the missing cask'
+says "$report" "App Store $app_name ($app_id)" 'names the missing App Store entry with its id'
+silent "$report" 'Not in the repository' 'prints no unmanaged section'
 
 printf '\nA machine holding more than the repository declares\n'
-# `git` stays installed but stops being a leaf: a declared formula pulled in as another's
-# dependency is present, so it is neither missing nor a decision owed.
-grep -v '^git$' "$machine/formulae" >"$machine/leaves"
+# A declared formula that stops being a leaf is installed as another's dependency:
+# present, so neither missing nor a decision owed.
+dependency=$(head -1 "$machine/formulae")
+grep -vxF "$dependency" "$machine/formulae" >"$machine/leaves"
 printf 'undeclared-formula\n' >>"$machine/leaves"
 printf 'undeclared-cask\n' >>"$machine/casks"
 printf '424242 Undeclared App\n' >>"$machine/mas"
 report=$(drift)
 check "$?" 1 'exits 1'
-says "$report" '^Not in the repository' 0 'prints the unmanaged section'
-says "$report" 'Formula undeclared-formula' 0 'names the undeclared leaf'
-says "$report" 'Cask undeclared-cask' 0 'names the undeclared cask'
-says "$report" 'App Store Undeclared App (424242)' 0 'names the undeclared App Store entry'
-says "$report" 'Formula git' 1 'says nothing about a declared formula that is not a leaf'
+says "$report" '^Not in the repository' 'prints the unmanaged section'
+says "$report" 'Formula undeclared-formula' 'names the undeclared leaf'
+says "$report" 'Cask undeclared-cask' 'names the undeclared cask'
+says "$report" 'App Store Undeclared App (424242)' 'names the undeclared App Store entry'
+silent "$report" "Formula $dependency" 'says nothing about a declared formula that is not a leaf'
 
 printf '\nApplications, by where each bundle came from\n'
 mkdir -p "$machine/Applications/Dragged In.app/Contents"
@@ -149,20 +170,38 @@ JSON
 printf 'From A Package.app\nFrom A Package.app/Contents\n' >"$machine/receipt-files"
 report=$(drift)
 check "$?" 1 'exits 1'
-says "$report" 'Application Dragged In.app' 0 'reports a bundle from neither source'
-says "$report" 'Application From The Store.app' 1 'says nothing about an App Store bundle'
-says "$report" 'Application Named By A Cask.app' 1 'says nothing about a bundle a cask names'
-says "$report" 'Application Relocated.app' 1 'says nothing about a bundle a cask relocates'
-says "$report" 'Application Deleted By A Cask.app' 1 "says nothing about a bundle a cask's uninstall names"
-says "$report" 'Application From A Package.app' 1 "says nothing about a bundle a cask's package receipt names"
-says "$report" 'Application Preview.app' 1 'says nothing about an application macOS signs itself'
+says "$report" 'Application Dragged In.app' 'reports a bundle from neither source'
+silent "$report" 'Application From The Store.app' 'says nothing about an App Store bundle'
+silent "$report" 'Application Named By A Cask.app' 'says nothing about a bundle a cask names'
+silent "$report" 'Application Relocated.app' 'says nothing about a bundle a cask relocates'
+silent "$report" 'Application Deleted By A Cask.app' "says nothing about a bundle a cask's uninstall names"
+silent "$report" 'Application From A Package.app' "says nothing about a bundle a cask's package receipt names"
+silent "$report" 'Application Preview.app' 'says nothing about an application macOS signs itself'
 
 printf '\nManaged files\n'
 printf ' M .gitconfig\nMM .zshrc\n' >"$machine/chezmoi-status"
 report=$(drift)
 check "$?" 1 'exits 1'
-says "$report" '^Diverged value' 0 'prints the diverged section'
-says "$report" '.gitconfig' 0 'names the diverged file'
+says "$report" '^Diverged value' 'prints the diverged section'
+says "$report" '.gitconfig' 'names the diverged file'
+
+printf '\nA machine that cannot answer\n'
+mv "$machine/bin/mas" "$machine/bin/mas.gone"
+report=$(drift)
+check "$?" 1 'exits 1'
+says "$report" '^This report is incomplete' 'says its reach fell short'
+says "$report" 'mas CLI is not installed' 'names the question that went unanswered'
+silent "$report" 'App Store .*([0-9]' 'reports no App Store entry in either direction'
+mv "$machine/bin/mas.gone" "$machine/bin/mas"
+
+# An inventory nobody could read must not read as an empty inventory: every cask would
+# otherwise be missing, and every application a stranger.
+printf '#!/bin/bash\nexit 1\n' >"$machine/bin/brew"
+chmod +x "$machine/bin/brew"
+report=$(drift)
+check "$?" 1 'exits 1'
+says "$report" 'brew leaves did not answer' 'names the sweep that did not run'
+silent "$report" 'Application Dragged In.app' 'sweeps no application on claims it could not read'
 
 printf '\n'
 if [ "$failures" -gt 0 ]; then
