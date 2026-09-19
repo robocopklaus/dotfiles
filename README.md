@@ -194,6 +194,7 @@ output has two parts:
 .
 ├── .chezmoiroot                            → "home"
 ├── .github/workflows/                      lint.yml, e2e.yml
+├── .gitignore                              what this repository produces (§5.1)
 ├── Brewfile                                the inventory (§6.1)
 ├── Brewfile.work                           the work group (§6.1)
 ├── CLAUDE.md
@@ -228,6 +229,13 @@ writes an unexpected file into `$HOME`, silently. Under `.chezmoiroot` a file fo
 outside `home/` is simply not applied: visible, harmless. `.chezmoiignore` is deleted
 outright; chezmoi's own `.chezmoi*` directories never reach `$HOME`, so nothing remains
 to list.
+
+**`.gitignore` declares only what this repository produces.** Machine-wide noise is
+declared once, in the global ignore this repository manages (§6.3); repeating it here
+would be a second list (§5.1). It is a denylist, and ADR 0005's argument reverses here:
+a forgotten deny line surfaces as an untracked file in the status output — visible,
+harmless — while a forgotten allow line under `.claude/*` would silently drop a shared
+file from the repository.
 
 **One script per precondition; the tens digit names the phase.** P4 is three scripts
 because it has three preconditions: `mas` needs root, and the Claude Code installer needs

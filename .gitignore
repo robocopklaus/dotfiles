@@ -1,0 +1,10 @@
+# What this repository produces, and nothing else. Machine-wide noise —
+# .DS_Store, editor swap files, .env — is declared once in the global ignore
+# this repository manages (home/dot_gitignore, §6.3), never a second time
+# here (§5.1).
+
+# Agent worktrees: a full checkout of this repository per task.
+.claude/worktrees/
+
+# Machine-local agent settings. A shared .claude/settings.json is tracked.
+.claude/settings.local.json
