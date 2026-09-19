@@ -31,12 +31,19 @@ trap 'kill "$keepalive" 2>/dev/null || true' EXIT
 {{ template "lib/homebrew.sh" . }}
 if ! command -v brew >/dev/null 2>&1; then
   printf 'P4: installing Homebrew.\n'
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  # Fetched into a variable first, so a failed download aborts here. Piped straight into
+  # bash it would be invisible: the substitution yields an empty script that exits 0.
+  installer=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+  NONINTERACTIVE=1 /bin/bash -c "$installer"
   # The installer's own prefix on Apple Silicon, which is the only architecture the gate
   # admits — not a second cascade.
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
+# Both filters below read the entry shape §6.1 fixes: a type keyword at column zero, then
+# a double-quoted name. Homebrew offers no filter of its own, and the CI reason-comment
+# check reads the same shape.
+#
 # Homebrew itself and the formulae abort the run, because later phases depend on them:
 # P5 needs `mise`, P6 needs `dockutil` (§3). `set -e` makes both fatal.
 printf 'P4: installing the tap and the formulae.\n'
@@ -48,6 +55,8 @@ printf '%s\n' "$brewfile" | grep -E '^(tap|brew) ' | brew bundle --file=-
 # colliding with them.
 failed=()
 while IFS= read -r cask; do
+  # Already Homebrew's: nothing to install and nothing to adopt. Skipping keeps a re-run
+  # quiet, so what the run does print is what it actually did.
   if brew list --cask "$cask" >/dev/null 2>&1; then
     continue
   fi

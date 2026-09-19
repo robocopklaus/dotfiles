@@ -495,10 +495,10 @@ nothing. Only the recorded reason differs.**
 
 - **Account-restored** — Raycast, Slack, Chrome (including its extensions — Chrome sync
   installs them, which is why signing into Chrome is not a P0 item), ChatGPT, Mimestream,
-  Clockify, WhatsApp, 1Password, GCal, Docker Desktop, and the
-  editor's whole surface — VS Code's Settings Sync carries its `settings.json`, extensions
-  and keybindings together, so splitting the file out to manage it here would be the one
-  entry whose two copies could disagree.
+  Clockify, WhatsApp, 1Password, GCal, Docker Desktop, and the editor's whole surface —
+  VS Code's Settings Sync carries its `settings.json`, extensions and keybindings
+  together, so splitting the file out to manage it here would be the one entry whose two
+  copies could disagree.
 - **Out of scope** — **Obsidian.** All four vaults live under `~/Development/`, inside the
   data-restore zone this effort excludes; per-vault `.obsidian/` is versioned with each
   vault's own repository, and `obsidian.json` is a machine-written registry of absolute

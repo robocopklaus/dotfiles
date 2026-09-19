@@ -14,7 +14,7 @@ The third clause restates ADR 0003 at the level of an individual file, deliberat
 
 Where the criterion says no, the reason is recorded in one of three forms, and the distinction is documentary rather than mechanical — the repository does the same thing in all three cases, which is nothing:
 
-- **Account-restored** — the settings return by signing in. Raycast, Slack, Chrome, ChatGPT, Mimestream, Clockify, Telegram, WhatsApp, 1Password, Google Drive.
+- **Account-restored** — the settings return by signing in. Raycast, Slack, Chrome, ChatGPT, Mimestream, Clockify, WhatsApp, 1Password.
 - **Out of scope** — the configuration belongs to data this effort does not restore. Obsidian, whose four vaults all live under `~/Development/` and whose per-vault `.obsidian/` directories are already versioned with their own repositories; what remains at application level is a registry of absolute paths into those directories.
 - **Accepted lost** — a deliberate write-off. `gh`'s single alias, `codex`'s four lines.
 
