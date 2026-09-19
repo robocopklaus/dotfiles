@@ -38,6 +38,20 @@ jobs:
       - name: Shellcheck rendered scripts
         run: shellcheck "$RUNNER_TEMP"/rendered/*.sh
 
+      # Presence only — what the reason says is never judged, because a check that
+      # graded it would be satisfied by "# tool" and would have to be argued with. §6.1
+      - name: Brewfile reason comments
+        run: |
+          status=0
+          while IFS= read -r entry; do
+            case "$entry" in '' | '#'*) continue ;; esac
+            if ! printf '%s\n' "$entry" | grep -qE '#[[:space:]]*[^[:space:]]'; then
+              echo "Brewfile: entry without a reason comment: $entry"
+              status=1
+            fi
+          done < Brewfile
+          exit "$status"
+
       # Presence only — the prose is never read. §4
       - name: Script headers
         run: |

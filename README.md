@@ -361,7 +361,7 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `nmap` | Network inspection |
 | `homeassistant-cli` | Home automation |
 
-#### Base — applications (19 casks, 4 App Store)
+#### Base — applications (17 casks, 4 App Store)
 
 | Entry | Role |
 | --- | --- |
@@ -380,9 +380,7 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `whatsapp` | Messaging |
 | `codex` | Coding agent |
 | `docker-desktop` | Containers |
-| `telegram-desktop` | Messaging |
 | `finicky` | Routes URLs between browsers; background app, so no launch record by design |
-| `google-drive` | Background sync; no launch record by design |
 | `font-meslo-lg-nerd-font` | Bootstrap dependency: the glyphs `oh-my-posh` renders |
 | Pages — `361309726` | Documents; no Homebrew cask exists |
 | Numbers — `361304891` | Spreadsheets; no Homebrew cask exists |
@@ -497,7 +495,7 @@ nothing. Only the recorded reason differs.**
 
 - **Account-restored** — Raycast, Slack, Chrome (including its extensions — Chrome sync
   installs them, which is why signing into Chrome is not a P0 item), ChatGPT, Mimestream,
-  Clockify, Telegram, WhatsApp, 1Password, Google Drive, GCal, Docker Desktop, and the
+  Clockify, WhatsApp, 1Password, GCal, Docker Desktop, and the
   editor's whole surface — VS Code's Settings Sync carries its `settings.json`, extensions
   and keybindings together, so splitting the file out to manage it here would be the one
   entry whose two copies could disagree.
