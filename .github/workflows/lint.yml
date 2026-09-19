@@ -1,0 +1,23 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: macos-26 # §8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$RUNNER_TEMP/bin"
+
+      - name: Dry-run apply
+        run: >
+          "$RUNNER_TEMP/bin/chezmoi" apply --dry-run --verbose
+          --source .
+          --destination "$RUNNER_TEMP/home"

@@ -817,11 +817,13 @@ reviewed once a year trains you to dismiss it.
 
 Two tiers.
 
-**Lint tier — every push and pull request.** `chezmoi apply --dry-run`; shellcheck over
+**Lint tier — `macos-26`, every push and pull request.** `chezmoi apply --dry-run`; shellcheck over
 **rendered** scripts (sources are `.tmpl`, so the tier renders them with
 `chezmoi execute-template` first — a template that fails to render is caught a step
 earlier than one that renders to broken shell); the Brewfile reason-comment presence
-check; the script-header presence check; and the Dock-entry reference check.
+check; the script-header presence check; and the Dock-entry reference check. Both tiers
+run on macOS for the same reason: the source tree is templated for darwin, so a Linux
+runner would render the branch this repository never applies and lint the wrong shell.
 
 **End-to-end tier — `macos-26`, on pull requests and once a week.** Runs the real
 bootstrap, then runs `drift`, and **the exit code is the assertion**. A thin `bats` layer
