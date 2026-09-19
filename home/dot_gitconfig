@@ -1,5 +1,5 @@
 [core]
-	editor = cursor --wait
+	editor = code --wait
 	excludesfile = ~/.gitignore
 
 [alias]
@@ -8,16 +8,16 @@
 
 [diff]
 	renames = copies
-	tool = cursor
+	tool = code
 
-[difftool "cursor"]
-	cmd = cursor --wait --diff "$LOCAL" "$REMOTE"
+[difftool "code"]
+	cmd = code --wait --diff "$LOCAL" "$REMOTE"
 
 [merge]
-	tool = cursor
+	tool = code
 
-[mergetool "cursor"]
-	cmd = cursor --wait "$MERGED"
+[mergetool "code"]
+	cmd = code --wait "$MERGED"
 
 [init]
 	defaultBranch = main

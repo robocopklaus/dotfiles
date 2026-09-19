@@ -363,7 +363,7 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `1password` | Password manager; root of the bootstrap trust chain |
 | `1password-cli` | `op` — renders the work identity; trust chain |
 | `claude` | Primary coding agent |
-| `cursor` | Editor |
+| `visual-studio-code` | Editor |
 | `ghostty` | Terminal |
 | `google-chrome` | Browser |
 | `slack` | Messaging |
@@ -460,10 +460,12 @@ A configuration is managed as a file **iff** it is:
 3. **never a secret, whatever its shape** — stated outright, because the rule without it
    reads as "commit your Cloudflare token".
 
-The rule is a property of the **file**, not of its directory: Cursor's `settings.json`
-lives under `~/Library` and qualifies on its contents.
+The rule is a property of the **file**, not of its directory, and it is written that way
+even though nothing managed sits outside `~/.config` and `$HOME` today. An editor's
+`settings.json` under `~/Library/Application Support/` would qualify on its contents
+alone, and the boundary should not have to be renegotiated when one does.
 
-**Managed (13 paths):**
+**Managed (12 paths):**
 
 | Path | Reason |
 | --- | --- |
@@ -479,7 +481,6 @@ lives under `~/Library` and qualifies on its contents.
 | `dot_editorconfig` | Editor defaults |
 | `dot_zshrc`, `dot_zprofile`, `dot_zsh_plugins.txt` | Shell; `zsh_plugins.txt` is antidote's declaration |
 | `private_dot_ssh/private_config` + `id_personal.pub`, `id_work.pub` | Templated (§6.5) |
-| `Library/Application Support/Cursor/User/settings.json` | Five keys, all human |
 
 **On dominance.** `~/.claude/settings.json` is written back by its own application. It
 stays managed anyway: deliberate configuration is not discarded to protect a principle,
@@ -491,8 +492,10 @@ nothing. Only the recorded reason differs.**
 
 - **Account-restored** — Raycast, Slack, Chrome (including its extensions — Chrome sync
   installs them, which is why signing into Chrome is not a P0 item), ChatGPT, Mimestream,
-  Clockify, Telegram, WhatsApp, 1Password, Google Drive, GCal, Docker Desktop, and
-  Cursor's account-synced extensions and keybindings beyond its `settings.json`.
+  Clockify, Telegram, WhatsApp, 1Password, Google Drive, GCal, Docker Desktop, and the
+  editor's whole surface — VS Code's Settings Sync carries its `settings.json`, extensions
+  and keybindings together, so splitting the file out to manage it here would be the one
+  entry whose two copies could disagree.
 - **Out of scope** — **Obsidian.** All four vaults live under `~/Development/`, inside the
   data-restore zone this effort excludes; per-vault `.obsidian/` is versioned with each
   vault's own repository, and `obsidian.json` is a machine-written registry of absolute
@@ -654,7 +657,7 @@ The current sequence, in six categories:
 | Browsers | Safari, Chrome |
 | Communication | Mail, Mimestream, Slack, Messages, WhatsApp |
 | Work | ChatGPT, Claude, GCal, Calendar, Obsidian |
-| Development | Cursor, Ghostty |
+| Development | VS Code, Ghostty |
 | System | System Settings |
 
 **A Dock entry is a reference to an application the repository already declares, never a
