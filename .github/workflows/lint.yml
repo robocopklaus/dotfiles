@@ -35,8 +35,22 @@ jobs:
             "$RUNNER_TEMP/bin/chezmoi" execute-template --source . < "$template" > "$rendered"
           done
 
+      # drift is shell too, and the one piece of it a human runs by hand, so it is
+      # rendered and linted with the phase scripts. It is kept out of the directory the
+      # header check reads: it is a command, not a phase, so it carries no phase header. §7
+      - name: Render drift
+        run: |
+          mkdir -p "$RUNNER_TEMP/rendered-bin"
+          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+            < home/dot_local/bin/executable_drift.tmpl > "$RUNNER_TEMP/rendered-bin/drift.sh"
+
       - name: Shellcheck rendered scripts
-        run: shellcheck "$RUNNER_TEMP"/rendered/*.sh
+        run: shellcheck "$RUNNER_TEMP"/rendered/*.sh "$RUNNER_TEMP"/rendered-bin/*.sh tests/*.sh
+
+      # drift's own logic, against stubbed inventories. What the machine actually holds is
+      # the end-to-end tier's question, and the report is its oracle. §8
+      - name: Test drift
+        run: tests/drift.sh "$RUNNER_TEMP/rendered-bin/drift.sh"
 
       # Presence only — what the reason says is never judged, because a check that
       # graded it would be satisfied by "# tool" and would have to be argued with. §6.1

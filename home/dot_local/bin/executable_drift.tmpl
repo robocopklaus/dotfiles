@@ -1,0 +1,205 @@
+#!/bin/bash
+# drift — where does this machine disagree with the repository? (§7)
+# Report only: it never writes. Exit 0 when clean, 1 on any drift.
+
+set -euo pipefail
+
+# Drift is never measured Mac-to-Mac. Everything below compares this machine against the
+# declarations carried in this file, which are the repository's (§7, ADR 0002).
+#
+# The Brewfile (§6.1) is inlined at render time, as the P4 scripts inline it — but for a
+# different reason. There it is `run_onchange_`'s content hash; here it is §7's: the one
+# command whose whole value is being run on a whim must not require the source tree to be
+# on disk, let alone a `cd` into it.
+brewfile=$(
+  cat <<'BREWFILE'
+{{ include "../Brewfile" }}
+BREWFILE
+)
+
+# The prefix cascade, included at render time (ADR 0005). This command is run from a login
+# shell, which already has brew on PATH, and from the tail of a bootstrap, which does not.
+{{ template "lib/homebrew.sh" . }}
+
+missing=()
+unmanaged=()
+diverged=()
+
+# Declared, read from the entry shape §6.1 fixes — the same shape the P4 scripts and the
+# CI reason-comment check read.
+declared_formulae=$(printf '%s\n' "$brewfile" | sed -n 's/^brew "\([^"]*\)".*/\1/p')
+declared_casks=$(printf '%s\n' "$brewfile" | sed -n 's/^cask "\([^"]*\)".*/\1/p')
+declared_mas=$(printf '%s\n' "$brewfile" | sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p')
+
+# grep -x -F: a name matches a whole line or not at all, and never as a pattern.
+#
+# A here-string rather than a pipe, deliberately: `grep -q` exits at the first match and
+# closes the pipe under it, and with `pipefail` the producer's SIGPIPE would then make a
+# *successful* match report failure — intermittently, once the list outgrows the buffer.
+listed() {
+  grep -qxF -- "$1" <<<"$2"
+}
+
+if ! command -v brew >/dev/null 2>&1; then
+  missing+=("Homebrew itself — the formula, cask and application sweeps did not run.")
+else
+  # Formulae are compared against everything installed, not against `brew leaves`: a
+  # declared formula pulled in as another's dependency is present, and presence is the
+  # whole question this section asks.
+  installed_formulae=$(brew list --formula -1)
+  installed_casks=$(brew list --cask -1)
+
+  while IFS= read -r formula; do
+    [ -n "$formula" ] || continue
+    listed "$formula" "$installed_formulae" || missing+=("Formula $formula")
+  done <<<"$declared_formulae"
+
+  while IFS= read -r cask; do
+    [ -n "$cask" ] || continue
+    listed "$cask" "$installed_casks" || missing+=("Cask $cask")
+  done <<<"$declared_casks"
+
+  # Swept as leaves only: a dependency is not a decision, and listing dependencies would
+  # bury the entries that are (§7, ADR 0002).
+  while IFS= read -r leaf; do
+    [ -n "$leaf" ] || continue
+    listed "$leaf" "$declared_formulae" || unmanaged+=("Formula $leaf")
+  done < <(brew leaves)
+
+  while IFS= read -r cask; do
+    [ -n "$cask" ] || continue
+    listed "$cask" "$declared_casks" || unmanaged+=("Cask $cask")
+  done <<<"$installed_casks"
+fi
+
+# `mas list` needs no root, unlike `mas install` (§7), so the sweep reads the logged-in
+# user's own App Store session at a desk.
+if ! command -v mas >/dev/null 2>&1; then
+  missing+=("The mas CLI — the App Store sweep did not run.")
+else
+  # `id  Name  (version)` — the id, and the name with its version and padding cut away.
+  installed_mas=$(mas list 2>/dev/null | sed -n 's/^ *\([0-9][0-9]*\)  *\(.*[^ ]\)  *(.*)$/\1 \2/p') || installed_mas=''
+  installed_mas_ids=$(printf '%s\n' "$installed_mas" | awk '{print $1}')
+  declared_mas_ids=$(printf '%s\n' "$declared_mas" | awk '{print $1}')
+
+  while read -r id name; do
+    [ -n "$id" ] || continue
+    listed "$id" "$installed_mas_ids" || missing+=("App Store $name ($id)")
+  done <<<"$declared_mas"
+
+  while read -r id name; do
+    [ -n "$id" ] || continue
+    listed "$id" "$declared_mas_ids" || unmanaged+=("App Store $name ($id)")
+  done <<<"$installed_mas"
+fi
+
+# A dragged-in application is the one class of drift the Brewfile structurally cannot
+# catch (§7), so /Applications is swept for bundles that came from neither source. Each
+# bundle's provenance is derived from the bundle itself rather than from a list of
+# exceptions this file would then have to maintain (rule 6).
+if command -v brew >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  cask_names=()
+  while IFS= read -r cask; do
+    [ -n "$cask" ] || continue
+    cask_names+=("$cask")
+  done < <(brew list --cask -1)
+
+  # The bundle names the installed casks claim, asked of Homebrew rather than guessed from
+  # the cask's name — `microsoft-teams` and `telegram-desktop` alone would defeat guessing.
+  #
+  # A cask names its application in one of four places: an `app` artifact, the `target` a
+  # relocated one is moved to, an `uninstall` path, or — for a cask that ships a `pkg` —
+  # nowhere at all, because the installer package's receipt is what knows. Every `.app`
+  # string anywhere in the artifacts covers the first three under one rule rather than
+  # three; the receipts named there cover the fourth.
+  cask_apps=''
+  cask_pkgids=''
+  if [ ${#cask_names[@]} -gt 0 ]; then
+    cask_json=$(brew info --cask --json=v2 "${cask_names[@]}" 2>/dev/null) || cask_json=''
+    if [ -n "$cask_json" ]; then
+      cask_apps=$(printf '%s' "$cask_json" |
+        jq -r '[.casks[].artifacts | .. | strings] | .[] | select(endswith(".app"))' | sed 's|.*/||')
+      cask_pkgids=$(printf '%s' "$cask_json" |
+        jq -r '[.casks[].artifacts | .. | objects | select(has("pkgutil")) | .pkgutil] | flatten | .[]')
+    fi
+  fi
+
+  while IFS= read -r pkgid; do
+    [ -n "$pkgid" ] || continue
+    # Paths in a receipt are relative to the package's install location, so a bundle
+    # installed into /Applications is a top-level entry. A cask may name a package this
+    # machine never received — an architecture's sibling, an optional component — and an
+    # absent receipt is silence, not an error.
+    from_receipt=$(pkgutil --files "$pkgid" 2>/dev/null | sed -n '/^[^/]*\.app$/p') || from_receipt=''
+    cask_apps+=$'\n'"$from_receipt"
+  done <<<"$cask_pkgids"
+
+  for bundle in /Applications/*.app; do
+    [ -d "$bundle" ] || continue
+    name=$(basename "$bundle")
+
+    # An App Store copy carries a receipt inside the bundle, whoever installed it.
+    if [ -e "$bundle/Contents/_MASReceipt/receipt" ]; then
+      continue
+    fi
+
+    listed "$name" "$cask_apps" && continue
+
+    # macOS's own applications are signed by Apple's internal authority, which no
+    # Developer ID application carries. Checked last, so it runs only for the handful of
+    # bundles neither inventory already claimed. The signature is read into a variable
+    # first, for the reason `listed` states: `grep -q` closing the pipe early under
+    # `pipefail` turns a match into a failure.
+    signature=$(codesign -dvv "$bundle" 2>&1) || signature=''
+    if listed 'Authority=macOS Software Signing' "$signature"; then
+      continue
+    fi
+
+    unmanaged+=("Application $name")
+  done
+fi
+
+# Managed files, which `chezmoi status` covers completely (ADR 0002) — the one section
+# this command delegates outright rather than derives.
+#
+# Scripts are excluded: a `run_after_` script is pending by design on every run (§4), so
+# including them would report the bootstrap's own epilogue as drift, permanently.
+if command -v chezmoi >/dev/null 2>&1; then
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    diverged+=("${line:0:2}  ${line:3}")
+  done < <(chezmoi status --exclude=scripts 2>/dev/null || true)
+fi
+
+# Two things are deliberately not swept, and their absence is written down so it is not
+# read as an oversight and repaired (§7): `mise` runtimes, which `mise ls` already diffs
+# against its own configuration, and `chezmoi unmanaged` over $HOME, which reports every
+# file the repository has never claimed and so reports nothing.
+
+section() {
+  local title=$1
+  shift
+  printf '\n%s\n\n' "$title"
+  printf '  %s\n' "$@"
+}
+
+# Empty sections are omitted, which is also why the bootstrap's epilogue needs no brief
+# mode: on a fresh machine nothing is unmanaged, so that section simply is not printed.
+if [ ${#missing[@]} -gt 0 ]; then
+  section 'Missing on the machine — run the bootstrap again' "${missing[@]}"
+fi
+
+if [ ${#unmanaged[@]} -gt 0 ]; then
+  section 'Not in the repository — a decision owed to the repository' "${unmanaged[@]}"
+fi
+
+if [ ${#diverged[@]} -gt 0 ]; then
+  section 'Diverged value — re-apply, or adopt' "${diverged[@]}"
+fi
+
+if [ $((${#missing[@]} + ${#unmanaged[@]} + ${#diverged[@]})) -gt 0 ]; then
+  printf '\n'
+  exit 1
+fi
+
+printf 'No drift: this machine matches the repository.\n'

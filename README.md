@@ -199,7 +199,9 @@ output has two parts:
 ├── CLAUDE.md
 ├── README.md                               ← this specification
 ├── docs/adr/   docs/agents/
-├── tests/                                  bats: idempotency only
+├── tests/
+│   ├── drift.sh                            drift's own logic, stubbed (§7)
+│   └── *.bats                              bats: idempotency only
 └── home/                                   ← the entire chezmoi source
     ├── .chezmoidata/macos-defaults.toml    the defaults declaration (§6.4)
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
@@ -876,10 +878,11 @@ reviewed once a year trains you to dismiss it.
 Two tiers.
 
 **Lint tier — `macos-26`, every push and pull request.** `chezmoi apply --dry-run`; shellcheck over
-**rendered** scripts (sources are `.tmpl`, so the tier renders them with
-`chezmoi execute-template` first — a template that fails to render is caught a step
-earlier than one that renders to broken shell); the Brewfile reason-comment presence
-check; the script-header presence check; and the Dock-entry reference check. Both tiers
+**rendered** scripts and the rendered `drift` (sources are `.tmpl`, so the tier renders
+them with `chezmoi execute-template` first — a template that fails to render is caught a
+step earlier than one that renders to broken shell); `tests/drift.sh`, which runs that
+rendered command against stubbed inventories; the Brewfile reason-comment presence check;
+the script-header presence check; and the Dock-entry reference check. Both tiers
 run on macOS for the same reason: the source tree is templated for darwin, so a Linux
 runner would render the branch this repository never applies and lint the wrong shell.
 
@@ -890,7 +893,9 @@ changes nothing, which is the convergence invariant.
 
 **The drift report is the oracle, not a bats expectation file.** A second set of
 expectations beside it would be the two-lists-one-truth failure again, inside the very
-tool built to detect it. Reusing it pays twice: the detector, which otherwise runs a
+tool built to detect it. `tests/drift.sh` is not that second list: it stubs the machine
+and asks which section an entry lands in and how a bundle's provenance is decided, and it
+reads the declarations it bends out of the Brewfile itself. Reusing it pays twice: the detector, which otherwise runs a
 handful of times a year, becomes continuously tested.
 
 **The gate reads `CI`.** Under it, the 1Password and Apple ID preconditions degrade from
