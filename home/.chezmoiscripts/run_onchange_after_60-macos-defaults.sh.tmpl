@@ -9,6 +9,9 @@ set -euo pipefail
 # phase by construction — the same binding 40 gets from inlining the Brewfile.
 {{ template "lib/macos-defaults.sh" . }}
 
+# Where a change to `com.apple.dock` is left for 61 to act on, rather than acted on here.
+{{ template "lib/dock-restart.sh" . }}
+
 # They are applied unconditionally: there is no flag to forget, and no
 # `CHEZMOI_APPLY_MACOS_DEFAULTS` to leave off. A gate that defaults to off means a
 # rebuilt machine comes up unconfigured, which is the rediscover-by-irritation loop the
@@ -41,23 +44,27 @@ done <<<"$managed_defaults"
 # NSGlobalDomain, the two trackpad domains and `com.apple.screencapture` name no process
 # to restart either — the trackpad keys are read by the window server at login, and that
 # lag is accepted knowingly (§6.4).
+#
+# A here-string, not a pipe: `grep -q` exits at the first match, and with `pipefail` a
+# producer killed by the closed pipe would turn a successful match into a failure.
+domain_changed() {
+  grep -qxF -- "$1" <<<"$changed_domains"
+}
+
 restart_if_changed() {
   local domain=$1 app=$2
-  # A here-string, not a pipe: `grep -q` exits at the first match, and with `pipefail` a
-  # producer killed by the closed pipe would turn a successful match into a failure.
-  if ! grep -qxF -- "$domain" <<<"$changed_domains"; then
-    return 0
-  fi
+  domain_changed "$domain" || return 0
   printf 'P6: restarting %s, whose domain changed.\n' "$app"
-  # macOS brings both back immediately, and neither is worth failing the phase over.
+  # macOS brings it back immediately, and it is not worth failing the phase over.
   killall "$app" >/dev/null 2>&1 || true
 }
 
-restart_if_changed com.apple.dock Dock
 restart_if_changed com.apple.finder Finder
 
-# The Dock's restart moves out of this script when 61 arrives (ADR 0009): the layout step
-# reports its change into this same rule, and one `killall Dock` at the end of the run
-# covers both managers of the domain. The mechanism for that is not built here, because
-# its second call site does not exist yet (rule 5) — 61 is where the line above moves to,
-# and naming it here is what keeps that from being rediscovered as a double restart.
+# The Dock is the one domain this script does not restart itself. It has two managers —
+# this table and 61's layout — and restarting it here would be both a restart too early,
+# before the layout is written, and the first of two (§6.4, ADR 0009). So the change is
+# recorded and 61 performs the single `killall Dock` at the end of P6.
+if domain_changed com.apple.dock; then
+  : >"$dock_restart_request"
+fi

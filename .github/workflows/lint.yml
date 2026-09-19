@@ -61,6 +61,42 @@ jobs:
             exit 1
           fi
 
+      # A Dock entry is a reference to an application the repository already declares,
+      # never a second declaration of it — so every name in the declaration must resolve
+      # to a Brewfile entry or to an Apple system application. The check is not
+      # precautionary: `zen` was cut from the inventory and was still sitting fifth in the
+      # prior Dock declaration. §6.4
+      - name: Dock entry references
+        run: |
+          status=0
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            # A cask, formula or App Store entry the Brewfile declares. Casks and formulae
+            # are named in Homebrew's slug, the App Store's under the name it ships as.
+            slug=$(printf '%s' "$name" | tr '[:upper:] ' '[:lower:]-')
+            if grep -qxF "$(printf 'brew "%s"' "$slug")" <(sed 's/ *#.*//' Brewfile) ||
+              grep -qxF "$(printf 'cask "%s"' "$slug")" <(sed 's/ *#.*//' Brewfile) ||
+              grep -qE "^mas \"$name\", id: [0-9]+" Brewfile; then
+              continue
+            fi
+            # Or an application macOS itself ships: under /System/Applications, or — as
+            # Safari is — at a path there that Apple signs. The bundle is asked rather
+            # than a list of exceptions this file would then have to maintain (rule 6).
+            if [ -d "/System/Applications/$name.app" ]; then
+              continue
+            fi
+            if codesign -dvv "/Applications/$name.app" 2>&1 |
+              grep -qxF 'Authority=macOS Software Signing'; then
+              continue
+            fi
+            echo "Dock entry '$name' resolves to no Brewfile entry and no Apple system application (§6.4)."
+            status=1
+          done < <(
+            "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+              '{{ range .dock.categories }}{{ range .apps }}{{ . }}{{ "\n" }}{{ end }}{{ end }}'
+          )
+          exit "$status"
+
       # Presence only — the prose is never read. §4
       - name: Script headers
         run: |

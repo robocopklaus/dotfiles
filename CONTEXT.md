@@ -209,7 +209,9 @@ output has two parts:
     ├── .chezmoitemplates/lib/               shared shell, included at render time
     │   ├── homebrew.sh                      the prefix cascade
     │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41
-    │   └── macos-defaults.sh                the declaration, shared by 60 and drift
+    │   ├── macos-defaults.sh                the declaration, shared by 60 and drift
+    │   ├── dock.sh                          the layout, shared by 61 and drift
+    │   └── dock-restart.sh                  the one restart rule, shared by 60 and 61
     ├── .chezmoiscripts/
     │   ├── run_before_20-gate.sh.tmpl                   P2
     │   ├── run_onchange_after_40-homebrew.sh.tmpl       P4  formulae + casks

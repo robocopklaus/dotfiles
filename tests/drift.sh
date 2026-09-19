@@ -9,9 +9,11 @@
 # here, so editing the inventory can never quietly turn a check into a no-op. The report
 # itself stays the oracle for machine state (§8).
 #
-# The one place this does reach into its subject is the prefix cascade, which it rewrites
-# out of the rendered script so the stubs are not shadowed. That couples the test to the
-# literal text of `lib/homebrew.sh` — loudly, since every case fails at once if it changes.
+# The one place this does reach into its subject is what the rendered script names in the
+# filesystem: the prefix cascade, which would shadow the stubs, and the two roots a Dock
+# entry is looked for under. Both are rewritten out of it. That couples the test to the
+# literal text of `lib/homebrew.sh` and `lib/dock.sh` — loudly, since every case fails at
+# once if either changes.
 
 set -uo pipefail
 
@@ -19,6 +21,9 @@ rendered=${1:?usage: tests/drift.sh <rendered-drift>}
 repo=$(cd "$(dirname "$0")/.." && pwd)
 
 failures=0
+
+# The separator every declaration this file reads back is written with.
+tab=$'\t'
 
 check() {
   if [ "$1" = "$2" ]; then
@@ -42,9 +47,15 @@ silent() {
 # A machine, built from the repository's own declarations and then bent away from them
 # one case at a time. Everything the command asks the machine is answered by a stub, so
 # the run is the same on a developer's Mac and on a bare CI runner.
-machine=$(mktemp -d)
+#
+# The path is resolved once, here, because the Dock stores the bundle paths it is given
+# with every symlink followed and the comparison below is made against those.
+machine=$(cd "$(mktemp -d)" && pwd -P)
 trap 'rm -rf "$machine"' EXIT
-mkdir -p "$machine/bin" "$machine/Applications"
+# The applications the Dock declaration points at live apart from the ones /Applications
+# is swept for: they are declared elsewhere in the inventory, and a bundle standing in for
+# one of them is not a stranger this report should name.
+mkdir -p "$machine/bin" "$machine/Applications" "$machine/DockApps"
 
 sed -n 's/^tap "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/taps"
 sed -n 's/^brew "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/formulae"
@@ -88,6 +99,11 @@ EOF
 # exiting non-zero rather than by answering emptily.
 cat >"$machine/bin/defaults" <<EOF
 #!/bin/bash
+# The Dock's own preferences, which drift exports whole rather than reading key by key.
+if [ "\$1" = 'export' ]; then
+  cat "$machine/dock.plist" >"\$3"
+  exit
+fi
 if [ "\$1" = '-currentHost' ]; then
   scope="\$3 -currentHost"
   key=\$4
@@ -113,6 +129,8 @@ chmod +x "$machine/bin"/*
 # The prefix cascade prepends Homebrew's own bin to PATH, which on a real Mac would shadow
 # the stubs; pointed at a path that does not exist it is the no-op it is before Homebrew.
 sed -e "s|/Applications/\*\.app|$machine/Applications/*.app|" \
+  -e "s|^/Applications\$|$machine/DockApps|" \
+  -e "s|^/System/Applications\$|$machine/DockSystemApps|" \
   -e "s|/opt/homebrew/bin/brew|$machine/absent/brew|" \
   -e "s|/usr/local/bin/brew|$machine/absent/brew|" \
   "$rendered" >"$machine/drift"
@@ -121,6 +139,95 @@ drift() {
   PATH="$machine/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash "$machine/drift" 2>&1
 }
 
+# The Dock (§6.4). Its declaration is read out of the rendered command, like every other
+# inventory here, and the machine is then built from a *second* model of what that
+# declaration means — which is the point: if the command stopped dropping an uninstalled
+# application, or stopped generating a spacer, the two models would disagree and say so.
+inlined() {
+  sed -n "/<<'$1'/,/^$1\$/p" "$machine/drift" | sed '1d;$d'
+}
+
+dock_declaration=$(inlined DOCK_DECLARED)
+dock_folder_declaration=$(inlined DOCK_FOLDERS)
+dock_option_codes=$(inlined DOCK_OPTION_CODES)
+
+# Every declared application, installed. What the cases below take away is what proves the
+# comparison is made against the declaration *rendered*.
+while IFS="$tab" read -r _ dock_app; do
+  [ -n "$dock_app" ] || continue
+  mkdir -p "$machine/DockApps/$dock_app.app"
+done <<<"$dock_declaration"
+
+dock_resolved() {
+  realpath "$1" 2>/dev/null || printf '%s\n' "$1"
+}
+
+# The tile sequence this machine ought to hold: the declared applications that are
+# installed, a spacer after each category that still has one, then the two folders.
+dock_expected_tiles() {
+  local category name previous='' path view sort display
+  while IFS="$tab" read -r category name; do
+    [ -n "$name" ] || continue
+    [ -d "$machine/DockApps/$name.app" ] || continue
+    if [ -n "$previous" ] && [ "$category" != "$previous" ]; then
+      printf 'spacer\n'
+    fi
+    previous=$category
+    printf 'app%s%s/DockApps/%s.app\n' "$tab" "$machine" "$name"
+  done <<<"$dock_declaration"
+  [ -z "$previous" ] || printf 'spacer\n'
+  while IFS="$tab" read -r path view sort display; do
+    [ -n "$path" ] || continue
+    path=${path//\$\{HOME\}/$HOME}
+    printf 'folder%s%s%s%s%s%s%s%s\n' \
+      "$tab" "$(dock_resolved "$path")" "$tab" "$view" "$tab" "$sort" "$tab" "$display"
+  done <<<"$dock_folder_declaration"
+}
+
+# A `com.apple.dock` plist holding exactly the tiles given, in the canonical spelling
+# above. The real Dock carries a bookmark blob per tile — the reason the command walks the
+# plist with `plutil` rather than converting it to JSON — and nothing reads it, so the
+# fixture carries none.
+dock_code() {
+  awk -F"$tab" -v option="$1" -v word="$2" '$1 == option && $2 == word { print $3 }' \
+    <<<"$dock_option_codes"
+}
+
+dock_plist() {
+  local tiles=$1 kind path view sort display
+  {
+    printf '<?xml version="1.0" encoding="UTF-8"?>\n'
+    printf '<plist version="1.0"><dict><key>persistent-apps</key><array>\n'
+    while IFS="$tab" read -r kind path view sort display; do
+      case $kind in
+        app)
+          printf '<dict><key>tile-type</key><string>file-tile</string><key>tile-data</key>'
+          printf '<dict><key>file-data</key><dict><key>_CFURLString</key>'
+          printf '<string>file://%s/</string></dict></dict></dict>\n' "$path"
+          ;;
+        spacer)
+          printf '<dict><key>tile-type</key><string>small-spacer-tile</string>'
+          printf '<key>tile-data</key><dict/></dict>\n'
+          ;;
+      esac
+    done <<<"$tiles"
+    printf '</array><key>persistent-others</key><array>\n'
+    while IFS="$tab" read -r kind path view sort display; do
+      [ "$kind" = 'folder' ] || continue
+      printf '<dict><key>tile-type</key><string>directory-tile</string><key>tile-data</key>'
+      printf '<dict><key>file-data</key><dict><key>_CFURLString</key>'
+      printf '<string>file://%s/</string></dict>' "$path"
+      printf '<key>showas</key><integer>%s</integer>' "$(dock_code view "$view")"
+      printf '<key>arrangement</key><integer>%s</integer>' "$(dock_code sort "$sort")"
+      printf '<key>displayas</key><integer>%s</integer></dict></dict>\n' \
+        "$(dock_code display "$display")"
+    done <<<"$tiles"
+    printf '</array></dict></plist>\n'
+  } >"$machine/dock.plist"
+}
+
+dock_plist "$(dock_expected_tiles)"
+
 # The machine's defaults are taken from drift's own first report rather than parsed out
 # of the declaration a second time. Against an empty stub every declared key is unset, so
 # the report names each one with the value it expected; feeding those back is a converged
@@ -128,7 +235,6 @@ drift() {
 # here — would re-implement how a declared value becomes the string `defaults` answers
 # with, and two implementations of that is the one thing a drift detector must not have.
 printf 'The managed defaults, on a machine that holds none of them\n'
-tab=$'\t'
 drift |
   sed -n "s/^  Default \\(.*\\) \\([^ ]*\\): expected \\(.*\\), is unset\$/\\1${tab}\\2${tab}\\3/p" \
     >"$machine/defaults"
@@ -274,6 +380,74 @@ says "$report" "Default $scoped_scope $scoped_key" 'names the scoped entry by it
 silent "$report" "Default ${scoped_scope% -currentHost} $scoped_key" 'says nothing about the unscoped entry of the same key'
 
 cp "$machine/defaults.declared" "$machine/defaults"
+
+printf '\nThe Dock\n'
+# The sections above have already bent the inventories, so the report is not clean here
+# and only the Dock's own line is asked about.
+report=$(drift)
+silent "$report" 'Dock layout' 'says nothing about a Dock that matches the declaration'
+
+# One line, whatever moved: the layout matches or it does not, and the two sequences say
+# the rest. A per-tile enumeration was rejected — it scatters one fact over many lines.
+dock_plist "$(dock_expected_tiles | tail -r)"
+report=$(drift)
+check "$?" 1 'exits 1'
+says "$report" '^Diverged value' 'prints the diverged section'
+check "$(grep -c 'Dock layout' <<<"$report")" 1 'reports a rearranged Dock as one line'
+says "$report" '    expected: ' 'prints the expected sequence'
+says "$report" '    actual:   ' 'prints the actual sequence'
+missing_section=$(awk '/^Missing on the machine/ { held = 1; next } /^[^ ]/ { held = 0 } held' <<<"$report")
+silent "$missing_section" 'Dock' 'reports the Dock nowhere but under Diverged value'
+
+# An application that never installed is the Brewfile sweep's to report, and the layout is
+# compared against the declaration minus it — so a Dock short that tile reads clean here.
+crowded=$(awk -F"$tab" '{ seen[$1]++ } END { for (c in seen) if (seen[c] > 1) { print c; exit } }' \
+  <<<"$dock_declaration")
+uninstalled=$(awk -F"$tab" -v category="$crowded" '$1 == category { print $2; exit }' <<<"$dock_declaration")
+rm -rf "${machine:?}/DockApps/$uninstalled.app"
+dock_plist "$(dock_expected_tiles)"
+report=$(drift)
+silent "$report" 'Dock layout' 'says nothing about a tile whose application is not installed'
+
+# And a category emptied by that same absence takes its separator with it, rather than
+# leaving a stray one behind. Both sequences are read out of the report, so this asks the
+# command what it expects rather than asking the fixture what it was given.
+expected_sequence() {
+  sed -n 's/^ *expected: //p' <<<"$1"
+}
+separators() {
+  awk -F'|' '{ print NF - 1 }' <<<"$1"
+}
+dock_plist ''
+report=$(drift)
+crowded_sequence=$(expected_sequence "$report")
+lonely=$(awk -F"$tab" '{ seen[$1]++; first[$1] = first[$1] == "" ? $2 : first[$1] } END { for (c in seen) if (seen[c] == 1) { print first[c]; exit } }' \
+  <<<"$dock_declaration")
+rm -rf "${machine:?}/DockApps/$lonely.app"
+report=$(drift)
+lonely_sequence=$(expected_sequence "$report")
+check "$(separators "$lonely_sequence")" "$(($(separators "$crowded_sequence") - 1))" \
+  'drops the separator of a category nothing is left in'
+silent "$lonely_sequence" "$lonely" 'drops the application with it'
+mkdir -p "$machine/DockApps/$lonely.app" "$machine/DockApps/$uninstalled.app"
+
+# A folder's display options are part of its tile, and `dockutil --list` does not report
+# them — which is why the command reads the Dock's preferences instead.
+folder_row=$(head -1 <<<"$dock_folder_declaration")
+folder_label=$(basename "$(cut -f1 <<<"$folder_row")")
+folder_view=$(cut -f2 <<<"$folder_row")
+folder_sort=$(cut -f3 <<<"$folder_row")
+folder_display=$(cut -f4 <<<"$folder_row")
+bent_sort=$(awk -F"$tab" -v declared="$folder_sort" \
+  '$1 == "sort" && $2 != declared { print $2; exit }' <<<"$dock_option_codes")
+dock_plist "$(dock_expected_tiles |
+  sed "s|${tab}${folder_view}${tab}${folder_sort}${tab}|${tab}${folder_view}${tab}${bent_sort}${tab}|")"
+report=$(drift)
+says "$report" 'Dock layout' 'reports a folder that stopped sorting the way it is declared'
+says "$report" "$folder_label($folder_view, $bent_sort, $folder_display)" \
+  'names the sort order it found'
+
+dock_plist "$(dock_expected_tiles)"
 
 printf '\nA machine that cannot answer\n'
 mv "$machine/bin/mas" "$machine/bin/mas.gone"
