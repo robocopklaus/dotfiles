@@ -274,18 +274,18 @@ fi
 # `defaults read` over a whole domain (§7). A Mac holds thousands of defaults and about
 # two dozen are decisions; enumerating the declaration bounds the comparison set to a
 # number that was chosen rather than discovered.
-while IFS=$'\t' read -r domain key type value host; do
+while IFS=$'\t' read -r domain key type value scope; do
   [ -n "$domain" ] || continue
 
   expected=$(managed_default_expected "$type" "$value")
-  current=$(managed_default_current "$host" "$domain" "$key")
+  current=$(managed_default_current "$scope" "$domain" "$key")
   if [ "$current" = "$expected" ]; then
     continue
   fi
 
   # A system setting you do not have is a *wrong* setting rather than an absence, because
   # macOS always supplies its own value — so an unset key is diverged, not missing (§6.4).
-  diverged+=("Default $(managed_default_scope "$host" "$domain") $key: expected $expected, is ${current:-unset}")
+  diverged+=("Default $(managed_default_label "$scope" "$domain") $key: expected $expected, is ${current:-unset}")
 done <<<"$managed_defaults"
 
 # Two things are deliberately not swept, and their absence is written down so it is not

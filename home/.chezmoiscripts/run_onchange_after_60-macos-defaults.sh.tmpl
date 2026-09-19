@@ -19,16 +19,16 @@ printf 'P6: applying the managed macOS defaults.\n'
 # Only the keys that disagree are written, and the domains they belong to are collected.
 # A converged machine writes nothing, so it also restarts nothing.
 changed_domains=''
-while IFS=$'\t' read -r domain key type value host; do
+while IFS=$'\t' read -r domain key type value scope; do
   [ -n "$domain" ] || continue
 
   expected=$(managed_default_expected "$type" "$value")
-  if [ "$(managed_default_current "$host" "$domain" "$key")" = "$expected" ]; then
+  if [ "$(managed_default_current "$scope" "$domain" "$key")" = "$expected" ]; then
     continue
   fi
 
-  printf 'P6: %s %s → %s\n' "$(managed_default_scope "$host" "$domain")" "$key" "$expected"
-  managed_defaults_run "$host" write "$domain" "$key" "-$type" "$expected"
+  printf 'P6: %s %s → %s\n' "$(managed_default_label "$scope" "$domain")" "$key" "$expected"
+  managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$expected"
   changed_domains+="$domain"$'\n'
 done <<<"$managed_defaults"
 
@@ -55,3 +55,9 @@ restart_if_changed() {
 
 restart_if_changed com.apple.dock Dock
 restart_if_changed com.apple.finder Finder
+
+# The Dock's restart moves out of this script when 61 arrives (ADR 0009): the layout step
+# reports its change into this same rule, and one `killall Dock` at the end of the run
+# covers both managers of the domain. The mechanism for that is not built here, because
+# its second call site does not exist yet (rule 5) — 61 is where the line above moves to,
+# and naming it here is what keeps that from being rediscovered as a double restart.

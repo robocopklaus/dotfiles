@@ -2,10 +2,10 @@
 # one declaration the P6 script and `drift` both derive from (ADR 0002). Included at
 # render time, so the P6 script's `run_onchange_` hash moves whenever the table does.
 #
-# One tab-separated line per entry: domain, key, type, expected value, and the host scope
-# — `currentHost` for the one key macOS keeps per machine, `any` for every other. The
-# scope is asked for with `hasKey` because only that one entry declares it; chezmoi
-# treats a missing key as an error rather than as false.
+# One tab-separated line per entry: domain, key, type, expected value, and the scope —
+# `currentHost` for the one key macOS keeps per machine, `any` for every other. The scope
+# is asked for with `hasKey` because only that one entry declares it; chezmoi treats a
+# missing key as an error rather than as false.
 managed_defaults=$(
   cat <<'MANAGED_DEFAULTS'
 {{ range .macosDefaults -}}
@@ -14,12 +14,12 @@ managed_defaults=$(
 MANAGED_DEFAULTS
 )
 
-# `defaults` takes the host scope as a flag before the verb. Branching here rather than
-# at each call site means the one entry that carries a scope is handled once.
+# `defaults` takes the scope as a flag before the verb. Branching here rather than at each
+# call site means the one entry that carries a scope is handled once.
 managed_defaults_run() {
-  local host=$1
+  local scope=$1
   shift
-  if [ "$host" = 'currentHost' ]; then
+  if [ "$scope" = 'currentHost' ]; then
     defaults -currentHost "$@"
   else
     defaults "$@"
@@ -47,16 +47,23 @@ managed_default_expected() {
 # What the machine holds, or nothing at all. `defaults` exits non-zero for a key it has
 # never been given, which is a value that disagrees like any other rather than an error —
 # and no managed value is the empty string, so the two cannot be confused.
+#
+# `defaults` itself is not guarded the way `drift` guards `brew`, `mas` and `chezmoi`
+# (§7). Those are installed software and can genuinely be absent; this is macOS, in the
+# same class as `sed` and `pkgutil`, which are not guarded either. And the two failures
+# point opposite ways: a `defaults` that could not run reports every managed key as
+# disagreeing, which is loud and sends you to re-run the bootstrap, where it would fail
+# again just as loudly. Under-reporting is the failure §7 will not have quietly.
 managed_default_current() {
-  local host=$1 domain=$2 key=$3
-  managed_defaults_run "$host" read "$domain" "$key" 2>/dev/null || true
+  local scope=$1 domain=$2 key=$3
+  managed_defaults_run "$scope" read "$domain" "$key" 2>/dev/null || true
 }
 
 # How an entry is named in a report: the domain, plus the scope when it has one, because
 # tap-to-click is declared twice and only the scope tells the two apart.
-managed_default_scope() {
-  local host=$1 domain=$2
-  if [ "$host" = 'currentHost' ]; then
+managed_default_label() {
+  local scope=$1 domain=$2
+  if [ "$scope" = 'currentHost' ]; then
     printf '%s -currentHost\n' "$domain"
   else
     printf '%s\n' "$domain"

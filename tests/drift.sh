@@ -135,6 +135,28 @@ drift |
 check "$(wc -l <"$machine/defaults" | tr -d ' ')" \
   "$(grep -c '^\[\[macosDefaults\]\]' "$repo/home/.chezmoidata/macos-defaults.toml")" \
   'reads every declared default and no other'
+
+# The fixture above cannot falsify the code that produced it: invert the boolean branch
+# and every assertion in this file still passes, while the P6 script writes the opposite
+# of §6.4 onto a real Mac. These three anchor the derivation to something outside it. The
+# entries are still read out of the rendered declaration rather than named here, so they
+# stay assertions about how a declared value becomes a string `defaults` answers with,
+# and never become a second copy of the table.
+declared_bool() {
+  awk -F"$tab" -v want="$1" '$3 == "bool" && $4 == want && $5 == "any" { print; exit }' "$machine/drift"
+}
+expected_for() {
+  awk -F"$tab" -v domain="$1" -v key="$2" '$1 == domain && $2 == key { print $3 }' "$machine/defaults"
+}
+row=$(declared_bool true)
+check "$(expected_for "$(cut -f1 <<<"$row")" "$(cut -f2 <<<"$row")")" 1 \
+  'expects 1 where the declaration says a boolean is true'
+row=$(declared_bool false)
+check "$(expected_for "$(cut -f1 <<<"$row")" "$(cut -f2 <<<"$row")")" 0 \
+  'expects 0 where the declaration says a boolean is false'
+# The token is spelled as a character class so the linter reads it as the literal it is.
+check "$(grep -c '[$]{HOME}' "$machine/defaults")" 0 'expands the path token in every value'
+
 cp "$machine/defaults" "$machine/defaults.declared"
 
 printf '\nA converged machine\n'
