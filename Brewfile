@@ -12,7 +12,7 @@ brew "antidote"            # zsh plugin manager, loaded by every shell
 brew "oh-my-posh"          # Prompt, rendered by every shell
 brew "zoxide"              # z — directory jumping
 brew "cloudflare-cli4"     # Personal infrastructure
-brew "gogcli"              # GOG library management
+brew "gogcli"              # Google Suite CLI — Gmail, Calendar, Drive, Docs, Sheets
 brew "homeassistant-cli"   # Home automation
 
 cask "1password"                 # Password manager; root of the bootstrap trust chain

@@ -357,7 +357,7 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `oh-my-posh` | Prompt, rendered by every shell |
 | `zoxide` | `z` — directory jumping |
 | `cloudflare-cli4` | Personal infrastructure |
-| `gogcli` | GOG library management |
+| `gogcli` | Google Suite CLI — Gmail, Calendar, Drive, Docs, Sheets |
 | `homeassistant-cli` | Home automation |
 
 #### Base — applications (17 casks, 4 App Store)
