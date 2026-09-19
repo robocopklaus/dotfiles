@@ -1,0 +1,47 @@
+#!/bin/bash
+# Phase: P4 — packages: the Claude Code CLI, from its native installer
+# Requires: P3, network
+
+set -euo pipefail
+
+# Separate from 40 because the precondition is: the CLI has no Homebrew formula, so it
+# comes from its own installer and wants network rather than Homebrew. A precondition of
+# its own is a script of its own (§4). The `claude` cask in the Brewfile is the desktop
+# application — a different artifact from a different source, and not this script's
+# business.
+#
+# No keepalive and no `sudo`, unlike its two siblings: the installer puts everything under
+# `$HOME` and refuses outright when invoked through `sudo`, so this is the one P4 script
+# that stays unprivileged.
+#
+#
+# `run_after_`, not `run_onchange_after_`: this script inlines no inventory, so its
+# rendered content never changes and content-hash skipping would make it a `run_once_` in
+# disguise, which §1 bans. §4 has the reasoning; the guard below is what makes re-deriving
+# on every run cheap.
+
+# The managed `.zshrc` already puts `~/.local/bin` first on PATH (§6.3), but this script
+# runs in chezmoi's environment rather than a login shell. Seeding it here is what lets the
+# guard see a CLI that is already installed.
+export PATH="$HOME/.local/bin:$PATH"
+
+# Present is converged. The CLI updates itself, so there is no version for the bootstrap
+# to chase: this phase's job is that it exists, and a re-run that downloaded it again
+# would be work performed to arrive where the machine already is (§1).
+if command -v claude >/dev/null 2>&1; then
+  exit 0
+fi
+
+printf 'P4: installing the Claude Code CLI.\n'
+
+# Fetched into a variable first, for the reason 40 states: piped straight into bash a
+# failed download is invisible, because the substitution yields an empty script that
+# exits 0.
+#
+# Tolerant end to end, because nothing later in the run depends on the CLI — P5, P6 and P7
+# take their preconditions from 40 and 41 (§3). A failure is reported and the run carries
+# on to the phases that do block.
+if ! { installer=$(curl -fsSL https://claude.ai/install.sh) && /bin/bash -c "$installer"; }; then
+  printf '\nP4: the Claude Code CLI did not install.\n'
+  printf '\nRe-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
+fi
