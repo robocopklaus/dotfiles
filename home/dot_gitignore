@@ -1,3 +1,7 @@
+# A global ignore holds what this machine produces in every repository it
+# touches. Build output, dependencies and coverage belong to a project and are
+# declared by that project, where a collaborator can see the rule too.
+
 # macOS
 .DS_Store
 .AppleDouble
@@ -11,39 +15,15 @@
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Editor swap and backup files
+*.swp
+*.swo
+*~
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage
-coverage/
-.nyc_output/
-
-# Dependencies
-node_modules/
-
-# Environment
+# Kept against the rule above: a project that forgets this one leaks
+# credentials, and the cost of the exception is a file nobody commits anyway.
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Editors
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# Temporary files
-*.tmp
-*.temp

@@ -5,33 +5,49 @@ path=("$HOME/.local/bin" $path)
 for brew_prefix in /opt/homebrew /usr/local; do
   if [[ -d "$brew_prefix/share/zsh/site-functions" ]]; then
     fpath=("$brew_prefix/share/zsh/site-functions" $fpath)
+    break
   fi
 done
 unset brew_prefix
 
-# Keep a large command history across terminal windows.
+# Keep a large command history across terminal windows. HISTFILE is declared
+# here rather than left to /etc/zshrc, which this repository does not own.
+HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
 HISTSIZE=50000
 SAVEHIST=50000
 
-# Append incrementally so parallel shells do not overwrite each other.
-setopt APPEND_HISTORY
+# SHARE_HISTORY already appends each command as it is typed and imports the
+# ones other shells write. zshoptions calls it, APPEND_HISTORY and
+# INC_APPEND_HISTORY mutually exclusive, so it stands alone.
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 setopt HIST_REDUCE_BLANKS
-setopt INC_APPEND_HISTORY
 
 # Plugins
 autoload -Uz colors && colors
 zstyle ':plugin:ez-compinit' use-cache on
 
+# An arrow key reaches zle as the normal-mode sequence unless something has put
+# the terminal in application mode by sending smkx; nothing here does. So the
+# normal-mode sequences are bound outright and terminfo's are added on top —
+# binding terminfo alone leaves the search unreachable.
 bind_history_substring_search() {
-  zmodload zsh/terminfo 2>/dev/null || return 0
+  local -a up=($'\e[A') down=($'\e[B')
 
-  local keymap
+  if zmodload zsh/terminfo 2>/dev/null; then
+    [[ -n "${terminfo[kcuu1]:-}" ]] && up+=("$terminfo[kcuu1]")
+    [[ -n "${terminfo[kcud1]:-}" ]] && down+=("$terminfo[kcud1]")
+  fi
+
+  local keymap key
   for keymap in main emacs viins; do
-    [[ -n "${terminfo[kcuu1]:-}" ]] && bindkey -M "$keymap" "$terminfo[kcuu1]" history-substring-search-up
-    [[ -n "${terminfo[kcud1]:-}" ]] && bindkey -M "$keymap" "$terminfo[kcud1]" history-substring-search-down
+    for key in "$up[@]"; do
+      bindkey -M "$keymap" "$key" history-substring-search-up
+    done
+    for key in "$down[@]"; do
+      bindkey -M "$keymap" "$key" history-substring-search-down
+    done
   done
 }
 

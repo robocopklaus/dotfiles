@@ -8,7 +8,17 @@
 
 [diff]
 	renames = copies
+	algorithm = histogram
 	tool = code
+
+[fetch]
+	prune = true
+
+[rebase]
+	autoStash = true
+
+[rerere]
+	enabled = true
 
 [difftool "code"]
 	cmd = code --wait --diff "$LOCAL" "$REMOTE"
@@ -38,7 +48,7 @@
 	allowedSignersFile = ~/.config/git/allowed_signers
 
 [commit]
-	gpgsign = true
+	gpgSign = true
 
 [tag]
 	gpgSign = true
