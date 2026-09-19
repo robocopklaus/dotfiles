@@ -19,6 +19,10 @@ jobs:
       - name: Install shellcheck
         run: command -v shellcheck >/dev/null || brew install shellcheck
 
+      # The Dock reference check reads Homebrew's cask metadata with it, as drift does.
+      - name: Install jq
+        run: command -v jq >/dev/null || brew install jq
+
       - name: Dry-run apply
         run: >
           "$RUNNER_TEMP/bin/chezmoi" apply --dry-run --verbose
@@ -60,6 +64,47 @@ jobs:
             echo 'The entries above carry no reason comment (§6.1).'
             exit 1
           fi
+
+      # A Dock entry is a reference to an application the repository already declares,
+      # never a second declaration of it — so every name in the declaration must resolve
+      # to a Brewfile entry or to an Apple system application. The check is not
+      # precautionary: `zen` was cut from the inventory and was still sitting fifth in the
+      # prior Dock declaration. §6.4
+      - name: Dock entry references
+        run: |
+          status=0
+          # The bundle each declared cask installs, asked of Homebrew rather than guessed
+          # from the cask's token: `telegram-desktop` and `microsoft-teams` are the
+          # examples that defeat guessing, and drift asks the same question the same way
+          # for the same reason (§7). The App Store entries name their bundle directly.
+          casks=$(sed -n 's/^cask "\([^"]*\)".*/\1/p' Brewfile)
+          # shellcheck disable=SC2086
+          cask_apps=$(brew info --cask --json=v2 $casks |
+            jq -r '[.casks[].artifacts | .. | strings] | .[] | select(endswith(".app"))' |
+            sed 's|.*/||; s|\.app$||')
+          store_apps=$(sed -n 's/^mas "\([^"]*\)".*/\1/p' Brewfile)
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            if grep -qxF "$name" <<<"$cask_apps" || grep -qxF "$name" <<<"$store_apps"; then
+              continue
+            fi
+            # Or an application macOS itself ships: under /System/Applications, or — as
+            # Safari is — at a path there that Apple signs. The bundle is asked rather
+            # than a list of exceptions this file would then have to maintain (rule 6).
+            if [ -d "/System/Applications/$name.app" ]; then
+              continue
+            fi
+            if codesign -dvv "/Applications/$name.app" 2>&1 |
+              grep -qxF 'Authority=macOS Software Signing'; then
+              continue
+            fi
+            echo "Dock entry '$name' resolves to no Brewfile entry and no Apple system application (§6.4)."
+            status=1
+          done < <(
+            "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+              '{{ range .dock.categories }}{{ range .apps }}{{ . }}{{ "\n" }}{{ end }}{{ end }}'
+          )
+          exit "$status"
 
       # Presence only — the prose is never read. §4
       - name: Script headers

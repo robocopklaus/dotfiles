@@ -1,0 +1,68 @@
+#!/bin/bash
+# Phase: P6 — system configuration: the Dock's layout, reconciled against the declaration
+# Requires: P4 (the applications the tiles point at, and dockutil), a non-root user
+
+set -euo pipefail
+
+# The declaration and everything a consumer of it needs, included at render time (§4,
+# ADR 0005). It is *in* this rendered script, so editing `dock.toml` re-triggers this
+# phase by construction — the same binding 40 gets from inlining the Brewfile.
+{{ template "lib/dock.sh" . }}
+
+# The marker 60 leaves when a key in `com.apple.dock` changed, so that the two managers of
+# that domain cost one restart rather than two (§6.4).
+{{ template "lib/dock-restart.sh" . }}
+
+# Reconciled, not rebuilt (ADR 0009): read the current tile sequence, compare it to the
+# expected one, and go near `dockutil` only on mismatch. On a converged machine this
+# prints nothing, changes nothing and restarts nothing — which is what makes a routine
+# apply something you do not learn to avoid.
+#
+# The expected sequence is the declaration rendered against this machine: an application
+# that never installed drops out, and its category keeps its spacer only if something
+# else in it survived.
+expected=$(dock_expected_sequence)
+current=$(dock_current_sequence)
+
+rebuilt='no'
+if [ "$current" != "$expected" ]; then
+  printf 'P6: the Dock does not match the declaration; rebuilding it.\n'
+  printf 'P6:   expected: %s\n' "$(dock_sequence_label "$expected")"
+  printf 'P6:   actual:   %s\n' "$(dock_sequence_label "$current")"
+
+  # Clear and re-add, which is the destructive rebuild the prior setup ran on *every*
+  # apply. Behind the comparison it is a different thing: it fires only when the Dock has
+  # genuinely diverged, so the plist backup and its five-deep prune are gone with the
+  # reason they existed (ADR 0009).
+  dockutil --remove all --no-restart >/dev/null
+
+  # Each call reads from /dev/null, not from the here-string the loop is walking: a child
+  # that touched stdin would eat the rest of the sequence and leave a Dock that is half
+  # the declaration, silently and only sometimes.
+  while IFS=$'\t' read -r kind path view sort display; do
+    case $kind in
+      app)
+        dockutil --add "$path" --no-restart >/dev/null </dev/null
+        ;;
+      spacer)
+        dockutil --add '' --type small-spacer --section apps --no-restart >/dev/null </dev/null
+        ;;
+      folder)
+        dockutil --add "$path" --view "$view" --sort "$sort" --display "$display" \
+          --no-restart >/dev/null </dev/null
+        ;;
+    esac
+  done <<<"$expected"
+
+  rebuilt='yes'
+fi
+
+# The one restart, at the end of P6 and after the layout is written, covering both
+# managers of the domain: this step and the defaults table before it (§6.4). Every
+# `dockutil` call above passes `--no-restart` for exactly this reason.
+if [ "$rebuilt" = 'yes' ] || [ -e "$dock_restart_request" ]; then
+  rm -f "$dock_restart_request"
+  printf 'P6: restarting the Dock.\n'
+  # macOS brings it straight back, and it is not worth failing the phase over.
+  killall Dock >/dev/null 2>&1 || true
+fi

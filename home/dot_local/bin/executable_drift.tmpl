@@ -27,6 +27,10 @@ BREWFILE
 # detector.
 {{ template "lib/macos-defaults.sh" . }}
 
+# The Dock's layout, from the declaration P6 reconciles against — the same comparison the
+# reconcile performs, so the check and the application are one mechanism (ADR 0009).
+{{ template "lib/dock.sh" . }}
+
 missing=()
 unmanaged=()
 diverged=()
@@ -287,6 +291,22 @@ while IFS=$'\t' read -r domain key type value scope; do
   # macOS always supplies its own value — so an unset key is diverged, not missing (§6.4).
   diverged+=("Default $(managed_default_label "$scope" "$domain") $key: expected $expected, is ${current:-unset}")
 done <<<"$managed_defaults"
+
+# The Dock's layout, which is neither a managed file nor a flat default and so falls
+# through both checks above. One line, because the layout matches or it does not, followed
+# by the two sequences — the same information a per-tile diff carries, for a fraction of
+# the shell (ADR 0009). It is compared against the **rendered** declaration, so an
+# application that never installed is reported once, truthfully, by the Brewfile sweep,
+# and not a second time here as layout drift. The stated consequence: a Dock short a tile
+# because its cask failed reads clean in this section and red in that one.
+dock_expected=$(dock_expected_sequence)
+if ! dock_current=$(dock_current_sequence); then
+  incomplete+=('The Dock preferences could not be read, so the layout was not checked.')
+elif [ "$dock_current" != "$dock_expected" ]; then
+  diverged+=('Dock layout: the tile sequence does not match the declaration')
+  diverged+=("  expected: $(dock_sequence_label "$dock_expected")")
+  diverged+=("  actual:   $(dock_sequence_label "$dock_current")")
+fi
 
 # Two things are deliberately not swept, and their absence is written down so it is not
 # read as an oversight and repaired (§7): `mise` runtimes, which `mise ls` already diffs

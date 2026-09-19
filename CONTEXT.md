@@ -209,7 +209,9 @@ output has two parts:
     ├── .chezmoitemplates/lib/               shared shell, included at render time
     │   ├── homebrew.sh                      the prefix cascade
     │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41
-    │   └── macos-defaults.sh                the declaration, shared by 60 and drift
+    │   ├── macos-defaults.sh                the declaration, shared by 60 and drift
+    │   ├── dock.sh                          the layout, shared by 61 and drift
+    │   └── dock-restart.sh                  the one restart rule, shared by 60 and 61
     ├── .chezmoiscripts/
     │   ├── run_before_20-gate.sh.tmpl                   P2
     │   ├── run_onchange_after_40-homebrew.sh.tmpl       P4  formulae + casks
@@ -736,7 +738,17 @@ gone from both.
 **One restart rule.** Two managers of one domain is accepted, because the layout genuinely
 cannot be flat `domain/key/type/value`. Two restarts of one app is not: the layout step
 reports its change into the same restart mechanism the defaults use, and a single
-`killall Dock` at the end of the run covers both.
+`killall Dock` at the end of the run covers both. The defaults step records its change
+rather than acting on it, because the restart has to come *after* the layout is written.
+
+One consequence accepted knowingly, and named here so the annual review answers it in one
+line rather than rediscovers it: both steps are `run_onchange_`, so an apply that changes
+only the defaults table runs 60 without 61, and the recorded restart is then carried to
+61's next run rather than performed in that one. The Dock picks the change up at the next
+restart either way, and the cost when it is carried is one restart on a later apply that
+found the layout converged. The alternative is a layout step that re-derives on every run
+— which is what `9x` and `42` are, and what this one would become if the carry ever
+stopped reading as a footnote.
 
 ### 6.5 Secrets, SSH and signing (ADR 0003, ADR 0008)
 
