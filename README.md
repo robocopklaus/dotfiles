@@ -139,10 +139,13 @@ exists. This is deliberate: a config file is inert until its tool arrives, so th
 config pointing at the 1Password agent is written in P3 and becomes meaningful in P4.
 
 **P4 — the only phase that touches root.** Internal order is load-bearing: formulae
-first as the blocking base, then casks, then `mas`. The gate validated that `sudo` works;
+first as the blocking base, then casks, then `mas`, then the out-of-band Claude Code CLI
+(§6.1), which is last because nothing waits on it. The gate validated that `sudo` works;
 P4 starts its own keepalive, because each chezmoi script is a separate process and a
 keepalive started in P2 cannot be adopted here. Cask installers prompt at unpredictable
-points during a bundle run, which is why the keepalive exists at all.
+points during a bundle run, which is why the keepalive exists at all. The CLI script is
+the exception and takes no keepalive: its installer writes only under `$HOME` and refuses
+outright to run through `sudo`.
 
 **P7 — currently empty.** The phase stays in the model as the slot for post-install
 wiring, but nothing occupies it today: the one inherited integration was an `obsidian-cli`
@@ -156,8 +159,9 @@ One rule: **a phase aborts the run only if a later phase depends on it.**
 
 - **Abort** — the gate, Homebrew itself, formulae (P5 needs `mise`, P6 needs `dockutil`).
 - **Degrade and report** — casks and `mas` apps, installed individually so one bad GUI
-  app cannot kill a fresh bootstrap. Collected failures surface in the closing report
-  with an instruction to re-run.
+  app cannot kill a fresh bootstrap, and the out-of-band Claude Code CLI (§6.1), which
+  nothing waits on. Collected failures surface in the closing report with an instruction
+  to re-run.
 
 A tolerant phase must have tolerant dependents: P7 depends on P4's casks, so P7 skips
 cleanly when its app is absent rather than failing.
@@ -206,7 +210,7 @@ output has two parts:
     │   ├── run_before_20-gate.sh.tmpl                   P2
     │   ├── run_onchange_after_40-homebrew.sh.tmpl       P4  formulae + casks
     │   ├── run_onchange_after_41-mas.sh.tmpl            P4  separate: needs root
-    │   ├── run_onchange_after_42-claude-code.sh.tmpl    P4  separate: no brew
+    │   ├── run_after_42-claude-code.sh.tmpl             P4  separate: no brew
     │   ├── run_onchange_after_50-mise.sh.tmpl           P5
     │   ├── run_onchange_after_60-macos-defaults.sh.tmpl P6
     │   ├── run_onchange_after_61-dock.sh.tmpl           P6
@@ -227,6 +231,14 @@ to list.
 because it has three preconditions: `mas` needs root, and the Claude Code installer needs
 network but not Homebrew. 40/41/42 read as visible siblings — the fix for the prior
 10/20/30/40/50/60, where nothing explained the gaps.
+
+**42 is `run_after_`, for the same reason the epilogue is.** 40 and 41 inline the Brewfile,
+so their rendered content changes whenever the inventory does and `run_onchange_` re-triggers
+by construction. 42 inlines nothing, so its content never changes — `run_onchange_` would
+run it exactly once per machine, which is a `run_once_` wearing a different prefix, and §1
+bans that: a machine whose CLI went missing would never get it back from the one command
+that is supposed to be the whole recovery mechanism. So it re-derives on every run, and its
+presence guard makes a converged run cost one `command -v`.
 
 **`9x` is deliberately outside the phase range.** The closing report is the run's
 epilogue, not a phase; numbering it `80` would imply a P8 that does not exist. It is
@@ -288,8 +300,9 @@ These apply everywhere and are the ones most likely to be violated by accident.
 
 ### 6.1 Applications and tools — the Brewfile
 
-The Brewfile is the **full truth of the machine**. There is no unmanaged tail: an
-unmanaged tail means the wipe still silently deletes things, which is the
+The Brewfile is the **full truth of the machine**, save one entry neither Homebrew nor the
+App Store can carry, which is named below rather than left out. There is no unmanaged
+tail: an unmanaged tail means the wipe still silently deletes things, which is the
 review-through-the-wipe loop wearing a new hat.
 
 **Every entry carries one trailing `#` comment stating its role, and nothing else.**
@@ -368,7 +381,7 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | --- | --- |
 | `1password` | Password manager; root of the bootstrap trust chain |
 | `1password-cli` | `op` — renders the work identity; trust chain |
-| `claude` | Primary coding agent |
+| `claude` | Primary coding agent — the desktop application only; the CLI is out of band, below |
 | `visual-studio-code` | Editor |
 | `ghostty` | Terminal |
 | `google-chrome` | Browser |
@@ -387,6 +400,25 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | Numbers — `361304891` | Spreadsheets; no Homebrew cask exists |
 | GCal for Google Calendar — `1107163858` | Calendar; no Homebrew cask exists |
 | 1Password for Safari — `1569813296` | Safari extension; no cask, and no launch record by design |
+
+#### Out of band — the Claude Code CLI
+
+One installed thing reaches the machine through neither Homebrew nor the App Store, and it
+is named here rather than left to the unmanaged tail §6.1 opens by refusing. The Claude
+Code **CLI** has no formula and no cask, so it comes from its own installer, in its own P4
+script (§4). Its precondition is network, not Homebrew, which is exactly what cuts it away
+from the bundle run.
+
+**The `claude` cask is the desktop application, and that is the whole of the distinction.**
+Two artifacts, two sources, one name — which is why both entries say so rather than leaving
+the next review to rediscover it. The CLI is the `claude` on `PATH`, installed under `$HOME`
+and self-updating thereafter, so the bootstrap's only job is that it exists at all.
+
+This does not reopen the sourcing rule. ADR 0007 arbitrates between Homebrew and the App
+Store for a thing both could carry; this is a thing neither can, so it is a gap in the two
+mechanisms rather than a preference between them, and the rule's population stays closed by
+construction. Should a formula ever appear, the entry moves into the Brewfile and the script
+is deleted — that is the one question the annual review asks here.
 
 #### The work group (5)
 
