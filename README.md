@@ -68,6 +68,24 @@ pass, before a single file is written.
 | — | Signed in to the App Store | **not verifiable** → tolerant `mas`, closing report |
 | — | FileVault | deliberately **not** a gate item |
 
+**The gate reports the remedy, not just the verdict.** Every failed item is printed with
+the command that fixes it where one exists, and with the click path where none does. The
+remedies live in the gate script beside the checks they belong to — never as a second
+column in this table. A list of fix commands maintained apart from the checks it serves
+would drift from them, and the copy that drifts is the one that waves you through.
+
+**Why there is no preflight *script*.** The tempting version — one curl-piped script that
+*performs* P0 rather than checking it — does not survive its own dependency order:
+installing 1Password wants Homebrew, Homebrew wants Command Line Tools, and that is
+precisely the wait this design refuses to automate, so the script would stop mid-run and
+fetch you anyway. Three of the seven items — the Apple ID, the 1Password unlock and agent
+toggle, the GitHub registration — are GUI work no script can perform at all, and they are
+the slow ones. It would also be a **second entry point**, fetched and trusted before the
+gate exists to check anything, and structurally the least-tested script in the repository,
+since CI's runner arrives warm and never exercises bare metal (§8). A script that *checks*
+P0 is worse still: it is a second copy of the gate's list, which is rule 1's failure mode
+in the one place it is most dangerous.
+
 **Why 1Password is a precondition and not a phase.** P3 writes an `~/.ssh/config` and a
 `~/.gitconfig` that are inert until 1Password is installed, signed in, unlocked and has
 the SSH agent toggled on — none of which a script can do. It is also the source of the
@@ -111,7 +129,8 @@ order that a precondition justifies; it is never itself the justification.
 | 9x | **Epilogue** — the closing report | — | never fails the run |
 
 **P2 — the gate.** A `run_before_` script, and the structural addition the prior setup
-lacked entirely. It checks **every** P0 item and reports **all** failures in one pass.
+lacked entirely. It checks **every** P0 item and reports **all** failures in one pass,
+each with its remedy (§2).
 Running before file application means a failed gate leaves the machine completely
 untouched. Under CI the 1Password and Apple ID items degrade from refusing to reporting
 (§8); every other precondition still refuses.
