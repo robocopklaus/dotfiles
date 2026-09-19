@@ -399,15 +399,29 @@ on and off as **one fact under one guard**. No flag, no chezmoi config value, no
 file format — rule 6 asks for a machine-derived fact, and this one was already being
 derived for the surface next door.
 
-**It is not "optional" in the sense of a per-machine choice.** Both Macs are in the
-engagement and both install all five; the only renderer that ever omits the group is CI.
-What the split buys is **lifecycle**: ending the engagement is one deletion —
-`Brewfile.work` and its include line — with no per-entry judgement owed, which is the
-whole reason the five were held apart from a public repository that outlives them.
+**It is not "optional" in the sense of a per-machine choice.** Both Macs are company
+machines and both install all five; the only renderer that ever omits the group is CI.
 
-The guard is admittedly a **proxy**: `op` on the path means "1Password is installed", not
-"this machine is in the engagement". It is the right proxy because the true fact —
-resolving the work-identity item itself — would be a second and finer discriminator for
+**What the split buys is lifecycle — at the company's level, not a client's.** The work
+is done through one company for several clients, so ending *one* client relationship is
+not one deletion. It is a walk through `Brewfile.work` asking which entries were theirs,
+which is the per-entry judgement the split exists to avoid. What the file does buy in a
+single deletion is the whole surface at once: the day this repository stops carrying
+client work, `Brewfile.work` and its include line go and no entry in the base is touched.
+That is a weaker claim than the one a single engagement would support, and it is the one
+that is true.
+
+Weaker, so it is worth naming what still holds the file apart from the base. Two things,
+and only two: the base inventory stays a statement about the machine rather than about
+whose work it does, and CI is spared 1.5 GB of client tooling it would never open (below).
+Neither is the lifecycle argument, and if both ever stop mattering the honest move is to
+merge the five into the base rather than keep a file whose stated reason has drained out.
+
+The guard is a **proxy**, and a closer one than it first reads: `op` on the path means
+"1Password is installed", which stands in for "this is a company machine". Both Macs are,
+CI is not, and no third kind of machine applies this repository — there is no personal Mac
+in the fleet for the proxy to be wrong about. It is the right proxy because the true fact
+— resolving the work-identity item itself — would be a second and finer discriminator for
 the same relationship, with exactly one consumer (rule 5), guarding against a machine that
 does not exist. And ADR 0004's refusal to derive CI from `op`'s *absence* does not reach
 here: that ambiguity — a genuinely fresh Mac has no `op` either — lives at the **P2 gate**,
@@ -415,8 +429,8 @@ while the group renders at **P4**, after the gate has already refused every real
 lacking `op` (P0 item 4). By P4, CI is the only op-less renderer left.
 
 `drift` needs no special case for the group. The check is rendered by chezmoi too, so it
-evaluates the same guard at the same moment as the applying script: on a work Mac the five
-are declared *and* installed, on CI they are neither — clean either way, and never
+evaluates the same guard at the same moment as the applying script: on a company Mac the
+five are declared *and* installed, on CI they are neither — clean either way, and never
 reported as *Not in the repository*. That is also the guard's second consumer, which is
 what rule 5 asks of any shared mechanism.
 
@@ -427,11 +441,16 @@ group costs roughly 1.5 GB per run, 1.1 GB of that a GUI chat client installed i
 headless runner that will never open it, to prove that `brew bundle --file=-` works a
 second time.
 
-**The reasons state the role, never the engagement.** The trailing-comment convention
-above applies unchanged, but this is the one file where the temptation to explain *whose*
-stack it is runs strongest. `# Azure CLI — client cloud platform`, never the client's
-name: the five entries are generic and leak nothing by themselves, so the comments are the
-leak surface.
+**The reasons state the role, never the client.** The trailing-comment convention above
+applies unchanged, but this is the one file where the temptation to explain *whose* stack
+it is runs strongest. `# Azure CLI — client cloud platform`, never a client's name: the
+five entries are generic and leak nothing by themselves, so the comments are the leak
+surface.
+
+Serving several clients helps here rather than hurting. The set says the company works
+with cloud platforms and a ticket tracker; it does not say which client brought which
+entry, because more than one did. That is second-order comfort and not the rule — the
+rule is still the comments.
 
 #### What the bar is
 
@@ -928,8 +947,8 @@ Stated rather than discovered later.
   none today.
 - **The work group is exercised at one desk or not at all.** CI renders the op-less
   branch, so neither the work identity's populated templates nor the group's second
-  `brew bundle --file` invocation is ever run by a machine other than a Mac in the
-  engagement. This is one gap with one cause — the `op` guard of §6.1 and §6.5 — widened
+  `brew bundle --file` invocation is ever run by a machine other than a company Mac.
+  This is one gap with one cause — the `op` guard of §6.1 and §6.5 — widened
   from the identity to its tooling, not a second one.
 - **Onboarding a third machine, or handing this to someone else**, is not a goal. The
   document is written for two identical machines and one reader.
