@@ -19,6 +19,10 @@ jobs:
       - name: Install shellcheck
         run: command -v shellcheck >/dev/null || brew install shellcheck
 
+      # The Dock reference check reads Homebrew's cask metadata with it, as drift does.
+      - name: Install jq
+        run: command -v jq >/dev/null || brew install jq
+
       - name: Dry-run apply
         run: >
           "$RUNNER_TEMP/bin/chezmoi" apply --dry-run --verbose
@@ -69,14 +73,19 @@ jobs:
       - name: Dock entry references
         run: |
           status=0
+          # The bundle each declared cask installs, asked of Homebrew rather than guessed
+          # from the cask's token: `telegram-desktop` and `microsoft-teams` are the
+          # examples that defeat guessing, and drift asks the same question the same way
+          # for the same reason (§7). The App Store entries name their bundle directly.
+          casks=$(sed -n 's/^cask "\([^"]*\)".*/\1/p' Brewfile)
+          # shellcheck disable=SC2086
+          cask_apps=$(brew info --cask --json=v2 $casks |
+            jq -r '[.casks[].artifacts | .. | strings] | .[] | select(endswith(".app"))' |
+            sed 's|.*/||; s|\.app$||')
+          store_apps=$(sed -n 's/^mas "\([^"]*\)".*/\1/p' Brewfile)
           while IFS= read -r name; do
             [ -n "$name" ] || continue
-            # A cask, formula or App Store entry the Brewfile declares. Casks and formulae
-            # are named in Homebrew's slug, the App Store's under the name it ships as.
-            slug=$(printf '%s' "$name" | tr '[:upper:] ' '[:lower:]-')
-            if grep -qxF "$(printf 'brew "%s"' "$slug")" <(sed 's/ *#.*//' Brewfile) ||
-              grep -qxF "$(printf 'cask "%s"' "$slug")" <(sed 's/ *#.*//' Brewfile) ||
-              grep -qE "^mas \"$name\", id: [0-9]+" Brewfile; then
+            if grep -qxF "$name" <<<"$cask_apps" || grep -qxF "$name" <<<"$store_apps"; then
               continue
             fi
             # Or an application macOS itself ships: under /System/Applications, or — as

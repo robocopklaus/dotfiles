@@ -173,12 +173,12 @@ dock_current_sequence() {
 # `drift` print the pair, and printing both sequences gives the same information as a
 # per-tile diff for a fraction of the shell (ADR 0009).
 dock_sequence_label() {
-  local kind first second third fourth line=''
-  while IFS=$'\t' read -r kind first second third fourth; do
+  local kind path view sort display line=''
+  while IFS=$'\t' read -r kind path view sort display; do
     case $kind in
-      app) line+=" $(basename "$first" .app)" ;;
+      app) line+=" $(basename "$path" .app)" ;;
       spacer) line+=' |' ;;
-      folder) line+=" $(basename "$first")($second, $third, $fourth)" ;;
+      folder) line+=" $(basename "$path")($view, $sort, $display)" ;;
     esac
   done <<<"$1"
   printf '%s\n' "${line# }"

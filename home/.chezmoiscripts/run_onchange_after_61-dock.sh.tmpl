@@ -36,17 +36,20 @@ if [ "$current" != "$expected" ]; then
   # reason they existed (ADR 0009).
   dockutil --remove all --no-restart >/dev/null
 
+  # Each call reads from /dev/null, not from the here-string the loop is walking: a child
+  # that touched stdin would eat the rest of the sequence and leave a Dock that is half
+  # the declaration, silently and only sometimes.
   while IFS=$'\t' read -r kind path view sort display; do
     case $kind in
       app)
-        dockutil --add "$path" --no-restart >/dev/null
+        dockutil --add "$path" --no-restart >/dev/null </dev/null
         ;;
       spacer)
-        dockutil --add '' --type small-spacer --section apps --no-restart >/dev/null
+        dockutil --add '' --type small-spacer --section apps --no-restart >/dev/null </dev/null
         ;;
       folder)
         dockutil --add "$path" --view "$view" --sort "$sort" --display "$display" \
-          --no-restart >/dev/null
+          --no-restart >/dev/null </dev/null
         ;;
     esac
   done <<<"$expected"
