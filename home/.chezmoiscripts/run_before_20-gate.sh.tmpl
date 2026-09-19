@@ -32,7 +32,16 @@ refuse_unless_ci() {
   fi
 }
 
-# 1 — macOS 26 or newer on Apple Silicon
+# Administrator rights, first and once: P4 needs root, and this is the run's single
+# interactive moment (§1). Acquiring the privilege here means no later phase discovers
+# its absence halfway through a bundle.
+printf 'Preflight gate: checking administrator rights — macOS may ask for your password.\n'
+if ! sudo -v; then
+  refuse "Administrator rights are not available (sudo -v failed)." \
+    "Run the bootstrap from an account with administrator rights."
+fi
+
+# macOS 26 or newer on Apple Silicon
 architecture=$(uname -m)
 if [ "$architecture" != "arm64" ]; then
   refuse "This is not an Apple Silicon Mac (uname -m reports $architecture)." \
@@ -45,26 +54,26 @@ if [ "${macos_version%%.*}" -lt 26 ]; then
     "Update first: System Settings → General → Software Update."
 fi
 
-# 2 — Apple ID signed in
+# Apple ID signed in
 if ! defaults read MobileMeAccounts Accounts >/dev/null 2>&1; then
   refuse_unless_ci "No Apple ID is signed in." \
     "Sign in: System Settings → Sign in with your Apple Account, and to the App Store."
 fi
 
-# 3 — network
+# Network
 if ! curl -fsS --max-time 10 -o /dev/null https://github.com; then
   refuse "github.com is not reachable." \
     "Join a network that reaches github.com, then re-run."
 fi
 
-# 4 — Xcode Command Line Tools. Checked, never installed and never waited on: the
+# Xcode Command Line Tools. Checked, never installed and never waited on: the
 # prior setup's 3600s poll for them is deliberately not carried over (§2).
 if ! xcode-select --print-path >/dev/null 2>&1; then
   refuse "The Xcode Command Line Tools are not installed." \
     "Run: xcode-select --install — wait for it to finish, then re-run."
 fi
 
-# 5 — 1Password and its CLI, both installed by hand before the run (§2)
+# 1Password and its CLI, both installed by hand before the run (§2)
 if [ ! -d "/Applications/1Password.app" ]; then
   refuse_unless_ci "1Password is not installed." \
     "Install it by hand from https://1password.com/downloads/mac and sign in."
@@ -75,19 +84,11 @@ if ! command -v op >/dev/null 2>&1; then
     "Install it from https://developer.1password.com/docs/cli/get-started, then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
 fi
 
-# 6 — the 1Password SSH agent, which P3's ~/.ssh/config is written against
+# The 1Password SSH agent, which P3's ~/.ssh/config is written against
 agent_socket="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 if [ ! -S "$agent_socket" ]; then
   refuse_unless_ci "The 1Password SSH agent socket is missing ($agent_socket)." \
     "Unlock 1Password, then turn on Settings → Developer → Use the SSH agent."
-fi
-
-# 7 — administrator rights. P4 needs root; the gate acquires the privilege here so the
-# run does not discover its absence halfway through a bundle.
-printf 'Preflight gate: checking administrator rights — macOS may ask for your password.\n'
-if ! sudo -v; then
-  refuse "Administrator rights are not available (sudo -v failed)." \
-    "Run the bootstrap from an account with administrator rights."
 fi
 
 print_items() {
@@ -97,24 +98,15 @@ print_items() {
   done
 }
 
-if [ ${#refused[@]} -gt 0 ]; then
-  printf '\nPreflight gate: %d precondition(s) not met. Nothing has been written to %s.\n\n' \
-    "${#refused[@]}" "$HOME"
-  print_items "${refused[@]}"
-fi
-
 if [ ${#reported[@]} -gt 0 ]; then
   printf '\nPreflight gate: reported, not refused (CI):\n\n'
   print_items "${reported[@]}"
 fi
 
 if [ ${#refused[@]} -gt 0 ]; then
-  cat <<'RERUN'
-
-Fix the items above, then run the command again:
-
-  sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- -- --use-builtin-git=true init --apply robocopklaus/dotfiles
-
-RERUN
+  printf '\nPreflight gate: %d precondition(s) not met. Nothing has been written to %s.\n\n' \
+    "${#refused[@]}" "$HOME"
+  print_items "${refused[@]}"
+  printf '\nFix the items above, then run the command again.\n\n'
   exit 1
 fi
