@@ -54,6 +54,7 @@ cp "$machine/formulae" "$machine/leaves"
 printf '{"casks":[]}\n' >"$machine/cask-info.json"
 : >"$machine/chezmoi-status"
 : >"$machine/receipt-files"
+: >"$machine/defaults"
 
 cat >"$machine/bin/brew" <<EOF
 #!/bin/bash
@@ -82,6 +83,22 @@ cat >"$machine/bin/pkgutil" <<EOF
 cat "$machine/receipt-files"
 EOF
 
+# A machine's managed defaults, keyed by the scope and key drift names them with. A key
+# with no line here is one the machine was never given, which real \`defaults\` reports by
+# exiting non-zero rather than by answering emptily.
+cat >"$machine/bin/defaults" <<EOF
+#!/bin/bash
+if [ "\$1" = '-currentHost' ]; then
+  scope="\$3 -currentHost"
+  key=\$4
+else
+  scope=\$2
+  key=\$3
+fi
+awk -F'\t' -v scope="\$scope" -v key="\$key" \\
+  '\$1 == scope && \$2 == key { print \$3; found = 1 } END { exit !found }' "$machine/defaults"
+EOF
+
 # Apple signs its own applications with an authority no Developer ID application carries.
 cat >"$machine/bin/codesign" <<'EOF'
 #!/bin/bash
@@ -104,7 +121,23 @@ drift() {
   PATH="$machine/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash "$machine/drift" 2>&1
 }
 
-printf 'A converged machine\n'
+# The machine's defaults are taken from drift's own first report rather than parsed out
+# of the declaration a second time. Against an empty stub every declared key is unset, so
+# the report names each one with the value it expected; feeding those back is a converged
+# machine, by the same route the Brewfile stubs take. The alternative — reading the TOML
+# here — would re-implement how a declared value becomes the string `defaults` answers
+# with, and two implementations of that is the one thing a drift detector must not have.
+printf 'The managed defaults, on a machine that holds none of them\n'
+tab=$'\t'
+drift |
+  sed -n "s/^  Default \\(.*\\) \\([^ ]*\\): expected \\(.*\\), is unset\$/\\1${tab}\\2${tab}\\3/p" \
+    >"$machine/defaults"
+check "$(wc -l <"$machine/defaults" | tr -d ' ')" \
+  "$(grep -c '^\[\[macosDefaults\]\]' "$repo/home/.chezmoidata/macos-defaults.toml")" \
+  'reads every declared default and no other'
+cp "$machine/defaults" "$machine/defaults.declared"
+
+printf '\nA converged machine\n'
 report=$(drift)
 check "$?" 0 'exits 0'
 says "$report" '^No drift' 'says so'
@@ -184,6 +217,41 @@ report=$(drift)
 check "$?" 1 'exits 1'
 says "$report" '^Diverged value' 'prints the diverged section'
 says "$report" '.gitconfig' 'names the diverged file'
+
+printf '\nManaged defaults\n'
+: >"$machine/chezmoi-status"
+# The key bent is whichever the declaration carries first, read back out of the report
+# rather than named here — editing the declaration cannot quietly turn this into a no-op.
+scope=$(head -1 "$machine/defaults.declared" | cut -f1)
+key=$(head -1 "$machine/defaults.declared" | cut -f2)
+expected=$(head -1 "$machine/defaults.declared" | cut -f3)
+awk -F"$tab" -v OFS="$tab" 'NR == 1 { $3 = "bent" } { print }' \
+  "$machine/defaults.declared" >"$machine/defaults"
+report=$(drift)
+check "$?" 1 'exits 1'
+says "$report" '^Diverged value' 'prints the diverged section'
+says "$report" "Default $scope $key: expected $expected, is bent" 'names the key, what it expected and what it found'
+
+# A system setting the machine does not have is a wrong setting, not an absence: macOS
+# always supplies its own value, so an unset key is diverged rather than missing (§6.4).
+tail -n +2 "$machine/defaults.declared" >"$machine/defaults"
+report=$(drift)
+check "$?" 1 'exits 1'
+says "$report" "Default $scope $key: expected $expected, is unset" 'reports an unset key as diverged'
+missing_section=$(awk '/^Missing on the machine/ { held = 1; next } /^[^ ]/ { held = 0 } held' <<<"$report")
+silent "$missing_section" 'Default' 'does not report an unset key as missing'
+
+# The one entry carrying a host scope is declared under a domain and key another entry
+# also declares, so only the scope tells the two apart in the report.
+scoped_scope=$(grep -- "-currentHost$tab" "$machine/defaults.declared" | head -1 | cut -f1)
+scoped_key=$(grep -- "-currentHost$tab" "$machine/defaults.declared" | head -1 | cut -f2)
+grep -v -- "-currentHost$tab" "$machine/defaults.declared" >"$machine/defaults"
+report=$(drift)
+check "$?" 1 'exits 1'
+says "$report" "Default $scoped_scope $scoped_key" 'names the scoped entry by its scope'
+silent "$report" "Default ${scoped_scope% -currentHost} $scoped_key" 'says nothing about the unscoped entry of the same key'
+
+cp "$machine/defaults.declared" "$machine/defaults"
 
 printf '\nA machine that cannot answer\n'
 mv "$machine/bin/mas" "$machine/bin/mas.gone"
