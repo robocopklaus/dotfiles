@@ -1,0 +1,63 @@
+#!/bin/bash
+# Phase: P6 — system configuration: the managed macOS defaults, from the declaration
+# Requires: P4 (the applications whose domains these are), a non-root user
+
+set -euo pipefail
+
+# The declaration and the three things any consumer of it needs, included at render time
+# (§4, ADR 0005). The table is *in* this rendered script, so editing it re-triggers this
+# phase by construction — the same binding 40 gets from inlining the Brewfile.
+{{ template "lib/macos-defaults.sh" . }}
+
+# They are applied unconditionally: there is no flag to forget, and no
+# `CHEZMOI_APPLY_MACOS_DEFAULTS` to leave off. A gate that defaults to off means a
+# rebuilt machine comes up unconfigured, which is the rediscover-by-irritation loop the
+# repository exists to end (§6.4). What the flag actually guarded — a routine apply
+# yanking the Dock and killing Finder mid-workday — is solved below instead.
+printf 'P6: applying the managed macOS defaults.\n'
+
+# Only the keys that disagree are written, and the domains they belong to are collected.
+# A converged machine writes nothing, so it also restarts nothing.
+changed_domains=''
+while IFS=$'\t' read -r domain key type value scope; do
+  [ -n "$domain" ] || continue
+
+  expected=$(managed_default_expected "$type" "$value")
+  if [ "$(managed_default_current "$scope" "$domain" "$key")" = "$expected" ]; then
+    continue
+  fi
+
+  printf 'P6: %s %s → %s\n' "$(managed_default_label "$scope" "$domain")" "$key" "$expected"
+  managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$expected"
+  changed_domains+="$domain"$'\n'
+done <<<"$managed_defaults"
+
+# An application is restarted only when a key in **its own** domain changed (§6.4). That
+# is what makes a mid-workday apply a no-op in practice, and it is the data declaration
+# above that makes the condition trivial to compute — a script could not answer it.
+#
+# SystemUIServer is restarted nowhere, here or anywhere else: every key it owned was
+# among the seven cut, so no managed domain is left for it to be restarted for.
+# NSGlobalDomain, the two trackpad domains and `com.apple.screencapture` name no process
+# to restart either — the trackpad keys are read by the window server at login, and that
+# lag is accepted knowingly (§6.4).
+restart_if_changed() {
+  local domain=$1 app=$2
+  # A here-string, not a pipe: `grep -q` exits at the first match, and with `pipefail` a
+  # producer killed by the closed pipe would turn a successful match into a failure.
+  if ! grep -qxF -- "$domain" <<<"$changed_domains"; then
+    return 0
+  fi
+  printf 'P6: restarting %s, whose domain changed.\n' "$app"
+  # macOS brings both back immediately, and neither is worth failing the phase over.
+  killall "$app" >/dev/null 2>&1 || true
+}
+
+restart_if_changed com.apple.dock Dock
+restart_if_changed com.apple.finder Finder
+
+# The Dock's restart moves out of this script when 61 arrives (ADR 0009): the layout step
+# reports its change into this same rule, and one `killall Dock` at the end of the run
+# covers both managers of the domain. The mechanism for that is not built here, because
+# its second call site does not exist yet (rule 5) — 61 is where the line above moves to,
+# and naming it here is what keeps that from being rediscovered as a double restart.

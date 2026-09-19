@@ -21,6 +21,12 @@ BREWFILE
 # shell, which already has brew on PATH, and from the tail of a bootstrap, which does not.
 {{ template "lib/homebrew.sh" . }}
 
+# The managed defaults of §6.4, from the declaration P6 applies — the same table, read
+# here rather than copied (ADR 0002). A second list of expected values beside the script
+# that writes them would guarantee drift, which is an unusually poor property for a drift
+# detector.
+{{ template "lib/macos-defaults.sh" . }}
+
 missing=()
 unmanaged=()
 diverged=()
@@ -261,6 +267,26 @@ else
     diverged+=("${line:0:2}  ${line:3}")
   done <<<"$answer"
 fi
+
+# Managed defaults, which chezmoi cannot see at all: it tracks the applying script's
+# content hash, not its effect, so a key changed in System Settings leaves `chezmoi
+# status` clean (ADR 0002). Only the keys the repository declares are read — never
+# `defaults read` over a whole domain (§7). A Mac holds thousands of defaults and about
+# two dozen are decisions; enumerating the declaration bounds the comparison set to a
+# number that was chosen rather than discovered.
+while IFS=$'\t' read -r domain key type value scope; do
+  [ -n "$domain" ] || continue
+
+  expected=$(managed_default_expected "$type" "$value")
+  current=$(managed_default_current "$scope" "$domain" "$key")
+  if [ "$current" = "$expected" ]; then
+    continue
+  fi
+
+  # A system setting you do not have is a *wrong* setting rather than an absence, because
+  # macOS always supplies its own value — so an unset key is diverged, not missing (§6.4).
+  diverged+=("Default $(managed_default_label "$scope" "$domain") $key: expected $expected, is ${current:-unset}")
+done <<<"$managed_defaults"
 
 # Two things are deliberately not swept, and their absence is written down so it is not
 # read as an oversight and repaired (§7): `mise` runtimes, which `mise ls` already diffs

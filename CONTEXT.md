@@ -208,7 +208,8 @@ output has two parts:
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
     ├── .chezmoitemplates/lib/               shared shell, included at render time
     │   ├── homebrew.sh                      the prefix cascade
-    │   └── keepalive.sh                     the sudo keepalive, shared by 40 and 41
+    │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41
+    │   └── macos-defaults.sh                the declaration, shared by 60 and drift
     ├── .chezmoiscripts/
     │   ├── run_before_20-gate.sh.tmpl                   P2
     │   ├── run_onchange_after_40-homebrew.sh.tmpl       P4  formulae + casks

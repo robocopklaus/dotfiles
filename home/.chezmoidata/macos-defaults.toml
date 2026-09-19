@@ -1,0 +1,169 @@
+# The managed macOS defaults (§6.4).
+#
+# Data, not a script. chezmoi hashes a script's *content* and not its *effect*, so a
+# default changed in System Settings afterwards is invisible to every check this
+# repository has — unless the expected value is declared as something readable. Both the
+# P6 script and `drift` derive from this one table, and nowhere else (ADR 0002).
+#
+# Every entry is flat: domain, key, type, value. There is no nested-dictionary escape
+# hatch, and the one key that would have needed one was cut for exactly that reason
+# (§6.4). Flatness is what keeps this a table and the drift check derivable from it.
+#
+# The bar for an entry: you would re-set it by hand on a fresh machine, and its absence
+# would annoy you within the first hour. This list is also the only lever on the drift
+# report's size, since the report enumerates these declarations rather than the machine.
+#
+# `${HOME}` is the one token a value may carry. It is expanded where the value is used,
+# so the string the machine is given and the string `drift` compares against are produced
+# by the same line.
+
+# The Dock. `magnification`, `largesize`, `autohide-delay` and `autohide-time-modifier`
+# were cut (§6.4): the first two are cosmetic, the last two dead once autohide is off.
+# `autohide` is declared `false` because that is what the live machine held — the prior
+# declaration was the stale half, not the machine.
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "tilesize"
+type = "int"
+value = "36"
+
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "show-recents"
+type = "bool"
+value = "false"
+
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "autohide"
+type = "bool"
+value = "false"
+
+# Finder. `ShowExternalHardDrivesOnDesktop` and `ShowRecentTags` were cut as keys whose
+# absence was never consciously noticed, and
+# `DesktopViewSettings:IconViewSettings:arrangeBy` because it is a path into a nested
+# dictionary this table cannot express — the load-bearing cut (§6.4).
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "_FXSortFoldersFirst"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "NewWindowTarget"
+type = "string"
+value = "PfHm"
+
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "NewWindowTargetPath"
+type = "string"
+value = "file://${HOME}/"
+
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "FXDefaultSearchScope"
+type = "string"
+value = "SCcf"
+
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "ShowPathbar"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "ShowStatusBar"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.finder"
+key = "FXPreferredViewStyle"
+type = "string"
+value = "clmv"
+
+# Tap to click, which lives in two places: the global domain, and the same key scoped to
+# this machine. `currentHost` is the only scope any entry carries, and it is a flag on
+# the entry rather than a second shape for it.
+[[macosDefaults]]
+domain = "NSGlobalDomain"
+key = "com.apple.mouse.tapBehavior"
+type = "int"
+value = "1"
+
+[[macosDefaults]]
+domain = "NSGlobalDomain"
+key = "com.apple.mouse.tapBehavior"
+type = "int"
+value = "1"
+currentHost = true
+
+# The trackpad, declared once for the built-in device and once for a Bluetooth one. Some
+# of these are read by the window server at login, so on a running machine the change may
+# lag until the next one; on a fresh bootstrap that is free (§6.4).
+[[macosDefaults]]
+domain = "com.apple.AppleMultitouchTrackpad"
+key = "Clicking"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.AppleMultitouchTrackpad"
+key = "Dragging"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.AppleMultitouchTrackpad"
+key = "TrackpadThreeFingerDrag"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.driver.AppleBluetoothMultitouch.trackpad"
+key = "Clicking"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.driver.AppleBluetoothMultitouch.trackpad"
+key = "Dragging"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.driver.AppleBluetoothMultitouch.trackpad"
+key = "TrackpadThreeFingerDrag"
+type = "bool"
+value = "true"
+
+# The keyboard. Press-and-hold off is what makes key repeat reachable at all.
+[[macosDefaults]]
+domain = "NSGlobalDomain"
+key = "KeyRepeat"
+type = "int"
+value = "2"
+
+[[macosDefaults]]
+domain = "NSGlobalDomain"
+key = "InitialKeyRepeat"
+type = "int"
+value = "15"
+
+[[macosDefaults]]
+domain = "NSGlobalDomain"
+key = "ApplePressAndHoldEnabled"
+type = "bool"
+value = "false"
+
+# Screenshots. §6.4 writes this path as `~/Downloads`; it is spelled with the expansion
+# token here because `defaults` stores the string it is handed verbatim, so a literal
+# tilde would send screenshots to a directory of that name.
+[[macosDefaults]]
+domain = "com.apple.screencapture"
+key = "location"
+type = "string"
+value = "${HOME}/Downloads"
