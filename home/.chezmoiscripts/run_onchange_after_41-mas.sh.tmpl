@@ -17,16 +17,11 @@ brewfile=$(
 BREWFILE
 )
 
-# Its own keepalive, for the same reason 40 has one: each chezmoi script is a separate
-# process, so the privilege the gate acquired cannot be adopted here (§3).
-sudo -v
-while true; do
-  sudo -n true
-  sleep 60
-  kill -0 "$$" 2>/dev/null || exit
-done &
-keepalive=$!
-trap 'kill "$keepalive" 2>/dev/null || true' EXIT
+# The keepalive, shared with 40 (ADR 0005). `mas install` is not prefixed with `sudo`
+# below and must not be: the App Store session belongs to the logged-in user, and mas
+# run as root would look for root's. The privilege is held warm rather than invoked —
+# the installs themselves reach for it, which is why root is this script's precondition.
+{{ template "lib/keepalive.sh" . }}
 
 # `mas` is a formula, so it is on PATH only through Homebrew's (ADR 0005).
 {{ template "lib/homebrew.sh" . }}
@@ -34,7 +29,11 @@ trap 'kill "$keepalive" 2>/dev/null || true' EXIT
 # Everything already installed from the App Store, by id — including copies installed by
 # hand before the run. Skipping those keeps a re-run quiet and avoids re-downloading
 # gigabytes to arrive where the machine already is.
-installed=$(mas list | awk '{print $1}')
+#
+# Tolerant of its own failure, because the likeliest cause is the one this whole script
+# degrades around: no Apple ID. An empty list means nothing is skipped and every entry is
+# attempted, which is the right answer when the machine cannot say what it already has.
+installed=$(mas list 2>/dev/null | awk '{print $1}') || installed=''
 
 # Reads the entry shape §6.1 fixes — `mas "Name", id: 123` — and yields `id name`. The
 # App Store population is closed by construction: an entry reaches this loop only through
