@@ -839,6 +839,14 @@ repository: the one command whose entire value is being run on a whim must not r
 `cd ~/.local/share/chezmoi` first. The name avoids `doctor`, which `chezmoi doctor`
 already uses for an unrelated question.
 
+**The bare name is knowingly taken.** Nothing in Homebrew ships a `drift` today — the
+neighbours are `driftctl` and `driftwood`, each under its own full name — so the clash is
+hypothetical. The direction that would bite is the other one: `~/.local/bin` comes first
+on `PATH` (§6.3), so a `drift` arriving from upstream later would be shadowed by this one
+silently, and the first symptom would be a tool that appears installed and does the wrong
+thing. Named here so the annual review can answer it in one line rather than rediscover
+it: if that ever happens, this command is the one that renames.
+
 **Three sections; empty ones are omitted:**
 
 | Section | Meaning | Action |
