@@ -1,5 +1,8 @@
 # Load selected Oh My Zsh plugins without loading the full framework.
+# command-not-found needs the homebrew/command-not-found tap, which the
+# Brewfile declares.
 ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+ohmyzsh/ohmyzsh path:plugins/command-not-found
 
 # Completion initialization and extra completion definitions.
 mattmc3/ez-compinit

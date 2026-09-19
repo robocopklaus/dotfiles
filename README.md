@@ -309,6 +309,11 @@ Trailing rather than preceding is deliberate: `brew bundle dump` emits a *preced
 full-line comment carrying the upstream package description, a machine convention that
 means something else.
 
+**One `tap` line comes first.** `homebrew/command-not-found` is not an application but
+the data behind one: the zsh plugin of §6.3 is inert without it, and on macOS it fails
+silently rather than loudly. It carries a role comment like every other entry. It is the
+only tap — Homebrew's own defaults cover the rest of this inventory.
+
 **Structure: the `brew` / `cask` / `mas` split, and nothing else.** No thematic headers.
 The type split survives because the bootstrap already partitions on it; "Daily tools"
 earns nothing, and once every line states its own reason a header is a second and coarser
