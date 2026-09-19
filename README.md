@@ -341,7 +341,7 @@ App Store"; it asks only whether a cask has appeared since. Where both exist, Ho
 wins — the reason that matters here is that every App Store entry widens the Apple ID gap,
 which is the one precondition the gate cannot verify and CI must degrade under.
 
-#### Base — CLI (15)
+#### Base — CLI (14)
 
 | Entry | Role |
 | --- | --- |
@@ -357,11 +357,10 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `oh-my-posh` | Prompt, rendered by every shell |
 | `zoxide` | `z` — directory jumping |
 | `cloudflare-cli4` | Personal infrastructure |
-| `gogcli` | GOG library management |
-| `nmap` | Network inspection |
+| `gogcli` | Google Suite CLI — Gmail, Calendar, Drive, Docs, Sheets |
 | `homeassistant-cli` | Home automation |
 
-#### Base — applications (19 casks, 4 App Store)
+#### Base — applications (17 casks, 4 App Store)
 
 | Entry | Role |
 | --- | --- |
@@ -380,9 +379,7 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | `whatsapp` | Messaging |
 | `codex` | Coding agent |
 | `docker-desktop` | Containers |
-| `telegram-desktop` | Messaging |
 | `finicky` | Routes URLs between browsers; background app, so no launch record by design |
-| `google-drive` | Background sync; no launch record by design |
 | `font-meslo-lg-nerd-font` | Bootstrap dependency: the glyphs `oh-my-posh` renders |
 | Pages — `361309726` | Documents; no Homebrew cask exists |
 | Numbers — `361304891` | Spreadsheets; no Homebrew cask exists |
@@ -497,10 +494,10 @@ nothing. Only the recorded reason differs.**
 
 - **Account-restored** — Raycast, Slack, Chrome (including its extensions — Chrome sync
   installs them, which is why signing into Chrome is not a P0 item), ChatGPT, Mimestream,
-  Clockify, Telegram, WhatsApp, 1Password, Google Drive, GCal, Docker Desktop, and the
-  editor's whole surface — VS Code's Settings Sync carries its `settings.json`, extensions
-  and keybindings together, so splitting the file out to manage it here would be the one
-  entry whose two copies could disagree.
+  Clockify, WhatsApp, 1Password, GCal, Docker Desktop, and the editor's whole surface —
+  VS Code's Settings Sync carries its `settings.json`, extensions and keybindings
+  together, so splitting the file out to manage it here would be the one entry whose two
+  copies could disagree.
 - **Out of scope** — **Obsidian.** All four vaults live under `~/Development/`, inside the
   data-restore zone this effort excludes; per-vault `.obsidian/` is versioned with each
   vault's own repository, and `obsidian.json` is a machine-written registry of absolute
@@ -513,7 +510,7 @@ nothing. Only the recorded reason differs.**
   them. Their *paths* appear in the closing report's static tail; their values never leave
   1Password.
 - **No user-facing configuration at all** — `chezmoi`, `gh`, `jq`, `mas`, `dockutil`,
-  `uv`, `zoxide`, `gogcli`, `nmap`, `cloudflare-cli4`, `homeassistant-cli`,
+  `uv`, `zoxide`, `gogcli`, `cloudflare-cli4`, `homeassistant-cli`,
   `1password-cli`, `font-meslo-lg-nerd-font`, Pages, Numbers, 1Password for Safari. Named
   so the omission is a stated choice. The work group manages no configuration today
   either: those tools keep machine-written auth caches, which fail clause 2.

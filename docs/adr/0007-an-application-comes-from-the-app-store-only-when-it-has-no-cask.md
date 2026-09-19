@@ -4,7 +4,7 @@ Two clauses decide where a managed application comes from, applied in order. Fir
 
 The prior setup had no rule, only six App Store entries that had accumulated because that is where they were first found. The question the January review actually asks is not "is this app still used" — the content review answers that — but "why is this one installed differently from the others", and an inventory without a sourcing rule has no answer.
 
-The second clause costs nothing to apply because it is a fact, not a judgement: `brew search --cask` either finds the application or it does not. Measured against the base inventory, it leaves the App Store population at exactly four — Pages, Numbers, GCal for Google Calendar and 1Password for Safari — none of which has a cask, and no fifth entry is reachable by any future judgement call. Four applications in the base are genuinely available from both sources and all four are already taken from Homebrew: Slack, WhatsApp, Telegram and Clockify.
+The second clause costs nothing to apply because it is a fact, not a judgement: `brew search --cask` either finds the application or it does not. Measured against the base inventory, it leaves the App Store population at exactly four — Pages, Numbers, GCal for Google Calendar and 1Password for Safari — none of which has a cask, and no fifth entry is reachable by any future judgement call. Three applications in the base are genuinely available from both sources and all three are already taken from Homebrew: Slack, WhatsApp and Clockify.
 
 Three reasons stack behind preferring Homebrew where both exist, and the third is the one that matters here:
 

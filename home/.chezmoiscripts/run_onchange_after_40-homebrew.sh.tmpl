@@ -1,0 +1,76 @@
+#!/bin/bash
+# Phase: P4 — packages: Homebrew, the tap, formulae and casks
+# Requires: P3, Xcode Command Line Tools, administrator rights
+
+set -euo pipefail
+
+# The Brewfile (§6.1) is inlined here at render time rather than read from disk at
+# runtime, because `run_onchange_` hashes this rendered script: the inventory being *in*
+# the script is what makes any edit to it re-trigger the phase by construction. No
+# `sha256` comment, no `$CHEZMOI_SOURCE_DIR` lookup (§4).
+brewfile=$(
+  cat <<'BREWFILE'
+{{ include "../Brewfile" }}
+BREWFILE
+)
+
+# P4 starts its own sudo keepalive. The gate already proved the privilege is available,
+# but each chezmoi script is a separate process, so a keepalive from P2 cannot be adopted
+# here — and cask installers prompt at unpredictable points during a run (§3).
+sudo -v
+while true; do
+  sudo -n true
+  sleep 60
+  kill -0 "$$" 2>/dev/null || exit
+done &
+keepalive=$!
+trap 'kill "$keepalive" 2>/dev/null || true' EXIT
+
+# The prefix cascade, included at render time so it is written once and linted at every
+# call site (ADR 0005). A no-op before Homebrew exists.
+{{ template "lib/homebrew.sh" . }}
+if ! command -v brew >/dev/null 2>&1; then
+  printf 'P4: installing Homebrew.\n'
+  # Fetched into a variable first, so a failed download aborts here. Piped straight into
+  # bash it would be invisible: the substitution yields an empty script that exits 0.
+  installer=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+  NONINTERACTIVE=1 /bin/bash -c "$installer"
+  # The installer's own prefix on Apple Silicon, which is the only architecture the gate
+  # admits — not a second cascade.
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Both filters below read the entry shape §6.1 fixes: a type keyword at column zero, then
+# a double-quoted name. Homebrew offers no filter of its own, and the CI reason-comment
+# check reads the same shape.
+#
+# Homebrew itself and the formulae abort the run, because later phases depend on them:
+# P5 needs `mise`, P6 needs `dockutil` (§3). `set -e` makes both fatal.
+printf 'P4: installing the tap and the formulae.\n'
+printf '%s\n' "$brewfile" | grep -E '^(tap|brew) ' | brew bundle --file=-
+
+# Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
+# fresh bootstrap, and the failures are collected for the closing report (§3). `--adopt`
+# takes over the 1Password and `op` installed by hand before the run (§2) rather than
+# colliding with them.
+failed=()
+while IFS= read -r cask; do
+  # Already Homebrew's: nothing to install and nothing to adopt. Skipping keeps a re-run
+  # quiet, so what the run does print is what it actually did.
+  if brew list --cask "$cask" >/dev/null 2>&1; then
+    continue
+  fi
+  printf 'P4: installing cask %s.\n' "$cask"
+  if ! brew install --cask --adopt "$cask"; then
+    failed+=("$cask")
+  fi
+done < <(printf '%s\n' "$brewfile" | sed -n 's/^cask "\([^"]*\)".*/\1/p')
+
+# The `mas` lines are deliberately not installed here. They need an Apple ID, which is a
+# precondition of their own, so they are 41-mas (§4).
+
+if [ ${#failed[@]} -gt 0 ]; then
+  printf '\nP4: %d cask(s) did not install:\n\n' "${#failed[@]}"
+  printf '  ✗ %s\n' "${failed[@]}"
+  printf '\nRe-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
+fi

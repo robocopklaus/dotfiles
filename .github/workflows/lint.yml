@@ -38,6 +38,15 @@ jobs:
       - name: Shellcheck rendered scripts
         run: shellcheck "$RUNNER_TEMP"/rendered/*.sh
 
+      # Presence only — what the reason says is never judged, because a check that
+      # graded it would be satisfied by "# tool" and would have to be argued with. §6.1
+      - name: Brewfile reason comments
+        run: |
+          if grep -vE '^[[:space:]]*(#|$)' Brewfile | grep -vE '#[[:space:]]*[^[:space:]]'; then
+            echo 'The entries above carry no reason comment (§6.1).'
+            exit 1
+          fi
+
       # Presence only — the prose is never read. §4
       - name: Script headers
         run: |
