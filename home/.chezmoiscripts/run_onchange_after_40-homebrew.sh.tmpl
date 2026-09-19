@@ -16,15 +16,9 @@ BREWFILE
 
 # P4 starts its own sudo keepalive. The gate already proved the privilege is available,
 # but each chezmoi script is a separate process, so a keepalive from P2 cannot be adopted
-# here — and cask installers prompt at unpredictable points during a run (§3).
-sudo -v
-while true; do
-  sudo -n true
-  sleep 60
-  kill -0 "$$" 2>/dev/null || exit
-done &
-keepalive=$!
-trap 'kill "$keepalive" 2>/dev/null || true' EXIT
+# here — and cask installers prompt at unpredictable points during a run (§3). Shared
+# with 41, which needs the same privilege for the same reason (ADR 0005).
+{{ template "lib/keepalive.sh" . }}
 
 # The prefix cascade, included at render time so it is written once and linted at every
 # call site (ADR 0005). A no-op before Homebrew exists.

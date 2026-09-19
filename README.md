@@ -199,7 +199,9 @@ output has two parts:
 └── home/                                   ← the entire chezmoi source
     ├── .chezmoidata/macos-defaults.toml    the defaults declaration (§6.4)
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
-    ├── .chezmoitemplates/lib/homebrew.sh   shared shell, included at render time
+    ├── .chezmoitemplates/lib/               shared shell, included at render time
+    │   ├── homebrew.sh                      the prefix cascade
+    │   └── keepalive.sh                     the sudo keepalive, shared by 40 and 41
     ├── .chezmoiscripts/
     │   ├── run_before_20-gate.sh.tmpl                   P2
     │   ├── run_onchange_after_40-homebrew.sh.tmpl       P4  formulae + casks

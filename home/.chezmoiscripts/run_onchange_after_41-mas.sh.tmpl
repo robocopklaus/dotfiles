@@ -1,0 +1,59 @@
+#!/bin/bash
+# Phase: P4 — packages: the App Store entries
+# Requires: P4 (40-homebrew, for mas), root, an Apple ID signed in to the App Store
+
+set -euo pipefail
+
+# Separate from 40 because the precondition is: `mas install` needs root, and it installs
+# nothing unless the Apple ID is already signed in — the one P0 item the gate cannot
+# verify (ADR 0007). A precondition of its own is a script of its own (§4).
+#
+# The Brewfile (§6.1) is inlined here at render time for the reason 40 states: the
+# inventory being *in* the rendered script is what makes `run_onchange_` re-trigger on any
+# edit to it, with no `sha256` comment and no runtime lookup.
+brewfile=$(
+  cat <<'BREWFILE'
+{{ include "../Brewfile" }}
+BREWFILE
+)
+
+# The keepalive, shared with 40 (ADR 0005). `mas install` is not prefixed with `sudo`
+# below and must not be: the App Store session belongs to the logged-in user, and mas
+# run as root would look for root's. The privilege is held warm rather than invoked —
+# the installs themselves reach for it, which is why root is this script's precondition.
+{{ template "lib/keepalive.sh" . }}
+
+# `mas` is a formula, so it is on PATH only through Homebrew's (ADR 0005).
+{{ template "lib/homebrew.sh" . }}
+
+# Everything already installed from the App Store, by id — including copies installed by
+# hand before the run. Skipping those keeps a re-run quiet and avoids re-downloading
+# gigabytes to arrive where the machine already is.
+#
+# Tolerant of its own failure, because the likeliest cause is the one this whole script
+# degrades around: no Apple ID. An empty list means nothing is skipped and every entry is
+# attempted, which is the right answer when the machine cannot say what it already has.
+installed=$(mas list 2>/dev/null | awk '{print $1}') || installed=''
+
+# Reads the entry shape §6.1 fixes — `mas "Name", id: 123` — and yields `id name`. The
+# App Store population is closed by construction: an entry reaches this loop only through
+# the Brewfile, where `brew search --cask` has already shown no cask exists (ADR 0007).
+#
+# Entries degrade instead of aborting, and are installed one at a time so a single failure
+# — most often no Apple ID signed in — cannot take the other three with it (§3).
+failed=()
+while read -r id name; do
+  if printf '%s\n' "$installed" | grep -qx "$id"; then
+    continue
+  fi
+  printf 'P4: installing App Store entry %s (%s).\n' "$name" "$id"
+  if ! mas install "$id"; then
+    failed+=("$name ($id)")
+  fi
+done < <(printf '%s\n' "$brewfile" | sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p')
+
+if [ ${#failed[@]} -gt 0 ]; then
+  printf '\nP4: %d App Store entry(s) did not install:\n\n' "${#failed[@]}"
+  printf '  ✗ %s\n' "${failed[@]}"
+  printf '\nSign in to the App Store, then re-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
+fi
