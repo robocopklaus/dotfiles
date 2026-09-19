@@ -14,13 +14,15 @@ An entry belongs in the **cheapest mechanism that can hold it**, measured in wha
 
 This repository therefore declares only what neither of the first two can hold. On the agent-tooling surface that set is currently empty.
 
+The second row carries an unstated precondition: a project's `.claude/settings.json` travels with the clone only where the project is a clone. `~/Development/21st-brain` is not — it is an empty directory holding nothing but `.claude/`, created as a scope anchor and backed by no remote. Nothing pinned to it survives a wipe. This does not change the decision, because the entry pinned there is carried by the first row instead, but it is why the row is a claim about repositories and not about directories.
+
 Scope follows the domain, not the habit: tooling that applies regardless of what is being worked on is enabled on the account; tooling that only makes sense inside one domain is installed `--scope project`, which writes to that project's checked-in `.claude/settings.json` and travels with the clone. `mattpocock-skills` is domain-independent and belongs to the account. The Cloudflare set and the Obsidian plugin are domain-specific and belong to the projects that use them.
 
 Claude Code is the only agent this repository provisions. `~/.cursor/skills/` is Cursor's surface and is not managed.
 
 ## Considered options
 
-**Declaring plugins in the managed `~/.claude/settings.json` and installing them in P7.** Rejected once the account was confirmed to carry third-party marketplace plugins, not merely Anthropic's own. The declaration would be a second list beside the account's, kept in step by hand, and it would buy a phase-7 script whose entire job is to reproduce a state the login already reproduces. It also does not work on its own terms: there is no documented restore-from-declaration flow, so the script would have to walk `enabledPlugins` and shell out to `claude plugin install` per entry — bootstrap code written to compensate for a mechanism that was already free.
+**Declaring plugins in the managed `~/.claude/settings.json` and installing them in P7.** Rejected once the account was measured to carry third-party marketplace plugins, not merely Anthropic's own — private repositories included. The declaration would be a second list beside the account's, kept in step by hand, and it would buy a phase-7 script whose entire job is to reproduce a state the login already reproduces. It also does not work on its own terms: there is no documented restore-from-declaration flow, so the script would have to walk `enabledPlugins` and shell out to `claude plugin install` per entry — bootstrap code written to compensate for a mechanism that was already free.
 
 **Declaring the skills as managed files, the way configuration is managed.** Rejected by the criterion in ADR 0006: a skill is an *installed artifact*, not hand-authored configuration. Committing 14 vendored copies of somebody else's repository would freeze them at the commit they were copied, and the whole point of the account path is that it updates.
 
@@ -42,4 +44,8 @@ Five of the eight plugin installs on the live machine are project-scoped, pinned
 
 The Obsidian plugin is installed twice on the live machine — user-scoped *and* project-scoped across four vaults. That duplication is the measured evidence that an unstated scope rule produces drift on its own, and it is what the domain criterion above exists to prevent.
 
-One marketplace, `skills-leadership`, is a private repository reached over SSH. Whether the account can carry a private marketplace is untested, and it is the single candidate for a named exception: if it cannot sync, it is declared locally and rendered from the work identity under ADR 0003, guarded on `op`, never open in the public tree.
+The one candidate exception is closed, and there is no exception. `skills-leadership` is a private repository, and the account carries it: registered from claude.ai as `21stdigital/skills-leadership`, it reached `~/.claude/plugins/synced/` in about thirteen minutes and loads as `leadership-toolkit@synced`. The ticket's premise — that nothing obvious would hold the credentials — had an answer the local setup obscured. The local declaration reaches the repository over SSH; claude.ai reaches it over its own GitHub authorization, and records the source as `github` rather than the SSH URL. The credential was never the marketplace's property, only the client's.
+
+That fixes the boundary of this decision more precisely than "private or public": the account path is a **GitHub** path. A marketplace on a private host that is not GitHub has no demonstrated route onto the account, and would be the next candidate for a named exception. There is none today.
+
+So this repository declares nothing on the agent-tooling surface, without qualification, and `extraKnownMarketplaces` leaves the managed `settings.json` with no entry held back.
