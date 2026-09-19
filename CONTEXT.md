@@ -198,7 +198,7 @@ output has two parts:
 ├── Brewfile                                the inventory (§6.1)
 ├── Brewfile.work                           the work group (§6.1)
 ├── CLAUDE.md
-├── README.md                               ← this specification
+├── CONTEXT.md                              ← this specification
 ├── docs/adr/   docs/agents/
 ├── tests/
 │   ├── drift.sh                            drift's own logic, stubbed (§7)
