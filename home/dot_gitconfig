@@ -1,0 +1,44 @@
+[core]
+	editor = cursor --wait
+	excludesfile = ~/.gitignore
+
+[alias]
+	l = log --pretty=oneline -n 20 --graph --abbrev-commit
+	s = status -s
+
+[diff]
+	renames = copies
+	tool = cursor
+
+[difftool "cursor"]
+	cmd = cursor --wait --diff "$LOCAL" "$REMOTE"
+
+[merge]
+	tool = cursor
+
+[mergetool "cursor"]
+	cmd = cursor --wait "$MERGED"
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
+
+[user]
+	name = Fabian Pahl
+	email = 7754932+robocopklaus@users.noreply.github.com
+	signingkey = ~/.ssh/id_personal.pub
+
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+	allowedSignersFile = ~/.config/git/allowed_signers
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgSign = true

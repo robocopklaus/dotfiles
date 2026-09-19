@@ -1,0 +1,100 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 4,
+  "final_space": true,
+  "terminal_background": "#1d1f21",
+  "palette": {
+    "black": "#1d1f21",
+    "blue": "#4f8cff",
+    "cyan": "#56b6c2",
+    "green": "#98c379",
+    "orange": "#d19a66",
+    "red": "#e06c75",
+    "white": "#dcdfe4",
+    "yellow": "#e5c07b"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "os",
+          "style": "diamond",
+          "foreground": "p:black",
+          "background": "p:white",
+          "leading_diamond": "\ue0b6",
+          "trailing_diamond": "\ue0b4",
+          "template": "{{.Icon}}"
+        },
+        {
+          "type": "path",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:blue",
+          "trailing_diamond": "\ue0b4",
+          "template": " {{ .Path }} ",
+          "properties": {
+            "home_icon": "\uf015",
+            "mapped_locations": {
+              "~/Development": "\uf121",
+              "~/Downloads": "\uf0ed"
+            },
+            "style": "full"
+          }
+        },
+        {
+          "type": "git",
+          "style": "diamond",
+          "foreground": "p:black",
+          "background": "p:green",
+          "trailing_diamond": "\ue0b4",
+          "template": " {{ .HEAD }}{{ if .UpstreamIcon }} {{ .UpstreamIcon }}{{ end }}{{ if .Working.Changed }} \uf044{{ .Working.String }}{{ end }}{{ if .Staging.Changed }} \uf046{{ .Staging.String }}{{ end }} ",
+          "background_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}p:yellow{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}p:orange{{ end }}",
+            "{{ if gt .Behind 0 }}p:red{{ end }}"
+          ],
+          "properties": {
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "rprompt",
+      "alignment": "right",
+      "segments": [
+        {
+          "type": "executiontime",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:black",
+          "leading_diamond": "\ue0b6",
+          "trailing_diamond": "\ue0b4",
+          "template": " \uf252 {{ .FormattedMs }} ",
+          "properties": {
+            "style": "round",
+            "threshold": 500
+          }
+        },
+        {
+          "type": "status",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:green",
+          "leading_diamond": "\ue0b6",
+          "trailing_diamond": "\ue0b4",
+          "template": " {{ if eq .Code 0 }}\uf00c{{ else }}\uf071 {{ .Code }}{{ end }} ",
+          "background_templates": [
+            "{{ if gt .Code 0 }}p:red{{ end }}"
+          ],
+          "properties": {
+            "always_enabled": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false,
+  "statusLine": {
+    "type": "command",
+    "command": "mise exec -- pnpm dlx ccstatusline@latest",
+    "padding": 0,
+    "refreshInterval": 10
+  },
+  "theme": "auto",
+  "tui": "fullscreen",
+  "effortLevel": "medium",
+  "autoMemoryEnabled": false,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true,
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true
+}
