@@ -16,8 +16,38 @@ jobs:
       - name: Install chezmoi
         run: sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$RUNNER_TEMP/bin"
 
+      - name: Install shellcheck
+        run: command -v shellcheck >/dev/null || brew install shellcheck
+
       - name: Dry-run apply
         run: >
           "$RUNNER_TEMP/bin/chezmoi" apply --dry-run --verbose
           --source .
           --destination "$RUNNER_TEMP/home"
+
+      # Sources are .tmpl, so the tier renders them first: a template that fails to
+      # render is caught a step earlier than one that renders to broken shell. §8
+      - name: Render scripts
+        run: |
+          mkdir -p "$RUNNER_TEMP/rendered"
+          for template in home/.chezmoiscripts/*.tmpl; do
+            rendered="$RUNNER_TEMP/rendered/$(basename "$template" .tmpl)"
+            "$RUNNER_TEMP/bin/chezmoi" execute-template --source . < "$template" > "$rendered"
+          done
+
+      - name: Shellcheck rendered scripts
+        run: shellcheck "$RUNNER_TEMP"/rendered/*.sh
+
+      # Presence only — the prose is never read. §4
+      - name: Script headers
+        run: |
+          status=0
+          for rendered in "$RUNNER_TEMP"/rendered/*.sh; do
+            for field in '# Phase:' '# Requires:'; do
+              if ! grep -q "^$field" "$rendered"; then
+                echo "$(basename "$rendered"): missing '$field' header field"
+                status=1
+              fi
+            done
+          done
+          exit "$status"

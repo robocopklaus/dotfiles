@@ -58,7 +58,7 @@ pass, before a single file is written.
 
 | # | Step | What the gate checks |
 | --- | --- | --- |
-| 1 | macOS installed, Apple ID signed in in System Settings | macOS >= 26, Apple Silicon |
+| 1 | macOS installed, Apple ID signed in in System Settings | macOS >= 26, Apple Silicon, an Apple ID signed in |
 | 2 | Network | `github.com` reachable |
 | 3 | Xcode Command Line Tools — `xcode-select --install` | `xcode-select -p` |
 | 4 | 1Password and the 1Password CLI installed by hand | app present, `op` on `PATH` |
