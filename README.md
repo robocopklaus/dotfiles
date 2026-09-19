@@ -173,6 +173,7 @@ output has two parts:
 ├── .chezmoiroot                            → "home"
 ├── .github/workflows/                      lint.yml, e2e.yml
 ├── Brewfile                                the inventory (§6.1)
+├── Brewfile.work                           the work group (§6.1)
 ├── CLAUDE.md
 ├── README.md                               ← this specification
 ├── docs/adr/   docs/agents/
@@ -227,7 +228,8 @@ shellcheck (SC1090) — the helper would become the one piece of shell CI never 
 `{{ include "../Brewfile" }}`, piped to `brew bundle --file=-`. The content is *in* the
 rendered script, so `run_onchange_` re-triggers on any edit by construction: no `sha256`
 comment, no `$CHEZMOI_SOURCE_DIR` lookup at runtime. The most-edited file of the annual
-review belongs at the top level.
+review belongs at the top level. `Brewfile.work` sits beside it and is inlined the same
+way, inside the guarded branch described in §6.1.
 
 **The defaults and Dock declarations sit under `home/.chezmoidata/`** because
 `.chezmoidata` loads them into the template data context, so both the applying script and
@@ -364,19 +366,52 @@ which is the one precondition the gate cannot verify and CI must degrade under.
 | GCal for Google Calendar — `1107163858` | Calendar; no Homebrew cask exists |
 | 1Password for Safari — `1569813296` | Safari extension; no cask, and no launch record by design |
 
-#### Client group — optional (5)
+#### The work group (5)
 
-`azure-cli`, `databricks`, `jira-cli`, `gcloud-cli`, `microsoft-teams`.
+`azure-cli`, `databricks`, `jira-cli`, `gcloud-cli`, `microsoft-teams` — real tooling in
+weekly use, held in a **second Brewfile, `Brewfile.work`**, at the repository root beside
+the base one, inlined into the P4 Homebrew script and piped to a second
+`brew bundle --file=-`.
 
-Real tooling in weekly use, held apart so that one engagement's stack is not hardcoded
-into a public repository that outlives it. The group is a **second Brewfile applied with
-`brew bundle --file`**, not a data layer and not a comment header — the brew-native way to
-express an optional set.
+**It rides the guard that already exists.** The include sits inside the *same*
+`op`-presence branch §6.5 puts on the work identity, so the identity and its tooling turn
+on and off as **one fact under one guard**. No flag, no chezmoi config value, no second
+file format — rule 6 asks for a machine-derived fact, and this one was already being
+derived for the surface next door.
 
-> **Open:** the group's file name and the mechanism that turns it on are not yet decided —
-> see [Which mechanism applies the optional client group?](https://github.com/robocopklaus/dotfiles/issues/32).
-> Rule 6 above constrains it: a machine-derived fact is preferred to a flag someone sets.
-> Nothing in the base rebuild depends on this.
+**It is not "optional" in the sense of a per-machine choice.** Both Macs are in the
+engagement and both install all five; the only renderer that ever omits the group is CI.
+What the split buys is **lifecycle**: ending the engagement is one deletion —
+`Brewfile.work` and its include line — with no per-entry judgement owed, which is the
+whole reason the five were held apart from a public repository that outlives them.
+
+The guard is admittedly a **proxy**: `op` on the path means "1Password is installed", not
+"this machine is in the engagement". It is the right proxy because the true fact —
+resolving the work-identity item itself — would be a second and finer discriminator for
+the same relationship, with exactly one consumer (rule 5), guarding against a machine that
+does not exist. And ADR 0004's refusal to derive CI from `op`'s *absence* does not reach
+here: that ambiguity — a genuinely fresh Mac has no `op` either — lives at the **P2 gate**,
+while the group renders at **P4**, after the gate has already refused every real Mac
+lacking `op` (P0 item 4). By P4, CI is the only op-less renderer left.
+
+`drift` needs no special case for the group. The check is rendered by chezmoi too, so it
+evaluates the same guard at the same moment as the applying script: on a work Mac the five
+are declared *and* installed, on CI they are neither — clean either way, and never
+reported as *Not in the repository*. That is also the guard's second consumer, which is
+what rule 5 asks of any shared mechanism.
+
+The price, stated: CI never installs the group and so never exercises the second
+`brew bundle --file` invocation (§10). Applying it unconditionally was the runner-up and
+is not absurd — it would have CI run exactly what the Macs run. It loses on price. The
+group costs roughly 1.5 GB per run, 1.1 GB of that a GUI chat client installed into a
+headless runner that will never open it, to prove that `brew bundle --file=-` works a
+second time.
+
+**The reasons state the role, never the engagement.** The trailing-comment convention
+above applies unchanged, but this is the one file where the temptation to explain *whose*
+stack it is runs strongest. `# Azure CLI — client cloud platform`, never the client's
+name: the five entries are generic and leak nothing by themselves, so the comments are the
+leak surface.
 
 #### What the bar is
 
@@ -454,7 +489,7 @@ nothing. Only the recorded reason differs.**
 - **No user-facing configuration at all** — `chezmoi`, `gh`, `jq`, `mas`, `dockutil`,
   `uv`, `zoxide`, `gogcli`, `nmap`, `cloudflare-cli4`, `homeassistant-cli`,
   `1password-cli`, `font-meslo-lg-nerd-font`, Pages, Numbers, 1Password for Safari. Named
-  so the omission is a stated choice. The client group manages no configuration today
+  so the omission is a stated choice. The work group manages no configuration today
   either: those tools keep machine-written auth caches, which fail clause 2.
 
 **Reasons live in this table, not in the files.** The Brewfile's trailing-comment
@@ -518,7 +553,7 @@ declaration is a short reviewable list in git, and the drift report names any ke
 machine disagrees with.
 
 A package you do not have is an absence; a system setting you do not have is a *wrong*
-setting, because macOS always supplies its own value. That is why the optional-group
+setting, because macOS always supplies its own value. That is why the guarded second-file
 pattern from §6.1 deliberately does not extend here.
 
 **The managed 22:**
@@ -650,6 +685,10 @@ keeps the design testable. A mechanism that only works at one desk is untested b
 construction, and giving CI a stub `op` was rejected for the same reason: the templates CI
 proved would not be the templates that run. The refusal stays in the gate; the template
 layer does not refuse a second time.
+
+**The same guard carries the work group** (§6.1). The client relationship is one fact, so
+its identity and its tooling are switched by one condition rather than by two that can
+disagree.
 
 Two consequences, stated rather than discovered:
 
@@ -802,8 +841,9 @@ trains you to dismiss it; a failing Action is not at your desk.
 **Knowingly unverified**, handled as manual gates rather than tested away: anything behind
 an Apple ID, so `mas` end to end; 1Password's first authentication and its agent socket;
 FileVault; bare-metal state, since the runner is warm, so the tier proves convergence
-rather than a rebuild from nothing; the work identity's *populated* branch, since CI has
-no vault; and anything bound to the machine's own hardware.
+rather than a rebuild from nothing; the work identity's *populated* branch and the work
+group's `brew bundle --file` invocation with it, since CI has no vault and the same guard
+covers both; and anything bound to the machine's own hardware.
 
 A green pipeline proves the automated path works. It cannot prove the human path works.
 The closing report is the only thing that inspects the human path's result.
@@ -861,8 +901,11 @@ Stated rather than discovered later.
 - **A private marketplace on a non-GitHub host** has no demonstrated route onto the
   account and would be the first candidate for a named exception to ADR 0010. There is
   none today.
-- **The client group's application mechanism** is undecided — see §6.1 and
-  [#32](https://github.com/robocopklaus/dotfiles/issues/32).
+- **The work group is exercised at one desk or not at all.** CI renders the op-less
+  branch, so neither the work identity's populated templates nor the group's second
+  `brew bundle --file` invocation is ever run by a machine other than a Mac in the
+  engagement. This is one gap with one cause — the `op` guard of §6.1 and §6.5 — widened
+  from the identity to its tooling, not a second one.
 - **Onboarding a third machine, or handing this to someone else**, is not a goal. The
   document is written for two identical machines and one reader.
 - **Restoring repositories and working data** (`~/Development`, clones, project files) is
