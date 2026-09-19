@@ -130,9 +130,8 @@ order that a precondition justifies; it is never itself the justification.
 
 **P2 — the gate.** A `run_before_` script, and the structural addition the prior setup
 lacked entirely. It checks **every** P0 item and reports **all** failures in one pass,
-each with its remedy (§2).
-Running before file application means a failed gate leaves the machine completely
-untouched. Under CI the 1Password and Apple ID items degrade from refusing to reporting
+each with its remedy (§2). Running before file application means a failed gate leaves the
+machine completely untouched. Under CI the 1Password and Apple ID items degrade from refusing to reporting
 (§8); every other precondition still refuses.
 
 **P3 — files before tools.** Configuration lands before the software it configures
