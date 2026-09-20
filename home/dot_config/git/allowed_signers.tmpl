@@ -10,6 +10,6 @@ same 1Password field ~/.ssh/id_work.pub renders from.
 */ -}}
 7754932+robocopklaus@users.noreply.github.com {{ trim (include "private_dot_ssh/id_personal.pub") }}
 {{ if lookPath "op" -}}
-{{- $work := fromToml (includeTemplate "lib/work-identity.toml" .) -}}
+{{- $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
 {{ $work.email }} {{ $work.key }}
 {{ end -}}

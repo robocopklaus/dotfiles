@@ -209,7 +209,7 @@ output has two parts:
     ├── .chezmoidata/macos-defaults.toml    the defaults declaration (§6.4)
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
     ├── .chezmoitemplates/lib/               shared shell and one shared read, at render time
-    │   ├── work-identity.toml               the 1Password item, shared by five surfaces (§6.5)
+    │   ├── work-identity.json               the 1Password item, shared by five surfaces (§6.5)
     │   ├── agent-socket.sh                  the agent's socket path, shared by 20 and 70
     │   ├── homebrew.sh                      the prefix cascade
     │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41

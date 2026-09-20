@@ -1,5 +1,5 @@
 {{- if lookPath "op" -}}
-{{- $work := fromToml (includeTemplate "lib/work-identity.toml" .) -}}
+{{- $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
 # The work identity (§6.5), rendered from one 1Password item. Included by ~/.gitconfig on
 # the remote's host, so it applies per repository rather than per directory. Only [user]
 # differs from the global configuration: the signing setup — gpg.format, op-ssh-sign,

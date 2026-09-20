@@ -1,5 +1,5 @@
 {{ if lookPath "op" -}}
-{{- $work := fromToml (includeTemplate "lib/work-identity.toml" .) -}}
+{{- $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
 # The work host (§6.5), rendered from one 1Password item together with the rest of the
 # identity. IdentitiesOnly is not tidiness: without it the agent offers every key it holds
 # and the server can close the connection with "too many authentication failures". The

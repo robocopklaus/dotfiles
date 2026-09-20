@@ -58,6 +58,6 @@
 # fact the rest of it does, so this condition is rendered from the same 1Password item as
 # the file it includes — and on a machine without `op` neither is written. Only [user] is
 # overridden there; everything above is inherited. Requires git >= 2.36 (hasconfig).
-[includeIf "hasconfig:remote.*.url:*@{{ (fromToml (includeTemplate "lib/work-identity.toml" .)).host }}:**/**"]
+[includeIf "hasconfig:remote.*.url:*@{{ (fromJson (includeTemplate "lib/work-identity.json" .)).host }}:**/**"]
 	path = ~/.config/git/config-work
 {{- end }}
