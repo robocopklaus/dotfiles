@@ -1,19 +1,15 @@
 #!/bin/bash
 # Phase: 9x — the epilogue: the closing report
-# Requires: P3 (~/.local/bin/drift); everything past that degrades rather than fails
+# Requires: nothing — a missing `drift` shortens the report; it never fails the run (§3)
 
-# No `set -e`, alone among the scripts here. `drift` exits 1 on any finding (§7), and a
-# finding is a true report rather than a failed run — the whole point of the epilogue is
-# that it tells you what is wrong without pretending the run went wrong. chezmoi aborts on
-# a non-zero script, so "the epilogue never fails the run" (§3) is a property of this
-# file's exit status, which is why the last line is what it is.
+# No `set -e`, alone among the scripts here: chezmoi aborts on a non-zero script, and
+# `drift` exits 1 on any finding (§7) — a true report rather than a failed run. §3 has the
+# reasoning; the last line of this file is what enforces it.
 set -uo pipefail
 
-# `run_after_`, not `run_onchange_after_`: this script re-derives state on every run by
-# design, so content-hash skipping would be precisely wrong for it — a converged machine
-# would stop being told what it is still missing, which is the one thing only this script
-# says (§4). `9x` is outside the phase range deliberately: the closing report is the run's
-# epilogue, not a phase, and `80` would imply a P8 that does not exist.
+# `run_after_` at a `9x` slot outside the phase range, for the reasons §4 gives: this
+# script re-derives on every run, so content-hash skipping would stop a converged machine
+# being told what it is still missing.
 
 # A heredoc rather than `printf`, here and at the tail: a format string that begins with a
 # dash is read as an option, so the rule for a banner is simply not to hand it to `printf`.
@@ -24,21 +20,17 @@ The closing report
 ----------------------------------------------------------------------
 HEAD
 
-# Dynamic — what is missing *right now*.
+# Dynamic — what is missing *right now*, re-checked rather than replayed. There is no
+# scratch file for the phases to append to: that is the recorded intermediate state the
+# convergence invariant bans, and it would go stale on the second run and then lie (§1,
+# §3).
 #
-# Each chezmoi script is a separate process, so failures cannot be accumulated in memory,
-# and the obvious fix — a scratch file the phases append to — is exactly the recorded
-# intermediate state the convergence invariant bans (§1). It has the same failure mode
-# besides: after a re-run it goes stale, and then it lies. So nothing is replayed. The
-# world is re-checked, which is correct on the first run and the fifth alike (§3).
-#
-# This is the same invocation a human types at a desk, with no extra flag: `drift` omits
-# empty sections, so on a fresh machine the *Not in the repository* section simply is not
-# printed and there is nothing a brief mode would have to suppress (§7).
+# The same invocation a human types at a desk, with no extra flag: `drift` omits empty
+# sections, so nothing a brief mode would have to suppress is printed anyway (§7).
 #
 # The managed `.zshrc` puts `~/.local/bin` first on PATH (§6.3), but this script runs in
-# chezmoi's environment rather than a login shell — so the seeding 42 does is needed here
-# for the same reason.
+# chezmoi's environment rather than a login shell, so that declaration has not been read
+# here. Seeding it is what lets the guard below see a `drift` that P3 did write.
 export PATH="$HOME/.local/bin:$PATH"
 
 printf '\n'
@@ -77,13 +69,8 @@ Sign-ins other things depend on
   App Store       Sign in, then re-run the bootstrap if the report above is
                   short an App Store application: `mas` cannot install for an
                   account that is not signed in, and the phase is tolerant.
-  claude.ai       Agent skills and plugins ride the account, not this
-                  repository (ADR 0010). Sync is not instant — a newly enabled
-                  marketplace has taken roughly thirteen minutes to land — so
-                  do not read an empty ~/.claude/plugins/synced/ as a failure
-                  for the first quarter of an hour.
 
-Applications that restore themselves once you sign in
+Things that restore themselves once you sign in
 
   Nothing here is managed and nothing here is broken — signing in is the whole
   restore, and this list exists so a rebuilt machine is not audited by memory.
@@ -91,6 +78,11 @@ Applications that restore themselves once you sign in
   1Password, Chrome (its extensions arrive with Chrome sync), VS Code (Settings
   Sync carries settings, extensions and keybindings together), Raycast, Slack,
   ChatGPT, Mimestream, Clockify, WhatsApp, GCal, Docker Desktop.
+
+  Agent skills and plugins too: they ride the claude.ai account rather than this
+  repository (ADR 0010), and no phase here installs any. Sync is not instant — a
+  newly enabled marketplace has taken roughly thirteen minutes to land — so an
+  empty ~/.claude/plugins/synced/ is not a failure for the first quarter hour.
 
 Credential files, by path — the values live in 1Password
 
