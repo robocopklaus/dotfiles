@@ -1,11 +1,13 @@
 {{ if lookPath "op" -}}
 {{- $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
-# The work host (§6.5), rendered from one 1Password item together with the rest of the
-# identity. IdentitiesOnly is not tidiness: without it the agent offers every key it holds
-# and the server can close the connection with "too many authentication failures". The
-# .pub only selects which key the agent signs with — the private key never leaves
-# 1Password.
-Host {{ $work.host }}
+# The client-issued identity's hosts (§6.5), rendered from one 1Password item together with
+# the rest of it. One issuing account answers on more than one host, and a `Host` line takes
+# them all — they share an account, so they share the key it registers.
+#
+# IdentitiesOnly is not tidiness: without it the agent offers every key it holds and the
+# server can close the connection with "too many authentication failures". The .pub only
+# selects which key the agent signs with — the private key never leaves 1Password.
+Host{{ range $work.hosts }} {{ . }}{{ end }}
   IdentitiesOnly yes
   IdentityFile ~/.ssh/id_work.pub
 

@@ -1,26 +1,37 @@
 {{/*
-The work identity (§6.5, ADR 0003), read from the single 1Password item that carries it.
-This is the only place the item and its fields are named, and it serves the five surfaces
-that render from them: the `includeIf` in ~/.gitconfig, ~/.config/git/config-work, the
-work line in ~/.config/git/allowed_signers, the ssh `Host` block, and ~/.ssh/id_work.pub.
+The client-issued identity (§6.5, ADR 0003, ADR 0011), read from the single 1Password item
+that carries it. This is the only place the item and its fields are named, and it serves
+the five surfaces that render from them: the `includeIf` sections in ~/.gitconfig,
+~/.config/git/config-work, the work line in ~/.config/git/allowed_signers, the ssh `Host`
+block, and ~/.ssh/id_work.pub.
 
 The item's own name and its vault appear here, in a public tree, so neither names the
 client either. Nothing in the item is cryptographically secret — the signing key is a
-public key and the host is a public DNS name. What is kept out of the tree is the client
+public key and the hosts are public DNS names. What is kept out of the tree is the client
 relationship, which is why the unit is the whole identity and never half of it.
+
+`hosts` is a comma-separated list, because one issuing account answers on more than one
+host and a pattern that covers only the first leaves the rest to the refusal (ADR 0011).
+Hosts are the fact; the git and ssh patterns are derived from them by the templates that
+need them. Neither spelling of a remote URL is maintained in a password manager.
 
 It hands its caller JSON built by `toJson` rather than text the caller parses, so a field
 holding a quote is escaped by the encoder instead of ending the value early. Written by
-hand, the same partial breaks on a name like `A "Quoted" Name` — and it would break at
-apply time, on the one machine that renders the populated branch.
+hand as TOML, the same partial breaks on a name like `A "Quoted" Name` — and it would
+break at apply time, on the one machine that renders the populated branch.
 
 Every call site guards on `op` being on the path, so this template is reached only on a
 machine that has 1Password. It does not guard a second time: a template that refused here
 would be the refusal the gate already owns (§2).
 */ -}}
 {{- $item := "op://Private/work-identity" -}}
+{{- $hosts := list -}}
+{{- range splitList "," (onepasswordRead (printf "%s/hosts" $item)) -}}
+{{-   $host := trim . -}}
+{{-   if $host -}}{{- $hosts = append $hosts $host -}}{{- end -}}
+{{- end -}}
 {{- dict
-      "host" (onepasswordRead (printf "%s/host" $item))
+      "hosts" $hosts
       "name" (onepasswordRead (printf "%s/name" $item))
       "email" (onepasswordRead (printf "%s/email" $item))
       "key" (onepasswordRead (printf "%s/public_key" $item))

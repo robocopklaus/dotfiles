@@ -35,10 +35,15 @@
 [push]
 	autoSetupRemote = true
 
+# What every identity shares, and nothing that distinguishes one from another. There is no
+# `user.email` and no `user.signingkey` here on purpose: with `useConfigOnly` set, a
+# repository that no `includeIf` below matches refuses to commit rather than falling back
+# to a plausible wrong answer (ADR 0011). Every default is wrong somewhere and wrong
+# silently — a personal default signs paid work with a private address, a company default
+# writes an employer into a repository that outlives the employment.
 [user]
 	name = Fabian Pahl
-	email = 7754932+robocopklaus@users.noreply.github.com
-	signingkey = ~/.ssh/id_personal.pub
+	useConfigOnly = true
 
 [gpg]
 	format = ssh
@@ -52,12 +57,43 @@
 
 [tag]
 	gpgSign = true
-{{ if lookPath "op" }}
-# The work identity (§6.5), switched on by the remote a repository points at rather than
-# by the directory it sits in. The host pattern is part of the identity and leaks the same
-# fact the rest of it does, so this condition is rendered from the same 1Password item as
-# the file it includes — and on a machine without `op` neither is written. Only [user] is
-# overridden there; everything above is inherited. Requires git >= 2.36 (hasconfig).
-[includeIf "hasconfig:remote.*.url:*@{{ (fromJson (includeTemplate "lib/work-identity.json" .)).host }}:**/**"]
-	path = ~/.config/git/config-work
+
+# The three identities (§6.5, ADR 0011), each switched on by the remote a repository points
+# at rather than by the directory it sits in — a directory convention describes where files
+# were put, and breaks the first time a repository is cloned somewhere else.
+#
+# Each match below is emitted in **both** remote spellings. `*@host:owner/**` matches
+# `git@host:owner/repo` and nothing else; an HTTPS clone of the same repository would fall
+# through to no identity at all, and stop at its first commit for a reason that has nothing
+# to do with the repository. Only [user] is overridden; everything above is inherited.
+# Requires git >= 2.36 (hasconfig).
+#
+# The client-issued identity's hosts come from the 1Password item, which is why this file
+# is templated: the hosts leak exactly what the file they include does, so they are
+# rendered under the same guard and are simply absent on a machine without `op`.
+{{- $identities := list
+      (dict "path" "~/.config/git/config-personal"
+            "matches" (list (dict "host" "github.com" "owner" "robocopklaus"))) -}}
+{{- $identities = append $identities
+      (dict "path" "~/.config/git/config-company"
+            "matches" (list (dict "host" "github.com" "owner" "21stdigital")
+                            (dict "host" "github.com" "owner" "21st-digital"))) -}}
+{{- if lookPath "op" -}}
+{{-   $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
+{{-   $matches := list -}}
+{{-   range $work.hosts -}}
+{{-     $matches = append $matches (dict "host" . "owner" "*") -}}
+{{-   end -}}
+{{-   $identities = append $identities
+        (dict "path" "~/.config/git/config-work" "matches" $matches) -}}
 {{- end }}
+{{ range $identities -}}
+{{- $path := .path -}}
+{{- range .matches }}
+[includeIf "hasconfig:remote.*.url:*@{{ .host }}:{{ .owner }}/**"]
+	path = {{ $path }}
+
+[includeIf "hasconfig:remote.*.url:https://{{ .host }}/{{ .owner }}/**"]
+	path = {{ $path }}
+{{ end -}}
+{{- end -}}

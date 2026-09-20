@@ -204,6 +204,7 @@ output has two parts:
 ├── docs/adr/   docs/agents/
 ├── tests/
 │   ├── drift.sh                            drift's own logic, stubbed (§7)
+│   ├── identity.sh                         which identity a remote selects (§6.5)
 │   └── *.bats                              bats: idempotency only
 └── home/                                   ← the entire chezmoi source
     ├── .chezmoidata/macos-defaults.toml    the defaults declaration (§6.4)
@@ -546,7 +547,7 @@ even though nothing managed sits outside `~/.config` and `$HOME` today. An edito
 `settings.json` under `~/Library/Application Support/` would qualify on its contents
 alone, and the boundary should not have to be renegotiated when one does.
 
-**Managed (12 paths):**
+**Managed (13 paths):**
 
 | Path | Reason |
 | --- | --- |
@@ -555,8 +556,9 @@ alone, and the boundary should not have to be renegotiated when one does.
 | `dot_config/oh-my-posh/config.omp.json` | Prompt definition |
 | `dot_config/mise/config.toml` | Runtime pins |
 | `dot_config/ccstatusline/settings.json` | Statusline definition |
-| `dot_gitconfig`, `dot_gitignore` | Global git behaviour; the gitconfig is templated for the work identity's guarded `includeIf` (§6.5) |
-| `dot_config/git/allowed_signers`, `config-work` | Signing and the work identity; templated (§6.5) |
+| `dot_gitconfig`, `dot_gitignore` | Global git behaviour and the `includeIf` set that selects an identity; templated, because the client-issued half of that set is guarded (§6.5) |
+| `dot_config/git/allowed_signers`, `config-work` | Signing and the client-issued identity; templated (§6.5) |
+| `dot_config/git/config-personal`, `config-company` | The two cleartext identities, each included by remote (ADR 0011) |
 | `dot_claude/settings.json` | Permissions and hooks — see the dominance note |
 | `dot_mcp.json` | Fully hand-authored |
 | `dot_editorconfig` | Editor defaults |
@@ -800,8 +802,10 @@ is the same relationship §6.5 exists to keep out of it.
 whose filenames stay neutral — rendered from a **single** 1Password item via
 `onepasswordRead` templates. Nothing in it is cryptographically secret — the signing key is
 a *public* key and the GHE host is a *public* DNS name. What is kept out of a public tree
-is the **client relationship**. So the unit is the whole identity, indivisible: host
-pattern, name, address, signing key, its `allowed_signers` line, and the ssh `Host` block.
+is the **client relationship**. So the unit is the whole identity, indivisible: its hosts —
+one issuing account answers on more than one, and the git and ssh patterns are derived from
+them rather than written out by hand (ADR 0011) — name, address, signing key, its
+`allowed_signers` line, and the ssh `Host` block.
 Half-evicting it — hiding the email, leaving the hostname — reveals the same fact for none
 of the benefit.
 
@@ -978,7 +982,10 @@ Two tiers.
 **rendered** scripts and the rendered `drift` (sources are `.tmpl`, so the tier renders
 them with `chezmoi execute-template` first — a template that fails to render is caught a
 step earlier than one that renders to broken shell); `tests/drift.sh`, which runs that
-rendered command against stubbed inventories; the Brewfile reason-comment presence check;
+rendered command against stubbed inventories; `tests/identity.sh`, which asks the real git,
+against the rendered `~/.gitconfig`, which identity each shape of remote selects — a pattern
+that matches nothing is otherwise silent until a commit is refused somewhere else entirely
+(§6.5); the Brewfile reason-comment presence check;
 the script-header presence check; and the Dock-entry reference check. Both tiers
 run on macOS for the same reason: the source tree is templated for darwin, so a Linux
 runner would render the branch this repository never applies and lint the wrong shell.

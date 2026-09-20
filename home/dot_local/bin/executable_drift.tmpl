@@ -315,13 +315,13 @@ elif [ "$dock_current" != "$dock_expected" ]; then
 fi
 
 {{ if lookPath "op" }}
-# The work identity (§6.5), which is the one thing in this repository that can fail
-# quietly: a render skipped for want of 1Password leaves the files personal-only, valid
-# and silent, and the first sign of it is a work commit signed by the wrong key. The check
-# is rendered under the same `op` guard as the templates it asks about, so it asks only on
-# a machine those templates were supposed to write to — which is what makes it catch the
-# case that matters: an apply whose environment had no `op`, read back later from a shell
-# that does. An unguarded check would instead report CI, where nothing was skipped.
+# The client-issued identity (§6.5, ADR 0011). With no default identity, a skipped render
+# no longer mislabels a commit — it stops one. This check turns that stop into an
+# explanation, ahead of the moment it would otherwise be met. It is rendered under the same
+# `op` guard as the templates it asks about, so it asks only on a machine those templates
+# were supposed to write to, which is what makes it catch the case that matters: an apply
+# whose environment had no `op`, read back later from a shell that does. An unguarded check
+# would instead report CI, where nothing was skipped.
 #
 # Two files answer for all five surfaces of the identity. One 1Password read feeds them
 # all, so they render together or not at all; asking each in turn would be five questions
@@ -331,6 +331,31 @@ for rendered in "$HOME/.ssh/id_work.pub" "$HOME/.config/git/config-work"; do
     diverged+=("Work identity: $rendered did not render — re-apply with 1Password unlocked")
   fi
 done
+
+# Did it render, and does it *apply* to the repository in hand? Those are different
+# questions: a file can be present while the pattern that selects it misses the remote, in
+# which case nothing matches and git refuses the next commit. Asked of the repository drift
+# is run from, and only when there is one — the command is a whim away from any directory.
+#
+# The client hosts and address come from the same 1Password read as everything else above,
+# so this is not a second list of who commits where. The cleartext identities are not
+# checked here for the reason they need no checking: git's own refusal names them.
+if repo_remote=$(git remote get-url origin 2>/dev/null) && [ -n "$repo_remote" ]; then
+  repo_email=$(git config --get user.email 2>/dev/null) || repo_email=''
+  {{ $work := fromJson (includeTemplate "lib/work-identity.json" .) }}
+  case $repo_remote in
+{{- range $work.hosts }}
+    *{{ . }}[:/]*) repo_expected={{ $work.email | quote }} ;;
+{{- end }}
+    *) repo_expected='' ;;
+  esac
+
+  if [ -n "$repo_expected" ] && [ "$repo_email" != "$repo_expected" ]; then
+    diverged+=("Work identity: $PWD has a client remote but commits as ${repo_email:-no address} — expected $repo_expected")
+  elif [ -z "$repo_email" ]; then
+    diverged+=("Identity: no rule matches $PWD's remote, so git will refuse its next commit (ADR 0011)")
+  fi
+fi
 {{ end }}
 # Two things are deliberately not swept, and their absence is written down so it is not
 # read as an oversight and repaired (§7): `mise` runtimes, which `mise ls` already diffs

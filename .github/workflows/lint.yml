@@ -56,6 +56,17 @@ jobs:
       - name: Test drift
         run: tests/drift.sh "$RUNNER_TEMP/rendered-bin/drift.sh"
 
+      # Which identity a remote selects, asked of the real git against the rendered
+      # configuration. A pattern that looks right and matches nothing is silent everywhere
+      # else: with no default, it surfaces as a refused commit far from here. §6.5, ADR 0011
+      - name: Test identity selection
+        run: |
+          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+            < home/dot_gitconfig.tmpl > "$RUNNER_TEMP/rendered-bin/gitconfig"
+          tests/identity.sh "$RUNNER_TEMP/rendered-bin/gitconfig" \
+            home/dot_config/git/config-personal \
+            home/dot_config/git/config-company
+
       # Presence only — what the reason says is never judged, because a check that
       # graded it would be satisfied by "# tool" and would have to be argued with. §6.1
       - name: Brewfile reason comments

@@ -4,11 +4,18 @@ identities: no retired key is carried, because an ssh signature embeds the signe
 key and a dropped line is reconstructible from any commit it signed (ADR 0008). Because
 nothing accumulates here, no pruning rule has to exist.
 
+Three lines against two keys (ADR 0011). Personal and company run through one github.com
+account and therefore share its key, differing by address alone, so the same public key
+appears twice under two addresses; the client-issued identity has its own account and its
+own key.
+
 Each line derives its key from the public key *file* rather than transcribing the blob a
-second time — the personal one from the file in this repository, the work one from the
-same 1Password field ~/.ssh/id_work.pub renders from.
+second time — the two cleartext ones from the file in this repository, the client-issued
+one from the same 1Password field ~/.ssh/id_work.pub renders from.
 */ -}}
-7754932+robocopklaus@users.noreply.github.com {{ trim (include "private_dot_ssh/id_personal.pub") }}
+{{- $personal := trim (include "private_dot_ssh/id_personal.pub") -}}
+7754932+robocopklaus@users.noreply.github.com {{ $personal }}
+fabian@21st.digital {{ $personal }}
 {{ if lookPath "op" -}}
 {{- $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
 {{ $work.email }} {{ $work.key }}

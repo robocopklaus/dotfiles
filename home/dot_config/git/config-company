@@ -1,0 +1,13 @@
+# The company identity (§6.5, ADR 0011) — 21st digital, under which client work on
+# github.com is done. Included by ~/.gitconfig for repositories in the company's own
+# github.com organisations.
+#
+# Cleartext, and that is the distinction the `op` guard actually draws: it separates what
+# reveals a *client* relationship from what is public anyway. This names the company, not
+# a client.
+#
+# The key is the personal one, because both run through one github.com account and the
+# account is what verifies a signature. They differ by address alone (ADR 0011).
+[user]
+	email = fabian@21st.digital
+	signingkey = ~/.ssh/id_personal.pub

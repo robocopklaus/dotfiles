@@ -1,0 +1,12 @@
+# The personal identity (§6.5, ADR 0011). Included by ~/.gitconfig for repositories whose
+# remote is in this person's own github.com namespace, in either spelling.
+#
+# Cleartext, because it is already public on GitHub. It carries the address and the key,
+# and nothing else: `user.name` and the signing setup are shared by all three identities
+# and live in ~/.gitconfig.
+#
+# The key is the same file the company identity uses, because it is the same github.com
+# account — and the account is what verifies a signature (ADR 0011).
+[user]
+	email = 7754932+robocopklaus@users.noreply.github.com
+	signingkey = ~/.ssh/id_personal.pub
