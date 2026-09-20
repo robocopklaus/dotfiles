@@ -8,9 +8,17 @@ set -euo pipefail
 # together, each beside the remedy that fixes it. Running before any file is applied
 # means a refusal leaves $HOME completely untouched.
 #
-# Two P0 items are not verifiable at all — the GitHub key registration and the App
-# Store sign-in — so they are not here. An unverifiable item is a line in the closing
-# report, never a gate check and never a "have you signed in? [y/N]" prompt (§2).
+# Three P0 items are not verifiable at all — the GitHub key registration, the App Store
+# sign-in and the Apple Account sign-in — so they are not here. An unverifiable item is a
+# line in the closing report, never a gate check and never a "have you signed in? [y/N]"
+# prompt (§2).
+#
+# The Apple Account joined them by evidence, not by argument. The gate read the
+# `MobileMeAccounts` domain, which a freshly set up machine does not have even when it is
+# signed in: that domain is written when iCloud first stores something in it, not at
+# sign-in. So it refused a correctly prepared machine, and refused it for nothing — P4's
+# `mas` phase is tolerant of a missing account on its own, and the closing report already
+# asks for the sign-in the phase needs.
 
 refused=()
 reported=()
@@ -21,7 +29,7 @@ refuse() {
   refused+=("$1"$'\n'"    $2")
 }
 
-# Under CI the 1Password and Apple ID items degrade from refusing to reporting (§8).
+# Under CI the 1Password items degrade from refusing to reporting (§8).
 # The signal is `CI`, set by the runner and never written by this repository; deriving
 # it from op's absence would wave through the fresh Mac the gate exists for.
 refuse_unless_ci() {
@@ -52,12 +60,6 @@ macos_version=$(sw_vers -productVersion)
 if [ "${macos_version%%.*}" -lt 26 ]; then
   refuse "macOS $macos_version is older than the macOS 26 this repository targets." \
     "Update first: System Settings → General → Software Update."
-fi
-
-# Apple ID signed in
-if ! defaults read MobileMeAccounts Accounts >/dev/null 2>&1; then
-  refuse_unless_ci "No Apple ID is signed in." \
-    "Sign in: System Settings → Sign in with your Apple Account, and to the App Store."
 fi
 
 # Network
