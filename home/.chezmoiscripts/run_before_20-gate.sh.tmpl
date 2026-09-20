@@ -154,31 +154,8 @@ if ! command -v op >/dev/null 2>&1; then
 fi
 
 # The paths inside 1Password's group container, included at render time so that every
-# caller spells the container once. Both checks below read from them.
+# caller spells the container once.
 {{ template "lib/onepassword-paths.sh" . }}
-
-# App data access, which is the other way the handover fails. The CLI integration can be
-# on and `op` still hold no account, because `op` reads the account out of the app's own
-# settings file and macOS can withhold that file from the terminal the run is typed into.
-# `op --debug` says so plainly — `Skipped loading desktop app settings file … operation
-# not permitted` — and then reports no account at all.
-#
-# It is checked separately rather than folded into the remedy below because the two
-# machines want opposite things done to them, and the check below cannot tell them apart:
-# it would name the toggle on a machine whose toggle is already on.
-#
-# Asked of the file rather than of `op --debug`, whose wording is 1Password's to change.
-# A check that reads an error message passes silently the day the message is reworded,
-# and a gate that passes silently is worse than no gate.
-#
-# Unreadable, not absent. The gate installs the app (ADR 0012), and an app that has never
-# been opened has written no settings yet — that machine falls through to the check below,
-# whose remedy is the one it needs. `-e` answers the question macOS leaves answerable:
-# the file can be stat'd while opening it is refused.
-if [ -e "$app_settings" ] && ! head -c 1 "$app_settings" >/dev/null 2>&1; then
-  refuse_unless_ci "1Password's app data cannot be read, so op is handed no account." \
-    "Re-run the command you started with, with OP_BIOMETRIC_UNLOCK_ENABLED=true in front of it — that makes op ask the running app instead of reading the file. Nothing in the run can set it for you: chezmoi reads the 1Password item itself, so the variable has to be in the environment the command is typed into. macOS does not offer this permission under Privacy & Security; the terminal is not listed there at all."
-fi
 
 # The CLI integration, asked of `op account list` — which reads local metadata, returns
 # at once and unlocks nothing. Without the integration turned on, `op` knows no account at
@@ -207,9 +184,28 @@ fi
 # Emptiness, and nothing else. Two tidier-looking tests are both wrong, measured on a
 # machine with no account: the exit status is **0**, and `--format=json` prints `[]`,
 # which is not empty. Either one turns this check into a check that always passes.
+#
+# The empty list has two causes, so the refusal asks a second question before it names a
+# remedy (ADR 0016). It is asked *inside* this condition rather than beside it, and that
+# placement is the whole correction: app data stays unreadable whatever the reader does
+# — `OP_BIOMETRIC_UNLOCK_ENABLED=true` routes `op` around the file rather than opening it
+# — so a check standing on unreadability alone refuses a machine that has just been
+# fixed, forever. What is actually wrong is that no account came back. Unreadable app
+# data is why, not whether.
+#
+# Unreadable, not absent. The gate installs the app (ADR 0012), and one nobody has opened
+# has written no settings yet — that machine wants the toggle remedy. `-e` answers the
+# question macOS leaves answerable: the file can be stat'd while opening it is refused.
+#
+# Asked of the file rather than of `op --debug`, whose wording is 1Password's to change.
 if command -v op >/dev/null 2>&1 && [ -z "$(op account list </dev/null 2>/dev/null)" ]; then
-  refuse_unless_ci "The 1Password CLI has no account: the app is handing it none." \
-    "Quit 1Password fully (⌘Q), reopen it, unlock it, and check Settings → Developer → Integrate with 1Password CLI — that switch, not the SSH agent one beside it. The accounts come from the running app, so it is fixed when 'op account list' prints one."
+  if [ -e "$app_settings" ] && ! head -c 1 "$app_settings" >/dev/null 2>&1; then
+    refuse_unless_ci "1Password's app data cannot be read, so op is handed no account." \
+      "Re-run the command you started with, with OP_BIOMETRIC_UNLOCK_ENABLED=true in front of it — that makes op ask the running app instead of reading the file. Nothing in the run can set it for you: chezmoi reads the 1Password item itself, so the variable has to be in the environment the command is typed into. macOS does not offer this permission under Privacy & Security; the terminal is not listed there at all."
+  else
+    refuse_unless_ci "The 1Password CLI has no account: the app is handing it none." \
+      "Quit 1Password fully (⌘Q), reopen it, unlock it, and check Settings → Developer → Integrate with 1Password CLI — that switch, not the SSH agent one beside it. The accounts come from the running app, so it is fixed when 'op account list' prints one."
+  fi
 fi
 
 # The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote

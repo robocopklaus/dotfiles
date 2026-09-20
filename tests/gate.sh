@@ -14,19 +14,20 @@
 # the PATH and broke a later step that renders the work identity. A test that installs
 # software to prove it can is not a test.
 #
-# For the same reason the checks that call `op` are not driven from here. The cascade
+# For the same reason the 1Password checks are not driven from here at all. The cascade
 # puts the real `op` ahead of any stub too, so a case about the CLI integration would be
 # asking what the machine running the test has configured rather than what the gate does —
 # passing on a laptop with a vault, failing on a runner without one, and proving nothing
 # either way. The integration check and the acquisition are both bare-metal behaviour,
 # which CI already records as knowingly unverified.
 #
-# The app data check (ADR 0016) is the exception, and it is one because of its reason
-# rather than in spite of it: it calls nothing, reading only a path under $HOME, which
-# every case here already controls.
+# The app data diagnosis (ADR 0016) reads only a path under $HOME and would be drivable
+# from here on its own. It is not, because it is not on its own: it is reached only once
+# `op account list` has come back empty, which is the part the cascade decides. A case
+# for it would pass or fail on what the machine running it has configured.
 #
 # What is left is the part that is genuinely the gate's own: the order it does things in,
-# what it declines to do under CI, and the checks it can answer from the filesystem.
+# and what it declines to do under CI.
 set -uo pipefail
 
 gate=${1:?usage: tests/gate.sh <rendered gate>}
@@ -114,32 +115,6 @@ check 'exits 0' 0 "$code"
 says "$out" 'reported, not refused' 'reports the 1Password items'
 silent "$out" 'Preflight gate: installing' 'installs no cask'
 silent "$out" 'precondition(s) not met' 'refuses nothing'
-# No settings file at all is the machine whose app has never been opened. It must fall
-# through to the integration check rather than claim a permission problem.
-silent "$out" "app data cannot be read" 'says nothing about app data when the file is absent'
-
-# The app data check (ADR 0016), which is the one 1Password item this file can drive: it
-# reads a path under $HOME and calls nothing. Under CI it reports rather than refuses,
-# like every other 1Password item, so the case asserts the message and not the exit.
-#
-# chmod is the whole mechanism, and root is not subject to it — as root the file stays
-# readable, the branch never fires, and the case would pass while proving nothing.
-printf '\nThe app data is present but unreadable: the gate names the permission, not the toggle\n'
-if [ "$(id -u)" = 0 ]; then
-  printf '  skip app data case (running as root: chmod cannot make a file unreadable)\n'
-else
-  home="$root/home-appdata"
-  settings="$home/Library/Group Containers/2BUA8C4S2C.com.1password/Library/Application Support/1Password/Data/settings"
-  mkdir -p "$settings"
-  : >"$settings/settings.json"
-  chmod 000 "$settings/settings.json"
-  out=$(HOME="$home" PATH="$bin:$PATH" CI=1 bash "$gate" 2>&1)
-  code=$?
-  check 'exits 0' 0 "$code"
-  says "$out" "app data cannot be read" 'names the unreadable app data'
-  says "$out" 'OP_BIOMETRIC_UNLOCK_ENABLED=true' 'gives the remedy that can actually be applied'
-  chmod 644 "$settings/settings.json"
-fi
 
 printf '\n%d passed, %d failed\n\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

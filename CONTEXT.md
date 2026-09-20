@@ -87,8 +87,8 @@ all, and asks for one — which is why it is a gate item rather than something P
 
 **App data access**:
 Whether the process that starts the run may read the 1Password app's own data. The CLI
-integration can be on and the handover still fail on it, which is why it is a gate item
-of its own.
+integration can be on and the handover still fail on it, which is why the gate asks it
+before naming a remedy.
 _Avoid_: permission, Full Disk Access, TCC
 
 **Vault state**:

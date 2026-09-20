@@ -2,7 +2,7 @@
 
 The 1Password CLI integration is the setting that hands the account to `op`. Without it `op` holds no account at all. The gate refuses on it, and asks the question with `op account list`.
 
-The toggle is a necessary condition, not the only one: an empty account list also means the app's data could not be read at all, which ADR 0016 splits out into a check of its own ahead of this one.
+The toggle is a necessary condition, not the only one: an empty account list also means the app's data could not be read at all. ADR 0016 tells the two apart inside this refusal, so that each is given the remedy that clears it.
 
 **Why it is gated at all.** Left ungated, the toggle does not fail the run cleanly. P3 renders the work identity through `op`, and `op` with no account does not error — it *asks*, in the terminal, for a sign-in address, an email address, a secret key and a password. That is a second interactive moment in a run that promises one, collecting a secret this repository is built never to handle; and when nobody answers it, the run dies on an authorization timeout naming the template rather than the toggle.
 
