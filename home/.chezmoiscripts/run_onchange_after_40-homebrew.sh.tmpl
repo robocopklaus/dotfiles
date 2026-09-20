@@ -27,6 +27,27 @@ BREWFILE
 # precondition.
 {{ template "lib/homebrew-install.sh" . }}
 
+# Homebrew 7 refuses to load a formula or cask from a third-party tap until the tap is
+# trusted, and `brew bundle` reports the refusal per entry and carries on — so a missing
+# decision arrives looking like a flaky partial install, which is how it arrived here.
+#
+# Which taps are trusted is derived from the `tap` lines already in the inventory, not
+# named a second time: declaring a tap in a Brewfile is already the statement that its
+# formulae may be installed and run, so a separate list of the trusted ones would be a
+# second truth that can only drift from the first. Trusting is idempotent and does not
+# require the tap to exist yet, so this runs ahead of `brew bundle` rather than between
+# its two halves.
+#
+# `brew trust` is not guarded for absence the way `op` is. It is Homebrew's own
+# subcommand, and the Homebrew this bootstrap has is the one the gate just acquired.
+trust_declared_taps() {
+  local tap
+  while IFS= read -r tap; do
+    [ -n "$tap" ] || continue
+    brew trust --tap "$tap"
+  done < <(printf '%s\n' "$1" | sed -n 's/^tap "\([^"]*\)".*/\1/p')
+}
+
 # Both filters below read the entry shape the Brewfile fixes: a type keyword at column
 # zero, then a double-quoted name. Homebrew offers no filter of its own, and the CI
 # reason-comment check reads the same shape.
@@ -34,6 +55,7 @@ BREWFILE
 # Homebrew itself and the formulae abort the run, because later phases depend on them:
 # P5 needs `mise`, P6 needs `dockutil`. `set -e` makes both fatal.
 printf 'P4: installing the formulae.\n'
+trust_declared_taps "$brewfile"
 printf '%s\n' "$brewfile" | grep -E '^(tap|brew) ' | brew bundle --file=-
 
 # Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
@@ -87,6 +109,7 @@ BREWFILE
 )
 
 printf 'P4: installing the work group.\n'
+trust_declared_taps "$work_brewfile"
 if ! printf '%s\n' "$work_brewfile" | brew bundle --file=-; then
   printf '\nP4: the work group did not install completely.\n'
   retry_note
