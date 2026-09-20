@@ -319,7 +319,13 @@ fi
 # quietly: a render skipped for want of 1Password leaves the files personal-only, valid
 # and silent, and the first sign of it is a work commit signed by the wrong key. The check
 # is rendered under the same `op` guard as the templates it asks about, so it asks only on
-# a machine those templates were supposed to write to.
+# a machine those templates were supposed to write to — which is what makes it catch the
+# case that matters: an apply whose environment had no `op`, read back later from a shell
+# that does. An unguarded check would instead report CI, where nothing was skipped.
+#
+# Two files answer for all five surfaces of the identity. One 1Password read feeds them
+# all, so they render together or not at all; asking each in turn would be five questions
+# with one answer.
 for rendered in "$HOME/.ssh/id_work.pub" "$HOME/.config/git/config-work"; do
   if [ ! -s "$rendered" ]; then
     diverged+=("Work identity: $rendered did not render — re-apply with 1Password unlocked")

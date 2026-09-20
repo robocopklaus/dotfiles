@@ -125,7 +125,7 @@ order that a precondition justifies; it is never itself the justification.
 | P4 | **Packages** — Homebrew, formulae, casks, `mas`, out-of-band installers | P3, CLT, root | mixed — see below |
 | P5 | **Runtimes** — `mise install` | P4 (`mise`) | abort |
 | P6 | **System configuration** — macOS defaults, Dock | P4 (apps), non-root | abort |
-| P7 | **Integrations** — post-install wiring | P4 (casks) | tolerant |
+| P7 | **Integrations** — post-install wiring | P2 (the 1Password agent) | tolerant |
 | 9x | **Epilogue** — the closing report | — | never fails the run |
 
 **P2 — the gate.** A `run_before_` script, and the structural addition the prior setup
@@ -164,8 +164,9 @@ One rule: **a phase aborts the run only if a later phase depends on it.**
   nothing waits on. Collected failures surface in the closing report with an instruction
   to re-run.
 
-A tolerant phase must have tolerant dependents: P7 depends on P4's casks, so P7 skips
-cleanly when its app is absent rather than failing.
+A tolerant phase must have tolerant dependents: P7 depends on the 1Password agent, which
+the gate refuses on for a real Mac and merely reports under CI (§8), so P7 skips cleanly
+when the socket is absent rather than failing.
 
 ### The closing report re-derives; it never replays
 
@@ -209,6 +210,7 @@ output has two parts:
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
     ├── .chezmoitemplates/lib/               shared shell and one shared read, at render time
     │   ├── work-identity.toml               the 1Password item, shared by five surfaces (§6.5)
+    │   ├── agent-socket.sh                  the agent's socket path, shared by 20 and 70
     │   ├── homebrew.sh                      the prefix cascade
     │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41
     │   ├── macos-defaults.sh                the declaration, shared by 60 and drift
@@ -842,9 +844,10 @@ says "register the public key on GitHub", which is true of whichever key exists.
 remote's current value). It rewrites only a remote that is still the HTTPS form of a
 GitHub clone, derives the SSH form from it rather than writing this repository's name out
 a second time, and leaves the remote alone when the agent socket is missing — which is
-what CI holds, where the gate reports the 1Password items rather than refusing them (§8). The clone arrives over HTTPS because the repository is public;
-without the rewrite, the first `chezmoi git push` from a rebuilt machine prompts for a
-password that no longer exists.
+what CI holds, where the gate reports the 1Password items rather than refusing them (§8).
+The clone arrives over HTTPS because the repository is public; without the rewrite, the
+first `chezmoi git push` from a rebuilt machine prompts for a password that no longer
+exists.
 
 **The repository is public**, and that is load-bearing: a private clone on a fresh Mac
 needs a credential typed by hand, before `gh` and before 1Password exist, and it fails

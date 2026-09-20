@@ -84,8 +84,9 @@ if ! command -v op >/dev/null 2>&1; then
     "Install it from https://developer.1password.com/docs/cli/get-started, then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
 fi
 
-# The 1Password SSH agent, which P3's ~/.ssh/config is written against
-agent_socket="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+# The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
+# rewrite waits for — the socket's path is included at render time so both spell it once.
+{{ template "lib/agent-socket.sh" . }}
 if [ ! -S "$agent_socket" ]; then
   refuse_unless_ci "The 1Password SSH agent socket is missing ($agent_socket)." \
     "Unlock 1Password, then turn on Settings → Developer → Use the SSH agent."

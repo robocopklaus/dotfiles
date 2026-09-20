@@ -6,6 +6,8 @@
 # The reasons state the role, never the client. The five entries are generic and leak
 # nothing by themselves, so these comments are the leak surface.
 
+tap "databricks/tap"  # Backs the Databricks CLI below, which homebrew/core does not carry
+
 brew "azure-cli"    # Azure CLI — client cloud platform
 brew "databricks"   # Databricks CLI — client data platform
 brew "jira-cli"     # Jira CLI — client ticket tracker

@@ -62,6 +62,17 @@ done < <(printf '%s\n' "$brewfile" | sed -n 's/^cask "\([^"]*\)".*/\1/p')
 
 # The `mas` lines are deliberately not installed here. They need an Apple ID, which is a
 # precondition of their own, so they are 41-mas (§4).
+
+# Said by both reports below, and by neither of them twice.
+retry_note() {
+  printf '\nRe-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
+}
+
+if [ ${#failed[@]} -gt 0 ]; then
+  printf '\nP4: %d cask(s) did not install:\n\n' "${#failed[@]}"
+  printf '  ✗ %s\n' "${failed[@]}"
+  retry_note
+fi
 {{ if lookPath "op" }}
 # The work group (§6.1), inlined the same way and piped to a second `brew bundle --file=-`.
 # It sits inside the *same* `op`-presence branch that renders the work identity (§6.5), so
@@ -69,8 +80,12 @@ done < <(printf '%s\n' "$brewfile" | sed -n 's/^cask "\([^"]*\)".*/\1/p')
 # gate has already refused every real Mac lacking `op` (P0 item 4), which leaves CI as the
 # only renderer that omits the group.
 #
-# One invocation, and it degrades rather than aborting: nothing later depends on these
-# five, so the rule of §3 applies — a phase aborts the run only if a later phase needs it.
+# One invocation carries the whole file, casks included, where the base inventory splits
+# the two. Neither reason for the split reaches here: nothing later depends on these five,
+# so the failure rule of §3 is satisfied by capturing the exit code rather than by
+# installing one at a time, and none of them is the hand-installed copy `--adopt` exists
+# for (§2). `brew bundle` runs the rest of the file after an entry fails and names what
+# failed, so the per-entry report the cask loop builds by hand is already there.
 work_brewfile=$(
   cat <<'BREWFILE'
 {{ include "../Brewfile.work" }}
@@ -78,19 +93,8 @@ BREWFILE
 )
 
 printf 'P4: installing the work group.\n'
-work_failed='no'
 if ! printf '%s\n' "$work_brewfile" | brew bundle --file=-; then
-  work_failed='yes'
-fi
-{{ end }}
-if [ ${#failed[@]} -gt 0 ]; then
-  printf '\nP4: %d cask(s) did not install:\n\n' "${#failed[@]}"
-  printf '  ✗ %s\n' "${failed[@]}"
-  printf '\nRe-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
-fi
-{{ if lookPath "op" }}
-if [ "$work_failed" = 'yes' ]; then
   printf '\nP4: the work group did not install completely.\n'
-  printf '\nRe-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
+  retry_note
 fi
 {{- end }}

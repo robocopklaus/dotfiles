@@ -23,12 +23,12 @@ case $remote in
 esac
 
 # The agent is the whole reason for the rewrite, so its absence is the reason not to
-# perform it. Under CI the gate reports the 1Password preconditions rather than refusing
-# them (§8), and a machine pointed at a remote it cannot authenticate to is worse off than
-# one still on HTTPS.
-agent_socket="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+# perform it: a machine pointed at a remote it cannot authenticate to is worse off than one
+# still on HTTPS. Silently, and that is not a swallowed error — the gate refuses every real
+# Mac whose agent socket is missing (§2, P0 item 5), and only under CI does it report the
+# item instead (§8). CI is therefore the one machine that reaches this line, on every run.
+{{ template "lib/agent-socket.sh" . }}
 if [ ! -S "$agent_socket" ]; then
-  printf 'P7: the 1Password SSH agent is not running, so the source remote stays on HTTPS.\n'
   exit 0
 fi
 
