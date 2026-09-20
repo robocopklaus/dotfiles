@@ -176,9 +176,13 @@ fi
 # defect wearing the fix's clothes. With stdin at EOF the offer cannot be taken, `op`
 # gives up, and the empty output is the answer. The guidance it prints goes to stderr,
 # which is discarded for the same reason: what is tested is whether an account came back.
+#
+# Emptiness, and nothing else. Two tidier-looking tests are both wrong, measured on a
+# machine with no account: the exit status is **0**, and `--format=json` prints `[]`,
+# which is not empty. Either one turns this check into a check that always passes.
 if command -v op >/dev/null 2>&1 && [ -z "$(op account list </dev/null 2>/dev/null)" ]; then
-  refuse_unless_ci "The 1Password CLI knows no account, so the app integration is off." \
-    "Unlock 1Password, then turn on Settings → Developer → Integrate with 1Password CLI."
+  refuse_unless_ci "The 1Password CLI has no account: the app is handing it none." \
+    "Quit 1Password fully (⌘Q), reopen it, unlock it, and check Settings → Developer → Integrate with 1Password CLI — that switch, not the SSH agent one beside it. The accounts come from the running app, so it is fixed when 'op account list' prints one."
 fi
 
 # The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
