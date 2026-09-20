@@ -763,7 +763,7 @@ found the layout converged. The alternative is a layout step that re-derives on 
 — which is what `9x` and `42` are, and what this one would become if the carry ever
 stopped reading as a footnote.
 
-### 6.5 Secrets, SSH and signing (ADR 0003, ADR 0008)
+### 6.5 Secrets, SSH and signing (ADR 0003, ADR 0008, ADR 0011)
 
 **1Password stays**, in all three roles: SSH agent for authentication, `op-ssh-sign` for
 commit and tag signing, and the store for tokens. Dropping it for on-disk keys would
@@ -777,7 +777,27 @@ would depend on an unlocked vault, so the bootstrap could fail for a reason unre
 anything it was asked to do. Correspondingly, `gh auth login` is neither a gate item nor a
 line in the closing report's static tail; nothing in the bootstrap depends on `gh`.
 
-**The one exception is the work identity**, rendered from a **single** 1Password item via
+**Three identities commit from this machine, and none of them is the default** (ADR 0011).
+The **personal** identity, the **company** identity — 21st digital, under which client work
+on github.com is done — and the **client-issued** identity, whose account and hosts belong
+to a client. They are selected by two rules, because two things are being decided. *Key
+material belongs to the account that verifies it*: personal and company share one github.com
+account and therefore one key; the client-issued identity has its own account and its own.
+*The address belongs to the engagement*: `user.email` is chosen per repository by
+`includeIf "hasconfig:remote.*.url:…"`, keyed on the remote, because the remote is what
+decides which account will verify the signature.
+
+`~/.gitconfig` carries no `user.email` at all. It holds what every identity shares —
+`user.name` and the signing setup — and `user.useConfigOnly = true`. A repository that no
+`includeIf` matches **refuses to commit** rather than falling back. Every default is wrong
+somewhere and wrong *silently*: a personal default signs paid work with a private address, a
+company default writes an employer into a repository that outlives the employment. Refusal
+is loud, arrives at the first commit, and costs one line to resolve. It also removes the
+need to enumerate client organisations in a public tree in order to avoid a default — which
+is the same relationship §6.5 exists to keep out of it.
+
+**The one exception is the client-issued identity** — the *work identity* in the tree,
+whose filenames stay neutral — rendered from a **single** 1Password item via
 `onepasswordRead` templates. Nothing in it is cryptographically secret — the signing key is
 a *public* key and the GHE host is a *public* DNS name. What is kept out of a public tree
 is the **client relationship**. So the unit is the whole identity, indivisible: host
@@ -816,15 +836,22 @@ Two consequences, stated rather than discovered:
   the item holds all fields, so the cost is at most one unlock per apply. Rendering once
   into an unmanaged file would avoid it and is deliberately *not* done — that is the
   recorded intermediate state the convergence invariant bans.
-- **The quiet failure mode.** If the render is skipped, the files are silently
-  personal-only. So the work identity is a **dynamic check in the drift report**, not
-  something discovered at the first work commit.
+- **The failure mode, no longer a quiet one.** If the render is skipped, the client-issued
+  identity is absent — and because nothing defaults, the affected repository stops at its
+  first commit instead of signing as personal. The **dynamic check in the drift report**
+  stays: it turns that stop into an explanation, ahead of the moment it would otherwise be
+  met.
 
-**Keys: one per identity, doing both jobs.** Personal and work are each a single
-`ssh-ed25519` key used for authentication *and* signing. Splitting the two was rejected:
-both keys live in the same vault behind the same unlock, so the separation is nominal
-while the cost — two keys and three registrations at the one manual point of the
-rebuild — is real.
+**Keys: one per account, doing both jobs.** Each key is a single `ssh-ed25519` key used
+for authentication *and* signing. There are two, not three: personal and company work run
+through one github.com account and share its key, differing by address alone, while the
+client-issued identity has its own account and its own. ADR 0008 said *per identity*, which
+was written before the two came apart; the argument it rests on is unchanged and now cuts
+the same way twice. Splitting authentication from signing was rejected: both keys would live
+in the same vault behind the same unlock, so the separation is nominal while the cost — two
+keys and three registrations at the one manual point of the rebuild — is real. A separate
+key for the company identity was rejected for the same reason, with the account shared as
+well.
 
 **No retired key is carried anywhere** — no line in `allowed_signers`, no registration
 left on the GitHub account. This is safe because nothing is lost: GitHub records a
@@ -1083,3 +1110,4 @@ Stated rather than discovered later.
 | [0008](docs/adr/0008-one-key-per-identity-nothing-retired-is-carried.md) | One key per identity, for both roles; no retired key is carried |
 | [0009](docs/adr/0009-the-dock-is-reconciled-not-rebuilt.md) | The Dock is reconciled, not rebuilt |
 | [0010](docs/adr/0010-agent-tooling-is-restored-from-the-account.md) | Agent tooling is restored from the account, not declared |
+| [0011](docs/adr/0011-no-default-identity-keys-belong-to-accounts.md) | There is no default identity; keys belong to accounts, addresses to engagements |
