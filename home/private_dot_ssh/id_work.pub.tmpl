@@ -1,0 +1,3 @@
+{{- if lookPath "op" -}}
+{{ (fromToml (includeTemplate "lib/work-identity.toml" .)).key }}
+{{ end -}}

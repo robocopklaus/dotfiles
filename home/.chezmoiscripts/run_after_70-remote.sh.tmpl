@@ -1,0 +1,40 @@
+#!/bin/bash
+# Phase: P7 — integrations: the chezmoi source remote, rewritten HTTPS → SSH
+# Requires: P2 (the 1Password SSH agent), Xcode Command Line Tools (git)
+
+set -euo pipefail
+
+# The source clone arrives over HTTPS, because the repository is public and a fresh Mac
+# has no credential to offer (§6.5). Nothing in the run needs more than that — but the
+# first `chezmoi git push` from a rebuilt machine would prompt for a password that no
+# longer exists, so the remote is moved onto the agent once the agent is there to carry it.
+#
+# `run_after_`, not `run_onchange_`: this script inlines nothing, so its content hash never
+# changes and says nothing about the remote's current value. Under `run_onchange_` it would
+# run once per machine and never look again (§4).
+
+remote=$(git -C "$CHEZMOI_SOURCE_DIR" remote get-url origin 2>/dev/null) || remote=''
+
+# An already-rewritten remote is the converged state, and a clone from anywhere else is
+# not this script's to touch. Both exit quietly: what the run prints is what it did.
+case $remote in
+  https://github.com/*) ;;
+  *) exit 0 ;;
+esac
+
+# The agent is the whole reason for the rewrite, so its absence is the reason not to
+# perform it. Under CI the gate reports the 1Password preconditions rather than refusing
+# them (§8), and a machine pointed at a remote it cannot authenticate to is worse off than
+# one still on HTTPS.
+agent_socket="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+if [ ! -S "$agent_socket" ]; then
+  printf 'P7: the 1Password SSH agent is not running, so the source remote stays on HTTPS.\n'
+  exit 0
+fi
+
+# Derived from the URL that is there, rather than written out a second time: the clone
+# already states which repository this is (rule 1).
+path=${remote#https://github.com/}
+path=${path%.git}
+printf 'P7: pointing the chezmoi source remote at git@github.com:%s.git.\n' "$path"
+git -C "$CHEZMOI_SOURCE_DIR" remote set-url origin "git@github.com:$path.git"

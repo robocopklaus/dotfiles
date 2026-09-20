@@ -11,9 +11,15 @@ set -euo pipefail
 # different reason. There it is `run_onchange_`'s content hash; here it is §7's: the one
 # command whose whole value is being run on a whim must not require the source tree to be
 # on disk, let alone a `cd` into it.
+# The work group (§6.1) is appended under the same `op` guard the P4 script inlines it
+# behind, and this file is rendered by chezmoi too — so the check and the applying script
+# evaluate one condition at one moment. That is why no special case for the group is
+# written anywhere below: on a company Mac the five are declared and installed, on CI they
+# are neither, and neither machine reports them under *Not in the repository*.
 brewfile=$(
   cat <<'BREWFILE'
 {{ include "../Brewfile" }}
+{{ if lookPath "op" }}{{ include "../Brewfile.work" }}{{ end }}
 BREWFILE
 )
 
@@ -308,6 +314,18 @@ elif [ "$dock_current" != "$dock_expected" ]; then
   diverged+=("  actual:   $(dock_sequence_label "$dock_current")")
 fi
 
+{{ if lookPath "op" }}
+# The work identity (§6.5), which is the one thing in this repository that can fail
+# quietly: a render skipped for want of 1Password leaves the files personal-only, valid
+# and silent, and the first sign of it is a work commit signed by the wrong key. The check
+# is rendered under the same `op` guard as the templates it asks about, so it asks only on
+# a machine those templates were supposed to write to.
+for rendered in "$HOME/.ssh/id_work.pub" "$HOME/.config/git/config-work"; do
+  if [ ! -s "$rendered" ]; then
+    diverged+=("Work identity: $rendered did not render — re-apply with 1Password unlocked")
+  fi
+done
+{{ end }}
 # Two things are deliberately not swept, and their absence is written down so it is not
 # read as an oversight and repaired (§7): `mise` runtimes, which `mise ls` already diffs
 # against its own configuration, and `chezmoi unmanaged` over $HOME, which reports every

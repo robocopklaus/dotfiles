@@ -147,11 +147,12 @@ points during a bundle run, which is why the keepalive exists at all. The CLI sc
 the exception and takes no keepalive: its installer writes only under `$HOME` and refuses
 outright to run through `sudo`.
 
-**P7 — currently empty.** The phase stays in the model as the slot for post-install
-wiring, but nothing occupies it today: the one inherited integration was an `obsidian-cli`
-symlink, and Obsidian is out of scope (§6.3) while `obsidian-cli` is not declared
-anywhere in the inventory (§6.1). An integration that wires up a tool the repository does
-not install has nothing to do.
+**P7 — the source remote.** One thing occupies the phase: the chezmoi source remote is
+rewritten from HTTPS to SSH, once the 1Password agent is there to carry it (§6.5). The
+inherited integration that would otherwise have lived here was an `obsidian-cli` symlink,
+and Obsidian is out of scope (§6.3) while `obsidian-cli` is not declared anywhere in the
+inventory (§6.1) — an integration that wires up a tool the repository does not install has
+nothing to do.
 
 ### Failure behaviour
 
@@ -206,7 +207,8 @@ output has two parts:
 └── home/                                   ← the entire chezmoi source
     ├── .chezmoidata/macos-defaults.toml    the defaults declaration (§6.4)
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
-    ├── .chezmoitemplates/lib/               shared shell, included at render time
+    ├── .chezmoitemplates/lib/               shared shell and one shared read, at render time
+    │   ├── work-identity.toml               the 1Password item, shared by five surfaces (§6.5)
     │   ├── homebrew.sh                      the prefix cascade
     │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41
     │   ├── macos-defaults.sh                the declaration, shared by 60 and drift
@@ -220,6 +222,7 @@ output has two parts:
     │   ├── run_onchange_after_50-mise.sh.tmpl           P5
     │   ├── run_onchange_after_60-macos-defaults.sh.tmpl P6
     │   ├── run_onchange_after_61-dock.sh.tmpl           P6
+    │   ├── run_after_70-remote.sh.tmpl                  P7  the source remote, → SSH
     │   └── run_after_99-report.sh.tmpl                  epilogue — invokes drift
     ├── dot_local/bin/executable_drift.tmpl              → ~/.local/bin/drift
     ├── dot_zprofile.tmpl
@@ -252,6 +255,10 @@ run it exactly once per machine, which is a `run_once_` wearing a different pref
 bans that: a machine whose CLI went missing would never get it back from the one command
 that is supposed to be the whole recovery mechanism. So it re-derives on every run, and its
 presence guard makes a converged run cost one `command -v`.
+
+**70 is `run_after_` for the neighbouring reason.** It inlines nothing either, and its
+content hash says nothing about the value the source remote currently holds — so the rewrite
+would be attempted once per machine and never looked at again (§6.5).
 
 **`9x` is deliberately outside the phase range.** The closing report is the run's
 epilogue, not a phase; numbering it `80` would imply a P8 that does not exist. It is
@@ -542,7 +549,7 @@ alone, and the boundary should not have to be renegotiated when one does.
 | `dot_config/oh-my-posh/config.omp.json` | Prompt definition |
 | `dot_config/mise/config.toml` | Runtime pins |
 | `dot_config/ccstatusline/settings.json` | Statusline definition |
-| `dot_gitconfig`, `dot_gitignore` | Global git behaviour |
+| `dot_gitconfig`, `dot_gitignore` | Global git behaviour; the gitconfig is templated for the work identity's guarded `includeIf` (§6.5) |
 | `dot_config/git/allowed_signers`, `config-work` | Signing and the work identity; templated (§6.5) |
 | `dot_claude/settings.json` | Permissions and hooks — see the dominance note |
 | `dot_mcp.json` | Fully hand-authored |
@@ -777,6 +784,14 @@ of the benefit.
 must not name the client either. The personal identity, its key and its `allowed_signers`
 line stay in cleartext — they are already public on GitHub.
 
+**The item is named once.** The five surfaces that render from it — the `includeIf` in
+`~/.gitconfig`, `config-work`, the `allowed_signers` line, the ssh `Host` block and
+`id_work.pub` — all read one `.chezmoitemplates` partial, which is the only place the item
+and its field names are written down. That is also why `~/.gitconfig` is templated at all:
+the condition that switches the identity on is the host pattern, which leaks exactly what
+the file it includes does, so it is rendered under the same guard and is simply absent on a
+machine without `op`, where the file it would point at is not written either.
+
 **An `op`-less machine degrades; it does not refuse.** The work-identity templates are
 guarded on `op` being present, so CI and any machine without 1Password render a
 personal-only configuration that applies cleanly. This is not a convenience — it is what
@@ -822,9 +837,12 @@ they live in 1Password and are offered only through the agent, so there is no ex
 that grows with time. Rotation happens once, by hand, at any convenient moment. P0 item 6
 says "register the public key on GitHub", which is true of whichever key exists.
 
-**The source remote is rewritten HTTPS → SSH after the agent is verified**, in a plain
+**The source remote is rewritten HTTPS → SSH after the agent is verified**, in P7's plain
 `run_after_` script (not `run_onchange_`, whose content hash says nothing about the
-remote's current value). The clone arrives over HTTPS because the repository is public;
+remote's current value). It rewrites only a remote that is still the HTTPS form of a
+GitHub clone, derives the SSH form from it rather than writing this repository's name out
+a second time, and leaves the remote alone when the agent socket is missing — which is
+what CI holds, where the gate reports the 1Password items rather than refusing them (§8). The clone arrives over HTTPS because the repository is public;
 without the rewrite, the first `chezmoi git push` from a rebuilt machine prompts for a
 password that no longer exists.
 

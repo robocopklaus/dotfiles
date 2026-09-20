@@ -1,0 +1,14 @@
+{{- if lookPath "op" -}}
+{{- $work := fromToml (includeTemplate "lib/work-identity.toml" .) -}}
+# The work identity (§6.5), rendered from one 1Password item. Included by ~/.gitconfig on
+# the remote's host, so it applies per repository rather than per directory. Only [user]
+# differs from the global configuration: the signing setup — gpg.format, op-ssh-sign,
+# allowedSignersFile, commit.gpgSign — is inherited from it.
+#
+# On a machine without `op` this file renders empty and is therefore not written at all,
+# and the `includeIf` that would point at it is not written either (ADR 0003).
+[user]
+	name = {{ $work.name }}
+	email = {{ $work.email }}
+	signingkey = ~/.ssh/id_work.pub
+{{ end -}}

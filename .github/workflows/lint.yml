@@ -60,7 +60,9 @@ jobs:
       # graded it would be satisfied by "# tool" and would have to be argued with. §6.1
       - name: Brewfile reason comments
         run: |
-          if grep -vE '^[[:space:]]*(#|$)' Brewfile | grep -vE '#[[:space:]]*[^[:space:]]'; then
+          # Both inventories: the convention applies to the work group unchanged, and that
+          # is the one file where the comments are themselves the leak surface (§6.1).
+          if grep -vE '^[[:space:]]*(#|$)' Brewfile Brewfile.work | grep -vE '#[[:space:]]*[^[:space:]]'; then
             echo 'The entries above carry no reason comment (§6.1).'
             exit 1
           fi

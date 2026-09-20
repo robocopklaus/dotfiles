@@ -1,0 +1,15 @@
+{{/*
+Who git trusts to have signed a commit locally (§6.5). It holds exactly the live
+identities: no retired key is carried, because an ssh signature embeds the signer's public
+key and a dropped line is reconstructible from any commit it signed (ADR 0008). Because
+nothing accumulates here, no pruning rule has to exist.
+
+Each line derives its key from the public key *file* rather than transcribing the blob a
+second time — the personal one from the file in this repository, the work one from the
+same 1Password field ~/.ssh/id_work.pub renders from.
+*/ -}}
+7754932+robocopklaus@users.noreply.github.com {{ trim (include "private_dot_ssh/id_personal.pub") }}
+{{ if lookPath "op" -}}
+{{- $work := fromToml (includeTemplate "lib/work-identity.toml" .) -}}
+{{ $work.email }} {{ $work.key }}
+{{ end -}}

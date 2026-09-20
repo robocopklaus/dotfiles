@@ -1,0 +1,17 @@
+{{ if lookPath "op" -}}
+{{- $work := fromToml (includeTemplate "lib/work-identity.toml" .) -}}
+# The work host (§6.5), rendered from one 1Password item together with the rest of the
+# identity. IdentitiesOnly is not tidiness: without it the agent offers every key it holds
+# and the server can close the connection with "too many authentication failures". The
+# .pub only selects which key the agent signs with — the private key never leaves
+# 1Password.
+Host {{ $work.host }}
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_work.pub
+
+{{ end -}}
+# Every host authenticates through the 1Password agent. Written in P3 and inert until
+# 1Password is unlocked with the agent turned on, which is the preflight item the gate
+# verifies rather than this file (§2, §3).
+Host *
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

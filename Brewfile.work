@@ -1,0 +1,14 @@
+# The work group (§6.1). It rides the same `op` guard as the work identity (§6.5): one
+# client relationship, one condition, so the two can never disagree. The day this
+# repository stops carrying client work, this file and its include line go, and no entry
+# in the base inventory is touched.
+#
+# The reasons state the role, never the client. The five entries are generic and leak
+# nothing by themselves, so these comments are the leak surface.
+
+brew "azure-cli"    # Azure CLI — client cloud platform
+brew "databricks"   # Databricks CLI — client data platform
+brew "jira-cli"     # Jira CLI — client ticket tracker
+
+cask "gcloud-cli"        # Google Cloud CLI — client cloud platform; ships as a cask, not a formula
+cask "microsoft-teams"   # Client chat and meetings

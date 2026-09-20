@@ -1,0 +1,20 @@
+{{/*
+The work identity (§6.5, ADR 0003), read from the single 1Password item that carries it.
+This is the only place the item and its fields are named, and it serves the five surfaces
+that render from them: the `includeIf` in ~/.gitconfig, ~/.config/git/config-work, the
+work line in ~/.config/git/allowed_signers, the ssh `Host` block, and ~/.ssh/id_work.pub.
+
+The item's own name and its vault appear here, in a public tree, so neither names the
+client either. Nothing in the item is cryptographically secret — the signing key is a
+public key and the host is a public DNS name. What is kept out of the tree is the client
+relationship, which is why the unit is the whole identity and never half of it.
+
+Every call site guards on `op` being on the path, so this template is reached only on a
+machine that has 1Password. It does not guard a second time: a template that refused here
+would be the refusal the gate already owns (§2).
+*/ -}}
+{{- $item := "op://Private/work-identity" -}}
+host = "{{ onepasswordRead (printf "%s/host" $item) }}"
+name = "{{ onepasswordRead (printf "%s/name" $item) }}"
+email = "{{ onepasswordRead (printf "%s/email" $item) }}"
+key = "{{ onepasswordRead (printf "%s/public_key" $item) }}"
