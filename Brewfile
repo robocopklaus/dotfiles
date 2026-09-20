@@ -1,5 +1,3 @@
-tap "homebrew/command-not-found"  # Backs the zsh command-not-found plugin
-
 brew "chezmoi"             # Drives the entire bootstrap
 brew "git"                 # Version control
 brew "gh"                  # GitHub CLI — issues and this repository's map live there

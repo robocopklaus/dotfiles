@@ -57,10 +57,15 @@ trap 'rm -rf "$machine"' EXIT
 # one of them is not a stranger this report should name.
 mkdir -p "$machine/bin" "$machine/Applications" "$machine/DockApps"
 
-sed -n 's/^tap "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/taps"
-sed -n 's/^brew "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/formulae"
-sed -n 's/^cask "\([^"]*\)".*/\1/p' "$repo/Brewfile" >"$machine/casks"
-sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p' "$repo/Brewfile" >"$machine/mas"
+# The inventory is read back out of the rendered script rather than off disk. The work
+# group is inlined only where `op` renders it, so Brewfile alone is the list the subject
+# compares against on a runner without `op` and not on a Mac with one — and a stub built
+# from the wrong list reports drift that is the test's own.
+brewfile=$(awk '/^BREWFILE$/ { held = 0 } held { print } /cat <<.BREWFILE.$/ { held = 1 }' "$rendered")
+sed -n 's/^tap "\([^"]*\)".*/\1/p' <<<"$brewfile" >"$machine/taps"
+sed -n 's/^brew "\([^"]*\)".*/\1/p' <<<"$brewfile" >"$machine/formulae"
+sed -n 's/^cask "\([^"]*\)".*/\1/p' <<<"$brewfile" >"$machine/casks"
+sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p' <<<"$brewfile" >"$machine/mas"
 cp "$machine/formulae" "$machine/leaves"
 printf '{"casks":[]}\n' >"$machine/cask-info.json"
 : >"$machine/chezmoi-status"
@@ -290,7 +295,11 @@ cp "$machine/formulae" "$machine/leaves"
 report=$(drift)
 check "$?" 1 'exits 1'
 says "$report" '^Missing on the machine' 'prints the missing section'
-says "$report" "Tap $tap" 'names the missing tap'
+# Only the work group declares a tap, and it renders only where `op` does: on a runner
+# without it there is no tap to take away, and asserting on one would assert a fiction.
+if [ -n "$tap" ]; then
+  says "$report" "Tap $tap" 'names the missing tap'
+fi
 says "$report" "Formula $formula" 'names the missing formula'
 says "$report" "Cask $cask" 'names the missing cask'
 says "$report" "App Store $app_name ($app_id)" 'names the missing App Store entry with its id'
