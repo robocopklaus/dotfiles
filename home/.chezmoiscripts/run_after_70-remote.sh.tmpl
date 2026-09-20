@@ -28,7 +28,7 @@ esac
 # real Mac whose agent socket is missing (the gate's P0 item 5), and only under CI does it
 # report the item instead. CI is therefore the one machine that reaches this line, on
 # every run.
-{{ template "lib/agent-socket.sh" . }}
+{{ template "lib/onepassword-paths.sh" . }}
 if [ ! -S "$agent_socket" ]; then
   exit 0
 fi
