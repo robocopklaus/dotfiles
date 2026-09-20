@@ -123,15 +123,26 @@ than one, and the one-pass promise is narrower than it was: it holds within each
 across the run. The alternative was to keep asking a human for commands a machine can
 issue, which is a worse bargain.
 
-**Why the CLI integration toggle is gated.** It was not, on the argument that verifying
-it costs an interactive prompt: `op whoami` raises a GUI unlock against a locked vault,
-and §1 spends the run's entire interactive budget on `sudo -v`. The argument was right
-about `op whoami` and wrong about the toggle. `op account list` answers the same question
-for nothing — it reads local metadata, returns at once and unlocks nothing — and with the
-integration off it has nothing to list, because the account is handed to `op` by the app
-rather than stored on disk. A working machine's `~/.config/op/config` says `"accounts":
-null` and `op` still knows the account. So the toggle is verifiable, and §2's rule leaves
-no discretion: a verifiable manual step is a precondition the gate refuses on.
+**Why the CLI integration toggle is gated, and why by `op account list`.** It went
+ungated on the claim that verifying it costs an interactive prompt — that `op whoami`
+raises a GUI unlock against a locked vault, and §1 spends the run's entire interactive
+budget on `sudo -v`. That claim was never true. `op whoami` prompts for nothing: with no
+account it answers `no account found for filter`, and with an account but no live session
+it answers `account is not signed in`, both at once and both as errors.
+
+It is still the wrong check, for the reason the second of those answers gives away. It
+asks whether a session is open, and the run does not need one — the session is created at
+first use, when P3 renders the work identity and the app authenticates. A machine that is
+entirely correct, with the integration on and the vault simply not unlocked yet, fails
+`op whoami`. Gating on it would refuse the machine this repository is built to produce.
+
+`op account list` asks the question that is actually a precondition: does `op` have an
+account at all. It reads local metadata, returns at once and unlocks nothing, and with the
+integration off it has nothing to list — the account is handed to `op` by the app rather
+than stored on disk, which is why a working machine's `~/.config/op/config` says
+`"accounts": null` while `op` still knows the account. So the toggle is verifiable, and
+§2's rule leaves no discretion: a verifiable manual step is a precondition the gate
+refuses on.
 
 **What made it worth finding.** Left ungated, the toggle does not fail the run cleanly.
 chezmoi renders the work identity through `op`, and `op` with no account does not error —
