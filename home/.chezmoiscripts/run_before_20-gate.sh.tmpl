@@ -163,7 +163,14 @@ fi
 # an email, a secret key and a password, in the middle of a run that §1 says has exactly
 # one interactive moment. Then it times out. A precondition whose absence turns the run
 # into a credential prompt belongs in front of the run, not inside it.
-if command -v op >/dev/null 2>&1 && [ -z "$(op account list 2>/dev/null)" ]; then
+#
+# Read from /dev/null, because the command being asked about is the one that prompts. `op`
+# with no account offers to add one interactively — that is the observed failure this
+# check exists to prevent — and a check that can itself sit waiting for an answer is the
+# defect wearing the fix's clothes. With stdin at EOF the offer cannot be taken, `op`
+# gives up, and the empty output is the answer. The guidance it prints goes to stderr,
+# which is discarded for the same reason: what is tested is whether an account came back.
+if command -v op >/dev/null 2>&1 && [ -z "$(op account list </dev/null 2>/dev/null)" ]; then
   refuse_unless_ci "The 1Password CLI knows no account, so the app integration is off." \
     "Unlock 1Password, then turn on Settings → Developer → Integrate with 1Password CLI."
 fi
