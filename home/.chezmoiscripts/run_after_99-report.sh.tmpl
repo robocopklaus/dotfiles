@@ -66,6 +66,10 @@ Sign-ins other things depend on
                   "SSH signing keys" (P0 item 6). Authentication and signature
                   verification are separate registrations of the same key, and
                   the second one is the one that is silently forgotten.
+  Apple Account   Sign in under System Settings if you have not already. The gate
+                  does not check it: a freshly set up machine has no
+                  `MobileMeAccounts` domain to read even when it is signed in, so
+                  the check refused correctly prepared machines and is gone.
   App Store       Sign in, then re-run the bootstrap if the report above is
                   short an App Store application: `mas` cannot install for an
                   account that is not signed in, and the phase is tolerant.

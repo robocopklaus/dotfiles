@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Separate from 40 because the precondition is: `mas install` needs root, and it installs
-# nothing unless the Apple ID is already signed in — the one P0 item the gate cannot
+# nothing unless the Apple ID is already signed in — one of the P0 items the gate cannot
 # verify (ADR 0007). A precondition of its own is a script of its own (§4).
 #
 # The Brewfile (§6.1) is inlined here at render time for the reason 40 states: the

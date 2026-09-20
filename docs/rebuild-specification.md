@@ -58,13 +58,14 @@ pass, before a single file is written.
 
 | # | Step | What the gate checks |
 | --- | --- | --- |
-| 1 | macOS installed, Apple ID signed in in System Settings | macOS >= 26, Apple Silicon, an Apple ID signed in |
+| 1 | macOS installed, Apple Account signed in in System Settings | macOS >= 26, Apple Silicon |
 | 2 | Network | `github.com` reachable |
 | 3 | Xcode Command Line Tools — `xcode-select --install` | `xcode-select -p` |
 | 4 | 1Password and the 1Password CLI installed by hand | app present, `op` on `PATH` |
 | 5 | Signed in to 1Password, unlocked, **SSH agent enabled** | agent socket exists |
 | 6 | Public key registered on GitHub under *SSH keys* **and** *SSH signing keys* | **not verifiable** → closing report |
 | 7 | Administrator rights | `sudo -v` |
+| — | Signed in with the Apple Account | **not verifiable** → tolerant `mas`, closing report |
 | — | Signed in to the App Store | **not verifiable** → tolerant `mas`, closing report |
 | — | FileVault | deliberately **not** a gate item |
 
@@ -131,7 +132,7 @@ order that a precondition justifies; it is never itself the justification.
 **P2 — the gate.** A `run_before_` script, and the structural addition the prior setup
 lacked entirely. It checks **every** P0 item and reports **all** failures in one pass,
 each with its remedy (§2). Running before file application means a failed gate leaves the
-machine completely untouched. Under CI the 1Password and Apple ID items degrade from refusing to reporting
+machine completely untouched. Under CI the 1Password items degrade from refusing to reporting
 (§8); every other precondition still refuses.
 
 **P3 — files before tools.** Configuration lands before the software it configures
@@ -1026,9 +1027,9 @@ entries it bends are *read out of* the Brewfile rather than named, so editing th
 cannot quietly turn a check into a no-op. Reusing it pays twice: the detector, which
 otherwise runs a handful of times a year, becomes continuously tested.
 
-**The gate reads `CI`.** Under it, the 1Password and Apple ID preconditions degrade from
-refusing to reporting; everything else still refuses. Deriving CI from `op`'s *absence*
-was the tempting version and does not survive: a genuinely fresh Mac has no `op` either,
+**The gate reads `CI`.** Under it, the 1Password preconditions degrade from refusing to
+reporting; everything else still refuses. Deriving CI from `op`'s *absence* was the
+tempting version and does not survive: a genuinely fresh Mac has no `op` either,
 and that machine must be refused. A signal that cannot tell the two apart waves through
 precisely the case the gate exists for. `CI` is set by the runner and never written by
 this repository, so it is environmental fact, not the opt-in flag rule 6 rejects.
