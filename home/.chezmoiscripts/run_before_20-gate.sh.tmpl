@@ -153,6 +153,21 @@ if ! command -v op >/dev/null 2>&1; then
     "Run: brew install --cask 1password-cli — then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
 fi
 
+# The CLI integration, asked of `op account list` — which reads local metadata, returns
+# at once and unlocks nothing. Without the integration turned on, `op` knows no account at
+# all: `~/.config/op/config` carries `"accounts": null` even on a working machine, because
+# the account is handed over by the app.
+#
+# This is checked rather than left to P3 because of what P3 does without it. chezmoi calls
+# `op signin`, and `op` with no account does not fail — it *asks*, for a sign-in address,
+# an email, a secret key and a password, in the middle of a run that §1 says has exactly
+# one interactive moment. Then it times out. A precondition whose absence turns the run
+# into a credential prompt belongs in front of the run, not inside it.
+if command -v op >/dev/null 2>&1 && [ -z "$(op account list 2>/dev/null)" ]; then
+  refuse_unless_ci "The 1Password CLI knows no account, so the app integration is off." \
+    "Unlock 1Password, then turn on Settings → Developer → Integrate with 1Password CLI."
+fi
+
 # The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
 # rewrite waits for — the socket's path is included at render time so both spell it once.
 # This is the one the acquisition can never satisfy: it is a toggle behind an unlock.

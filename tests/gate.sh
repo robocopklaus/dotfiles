@@ -54,6 +54,16 @@ if [ "${1:-}" = "install" ]; then
 fi
 exit 0
 EOF
+# `op`, answering to $STUB_NO_ACCOUNT so one case can present a CLI whose integration is
+# off — which is what an empty `op account list` means.
+cat >"$bin/op" <<'EOF'
+#!/bin/bash
+if [ "${1:-}" = "account" ]; then
+  [ -n "${STUB_NO_ACCOUNT:-}" ] && exit 0
+  echo "example.1password.com  someone@example.com  ID"
+fi
+exit 0
+EOF
 chmod +x "$bin"/*
 
 pass=0
@@ -87,6 +97,15 @@ silent "$out" 'Installing Homebrew' 'installs no Homebrew'
 silent "$out" 'Preflight gate: installing' 'installs no cask'
 # The second stop is never reached, so nothing it would have said may appear.
 silent "$out" 'SSH agent socket' 'never reaches the trust-chain checks'
+
+printf '\nThe CLI integration is off: the gate refuses rather than letting P3 ask\n'
+home="$root/home-nointegration"
+mkdir -p "$home"
+out=$(HOME="$home" PATH="$bin:$PATH" STUB_NO_ACCOUNT=1 CI='' bash "$gate" 2>&1)
+code=$?
+check 'exits 1' 1 "$code"
+says "$out" 'knows no account' 'names the missing integration'
+says "$out" 'Integrate with 1Password CLI' 'names the toggle that fixes it'
 
 printf '\nUnder CI: the casks are skipped and 1Password reports rather than refuses\n'
 home="$root/home-ci"

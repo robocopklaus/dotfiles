@@ -64,7 +64,7 @@ left, before a single file is written.
 | 2 | Network | `github.com` reachable |
 | 3 | Xcode Command Line Tools — `xcode-select --install` | `xcode-select -p` |
 | 4 | 1Password and the 1Password CLI — **the gate installs both** | app present, `op` on `PATH` |
-| 5 | Signed in to 1Password, unlocked, **SSH agent enabled**, **CLI integration enabled** | agent socket exists |
+| 5 | Signed in to 1Password, unlocked, **SSH agent enabled**, **CLI integration enabled** | agent socket exists, `op` knows an account |
 | 6 | Public key registered on GitHub under *SSH keys* **and** *SSH signing keys* | **not verifiable** → closing report |
 | 7 | Administrator rights | `sudo -v` |
 | — | Signed in with the Apple Account | **not verifiable** → tolerant `mas`, closing report |
@@ -123,15 +123,25 @@ than one, and the one-pass promise is narrower than it was: it holds within each
 across the run. The alternative was to keep asking a human for commands a machine can
 issue, which is a worse bargain.
 
-**Why the CLI integration toggle is not gated.** The `op` check verifies the binary on
-`PATH`, and the remedy tells you to turn on 1Password → Settings → Developer → Integrate
-with 1Password CLI — but nothing verifies the toggle. `op whoami` would, and it is
-declined: against a locked vault it raises a GUI unlock prompt, and §1 spends the run's
-entire interactive budget on `sudo -v`. A check the gate cannot afford to run is not a
-check, so the toggle is unverifiable in the only sense this document uses the word. It
-needs no closing-report line either, because it is the one manual step that announces
-itself: the very next phase renders the work identity through `op`, and a missing toggle
-stops P3 with that template named in the error.
+**Why the CLI integration toggle is gated.** It was not, on the argument that verifying
+it costs an interactive prompt: `op whoami` raises a GUI unlock against a locked vault,
+and §1 spends the run's entire interactive budget on `sudo -v`. The argument was right
+about `op whoami` and wrong about the toggle. `op account list` answers the same question
+for nothing — it reads local metadata, returns at once and unlocks nothing — and with the
+integration off it has nothing to list, because the account is handed to `op` by the app
+rather than stored on disk. A working machine's `~/.config/op/config` says `"accounts":
+null` and `op` still knows the account. So the toggle is verifiable, and §2's rule leaves
+no discretion: a verifiable manual step is a precondition the gate refuses on.
+
+**What made it worth finding.** Left ungated, the toggle does not fail the run cleanly.
+chezmoi renders the work identity through `op`, and `op` with no account does not error —
+it *asks*, in the terminal, for a sign-in address, an email address, a secret key and a
+password. That is a second interactive moment, in a run that promises one, collecting a
+secret this repository is built never to handle; and when nobody answers it, the run dies
+on an authorization timeout naming the template rather than the toggle. The gate check is
+the fix. `onepassword.prompt = false`, declared in chezmoi's own configuration, is the
+second net for the case the gate degrades — under CI, where the 1Password items report
+rather than refuse and nothing may be prompted for.
 
 **Why Command Line Tools is a precondition and not an installation.** The prior setup
 polled for up to 3600 seconds waiting for CLT to appear mid-run. That poll is deleted.
