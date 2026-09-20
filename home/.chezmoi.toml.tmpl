@@ -4,12 +4,12 @@
 # chezmoi reads the work identity through `op` while it renders P3. With no account —
 # which is what the machine looks like when 1Password's CLI integration is off — `op` does
 # not fail. It asks: for a sign-in address, an email address, a secret key and a password,
-# in the middle of a run that §1 promises has exactly one interactive moment. Then the
+# in the middle of a run that promises exactly one interactive moment. Then the
 # request times out and the run dies on a message about the template rather than about the
 # toggle.
 #
 # `prompt = false` turns that question into an error. The gate refuses on the same
-# condition before any of this is reached (§2), so in practice this is the second net,
+# condition before any of this is reached, so in practice this is the second net,
 # for the case the gate degrades: under CI, where the 1Password items report rather than
 # refuse and nothing should ever be prompted for.
 [onepassword]

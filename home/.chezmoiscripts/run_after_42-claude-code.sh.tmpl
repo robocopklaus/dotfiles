@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Separate from 40 because the precondition is: the CLI has no Homebrew formula, so it
 # comes from its own installer and wants network rather than Homebrew. A precondition of
-# its own is a script of its own (§4). The `claude` cask in the Brewfile is the desktop
+# its own is a script of its own. The `claude` cask in the Brewfile is the desktop
 # application — a different artifact from a different source, and not this script's
 # business.
 #
@@ -17,17 +17,17 @@ set -euo pipefail
 #
 # `run_after_`, not `run_onchange_after_`: this script inlines no inventory, so its
 # rendered content never changes and content-hash skipping would make it a `run_once_` in
-# disguise, which §1 bans. §4 has the reasoning; the guard below is what makes re-deriving
-# on every run cheap.
+# disguise, which the one-command contract bans. The script conventions have the
+# reasoning; the guard below is what makes re-deriving on every run cheap.
 
-# The managed `.zshrc` already puts `~/.local/bin` first on PATH (§6.3), but this script
+# The managed `.zshrc` already puts `~/.local/bin` first on PATH, but this script
 # runs in chezmoi's environment rather than a login shell. Seeding it here is what lets the
 # guard see a CLI that is already installed.
 export PATH="$HOME/.local/bin:$PATH"
 
 # Present is converged. The CLI updates itself, so there is no version for the bootstrap
 # to chase: this phase's job is that it exists, and a re-run that downloaded it again
-# would be work performed to arrive where the machine already is (§1).
+# would be work performed to arrive where the machine already is.
 if command -v claude >/dev/null 2>&1; then
   exit 0
 fi
@@ -39,7 +39,7 @@ printf 'P4: installing the Claude Code CLI.\n'
 # exits 0.
 #
 # Tolerant end to end, because nothing later in the run depends on the CLI — P5, P6 and P7
-# take their preconditions from 40 and 41 (§3). A failure is reported and the run carries
+# take their preconditions from 40 and 41. A failure is reported and the run carries
 # on to the phases that do block.
 if ! { installer=$(curl -fsSL https://claude.ai/install.sh) && /bin/bash -c "$installer"; }; then
   printf '\nP4: the Claude Code CLI did not install.\n'

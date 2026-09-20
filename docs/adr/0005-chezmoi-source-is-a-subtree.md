@@ -1,8 +1,8 @@
 # The chezmoi source is a subtree, not the repository root
 
-A `.chezmoiroot` file containing `home` confines the chezmoi source to `home/`. Everything chezmoi reads lives under it; everything else — the Brewfile, the ADRs, the CI workflows, the bats suite, the specification — sits at the repository root, structurally out of reach of `$HOME`.
+A `.chezmoiroot` file containing `home` confines the chezmoi source to `home/`. Everything chezmoi reads lives under it; everything else — the Brewfile, the ADRs, the CI workflows, the bats suite — sits at the repository root, structurally out of reach of `$HOME`.
 
-The prior setup made the repository root the source and excluded the rest with `.chezmoiignore`. That is a denylist, and a denylist fails open: the file you forget to list is the file that lands in `$HOME`. It cost four lines when the repository held four non-dotfile assets. This repository holds a growing `docs/adr/`, `.github/workflows/`, a test suite, a drift command, a defaults declaration and a specification, and every one of them would be another line that must not be forgotten. `.chezmoiroot` inverts the default: only what is placed under `home/` can ever reach `$HOME`, and `.chezmoiignore` is deleted outright.
+The prior setup made the repository root the source and excluded the rest with `.chezmoiignore`. That is a denylist, and a denylist fails open: the file you forget to list is the file that lands in `$HOME`. It cost four lines when the repository held four non-dotfile assets. This repository holds a growing `docs/adr/`, `.github/workflows/`, a test suite, a drift command and a defaults declaration, and every one of them would be another line that must not be forgotten. `.chezmoiroot` inverts the default: only what is placed under `home/` can ever reach `$HOME`, and `.chezmoiignore` is deleted outright.
 
 ## Considered options
 

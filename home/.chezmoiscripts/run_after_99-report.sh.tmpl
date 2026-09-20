@@ -1,13 +1,13 @@
 #!/bin/bash
 # Phase: 9x — the epilogue: the closing report
-# Requires: nothing — a missing `drift` shortens the report; it never fails the run (§3)
+# Requires: nothing — a missing `drift` shortens the report; it never fails the run
 
 # No `set -e`, alone among the scripts here: chezmoi aborts on a non-zero script, and
-# `drift` exits 1 on any finding (§7) — a true report rather than a failed run. §3 has the
-# reasoning; the last line of this file is what enforces it.
+# `drift` exits 1 on any finding — a true report rather than a failed run. The epilogue
+# never fails the run; the last line of this file is what enforces it.
 set -uo pipefail
 
-# `run_after_` at a `9x` slot outside the phase range, for the reasons §4 gives: this
+# `run_after_` at a `9x` slot outside the phase range, for a reason of its own: this
 # script re-derives on every run, so content-hash skipping would stop a converged machine
 # being told what it is still missing.
 
@@ -22,13 +22,12 @@ HEAD
 
 # Dynamic — what is missing *right now*, re-checked rather than replayed. There is no
 # scratch file for the phases to append to: that is the recorded intermediate state the
-# convergence invariant bans, and it would go stale on the second run and then lie (§1,
-# §3).
+# convergence invariant bans, and it would go stale on the second run and then lie.
 #
 # The same invocation a human types at a desk, with no extra flag: `drift` omits empty
-# sections, so nothing a brief mode would have to suppress is printed anyway (§7).
+# sections, so nothing a brief mode would have to suppress is printed anyway.
 #
-# The managed `.zshrc` puts `~/.local/bin` first on PATH (§6.3), but this script runs in
+# The managed `.zshrc` puts `~/.local/bin` first on PATH, but this script runs in
 # chezmoi's environment rather than a login shell, so that declaration has not been read
 # here. Seeding it is what lets the guard below see a `drift` that P3 did write.
 export PATH="$HOME/.local/bin:$PATH"
@@ -46,14 +45,14 @@ fi
 #
 # Everything above is derived from the machine. Everything below cannot be: it is GUI work
 # behind accounts, and a self-attested "have you signed in? [y/N]" would be a prompt
-# wearing a gate's clothes — it blocks the run while verifying nothing (§2). A manual step
+# wearing a gate's clothes — it blocks the run while verifying nothing. A manual step
 # is either verifiable, in which case the gate refuses on it, or it is not, in which case
 # it is a line here. There is no third category.
 #
-# Hand-written rather than derived from a declaration, and that is not rule 1 slipping:
-# nothing in the repository declares these, because the repository does nothing about them
-# (§6.3). A data file would be a first list, not a second one, with this script as its
-# only reader.
+# Hand-written rather than derived from a declaration, and that is not *one list, one
+# truth* slipping: nothing in the repository declares these, because the repository does
+# nothing about them. A data file would be a first list, not a second one, with this
+# script as its only reader.
 cat <<'TAIL'
 
 ----------------------------------------------------------------------

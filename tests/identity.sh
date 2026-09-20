@@ -1,5 +1,5 @@
 #!/bin/bash
-# Which identity does a repository resolve to, given its remote? (§6.5, ADR 0011)
+# Which identity does a repository resolve to, given its remote? (ADR 0011)
 #
 # Usage: tests/identity.sh <rendered-gitconfig> <config-personal> <config-company>
 #
@@ -10,7 +10,7 @@
 # else, because with no default git simply refuses at a first commit far from here.
 #
 # It runs in the op-less branch, so the client-issued identity is absent and only the two
-# cleartext ones are asserted. That is the same boundary CI renders at (§8, §10).
+# cleartext ones are asserted. That is the same boundary CI renders at.
 #
 # The addresses are read out of the rendered configuration rather than named here: this
 # stays a test of which file a remote selects, never a second copy of what is in them.

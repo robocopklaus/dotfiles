@@ -19,7 +19,7 @@
 # asking what the machine running the test has configured rather than what the gate does —
 # passing on a laptop with a vault, failing on a runner without one, and proving nothing
 # either way. The integration check and the acquisition are both bare-metal behaviour,
-# which §8 already records as knowingly unverified.
+# which CI already records as knowingly unverified.
 #
 # What is left is the part that is genuinely the gate's own: the order it does things in,
 # and what it declines to do under CI.
@@ -91,7 +91,7 @@ silent() { # haystack pattern name
 printf '\nThe foundation fails: the gate refuses before it acquires anything\n'
 home="$root/home-foundation"
 mkdir -p "$home"
-# The foundation refuses under CI too: only the 1Password items degrade (§8).
+# The foundation refuses under CI too: only the 1Password items degrade.
 out=$(HOME="$home" PATH="$bin:$PATH" STUB_NO_CLT=1 CI=1 bash "$gate" 2>&1)
 code=$?
 check 'exits 1' 1 "$code"

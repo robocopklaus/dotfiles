@@ -12,9 +12,9 @@ The gate checks the preconditions of the run. It now also installs two of them �
 
 **Leave it to the human, with a better remedy.** This was the previous decision, and it is what this one replaces. The remedy named Homebrew and the `brew` command, which was already an improvement on pointing at a vendor page that offers a `.pkg` — but it still asked for commands rather than issuing them, and it still left the person to notice that a freshly installed Homebrew is not yet on `PATH`.
 
-**A phase of its own, before the gate.** Rejected on cost, not on principle. Phases are cut by precondition, and "Homebrew plus the trust chain" has a real one — root, network, Command Line Tools. But inserting it means either renumbering every phase, script filename and cross-reference in the specification, or inventing a label that weakens the rule that a phase number records a justified order. The gate already holds the privilege and has already checked the foundation; a second phase would re-acquire both to earn a number.
+**A phase of its own, before the gate.** Rejected on cost, not on principle. Phases are cut by precondition, and "Homebrew plus the trust chain" has a real one — root, network, Command Line Tools. But inserting it means either renumbering every phase, script filename and cross-reference, or inventing a label that weakens the rule that a phase number records a justified order. The gate already holds the privilege and has already checked the foundation; a second phase would re-acquire both to earn a number.
 
-**A preflight script that performs P0.** Rejected in §2 and still rejected: a second entry point, fetched and trusted before anything exists to check it, and the least-tested script in the repository. The part of it that was worth having is the part the gate now does, from inside the run, after the foundation is verified.
+**A preflight script that performs P0.** Rejected before and still rejected: a second entry point, fetched and trusted before anything exists to check it, and the least-tested script in the repository. The part of it that was worth having is the part the gate now does, from inside the run, after the foundation is verified.
 
 ## Consequences
 
@@ -22,4 +22,4 @@ The gate checks the preconditions of the run. It now also installs two of them �
 
 **A refusal no longer leaves the machine untouched.** `$HOME` is still untouched, which is what P3 depends on. But `/opt/homebrew` and `/Applications` may have gained contents before the gate refused on a toggle. The gate prints what it installs as it installs it, so the change is visible rather than merely true.
 
-**CI skips the casks.** The runner arrives with Homebrew and wants neither 1Password, and its 1Password checks already report rather than refuse (§8). So the acquisition is exercised on bare metal only — the same blind spot §8 already records for everything bound to a fresh machine.
+**CI skips the casks.** The runner arrives with Homebrew and wants neither 1Password, and its 1Password checks already report rather than refuse. So the acquisition is exercised on bare metal only — the same blind spot CI already records for everything bound to a fresh machine.

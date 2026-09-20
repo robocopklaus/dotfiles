@@ -4,13 +4,13 @@
 
 set -euo pipefail
 
-# The runtimes are declared once, in the managed `~/.config/mise/config.toml` (§6.2),
+# The runtimes are declared once, in the managed `~/.config/mise/config.toml`,
 # which P3 wrote before this phase runs. `mise` reads that file itself, so this script
-# passes it no path and holds no second copy of what it says (§5.1).
+# passes it no path and holds no second copy of what it says.
 #
 # The hash below is what binds this script to that file: `run_onchange_` skips an
 # unchanged rendering, and a script that inlines nothing never changes, which is a
-# `run_once_` in disguise (§4). 40 binds itself by inlining the Brewfile it pipes into
+# `run_once_` in disguise. 40 binds itself by inlining the Brewfile it pipes into
 # `brew bundle`; here the consumer is `mise` reading the applied file rather than this
 # shell, so there is nothing to inline and the hash carries the binding alone.
 #
@@ -21,7 +21,7 @@ set -euo pipefail
 
 printf 'P5: installing the declared runtimes.\n'
 
-# P5 aborts on failure (§3) and needs no `if` to do it: `set -e` is the whole mechanism.
+# P5 aborts on failure and needs no `if` to do it: `set -e` is the whole mechanism.
 # The collect-and-report shape 40 and 41 carry is for a phase installing many independent
 # things; this is one command over one declaration.
 mise install

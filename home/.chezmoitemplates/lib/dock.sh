@@ -1,4 +1,4 @@
-# The Dock declaration of §6.4, rendered from `.chezmoidata/dock.toml` — the one
+# The Dock declaration, rendered from `.chezmoidata/dock.toml` — the one
 # declaration the P6 layout script and `drift` both reconcile against (ADR 0009).
 # Included at render time, so 61's `run_onchange_` hash moves whenever the declaration
 # does, and the check and the application stay one mechanism rather than two lists.
@@ -84,7 +84,7 @@ dock_app_path() {
 
 # The declaration **rendered** against this machine: an application that is not installed
 # drops out, and a spacer follows every category that still has a member. This is the
-# sequence both the reconcile and the drift report compare against (§7) — comparing
+# sequence both the reconcile and the drift report compare against — comparing
 # against the raw declaration would report a missing cask twice, once truthfully as a
 # package and once misleadingly as layout drift.
 #

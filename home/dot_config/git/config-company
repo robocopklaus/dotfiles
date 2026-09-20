@@ -1,4 +1,4 @@
-# The company identity (§6.5, ADR 0011) — 21st digital, under which client work on
+# The company identity (ADR 0011) — 21st digital, under which client work on
 # github.com is done. Included by ~/.gitconfig for repositories in the company's own
 # github.com organisations.
 #

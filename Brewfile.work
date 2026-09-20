@@ -1,4 +1,4 @@
-# The work group (§6.1). It rides the same `op` guard as the work identity (§6.5): one
+# The work group. It rides the same `op` guard as the work identity: one
 # client relationship, one condition, so the two can never disagree. The day this
 # repository stops carrying client work, this file and its include line go, and no entry
 # in the base inventory is touched.

@@ -1,4 +1,4 @@
-# §6.4's one restart rule, shared by the two managers of `com.apple.dock`: the defaults
+# The one restart rule, shared by the two managers of `com.apple.dock`: the defaults
 # table (60) and the layout (61). Two managers of one domain is accepted, because the
 # layout genuinely cannot be flat `domain/key/type/value`. Two restarts of one application
 # is not — and the restart has to come *after* the layout is written rather than between

@@ -1,4 +1,4 @@
-# Which keys the 1Password SSH agent may offer (§6.5).
+# Which keys the 1Password SSH agent may offer.
 #
 # Without this file the agent's default covers the built-in vaults only — Personal, Private
 # and Employee. The project keys live in Shared, so a server that authenticates with one of
@@ -9,7 +9,7 @@
 # entry would take the GitHub key away from the agent, silently.
 #
 # Vaults, never items. An item name would write a client's name into a public tree, which is
-# the one fact §6.5 exists to keep out of it. The ordering an item list would buy is not
+# the one fact ADR 0003 exists to keep out of it. The ordering an item list would buy is not
 # needed: the live keys are under the six-attempt limit an SSH server imposes by default, so
 # there is nothing for an order to protect.
 

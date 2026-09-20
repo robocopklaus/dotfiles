@@ -9,7 +9,9 @@ permissions:
 
 jobs:
   lint:
-    runs-on: macos-26 # §8
+    # Both tiers run on macOS: the source tree is templated for darwin, so a Linux runner
+    # would render the branch this repository never applies and lint the wrong shell.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
@@ -30,7 +32,7 @@ jobs:
           --destination "$RUNNER_TEMP/home"
 
       # Sources are .tmpl, so the tier renders them first: a template that fails to
-      # render is caught a step earlier than one that renders to broken shell. §8
+      # render is caught a step earlier than one that renders to broken shell.
       - name: Render scripts
         run: |
           mkdir -p "$RUNNER_TEMP/rendered"
@@ -41,7 +43,7 @@ jobs:
 
       # drift is shell too, and the one piece of it a human runs by hand, so it is
       # rendered and linted with the phase scripts. It is kept out of the directory the
-      # header check reads: it is a command, not a phase, so it carries no phase header. §7
+      # header check reads: it is a command, not a phase, so it carries no phase header.
       - name: Render drift
         run: |
           mkdir -p "$RUNNER_TEMP/rendered-bin"
@@ -52,7 +54,7 @@ jobs:
         run: shellcheck "$RUNNER_TEMP"/rendered/*.sh "$RUNNER_TEMP"/rendered-bin/*.sh tests/*.sh
 
       # drift's own logic, against stubbed inventories. What the machine actually holds is
-      # the end-to-end tier's question, and the report is its oracle. §8
+      # the end-to-end tier's question, and the report is its oracle.
       - name: Test drift
         run: tests/drift.sh "$RUNNER_TEMP/rendered-bin/drift.sh"
 
@@ -63,7 +65,7 @@ jobs:
 
       # Which identity a remote selects, asked of the real git against the rendered
       # configuration. A pattern that looks right and matches nothing is silent everywhere
-      # else: with no default, it surfaces as a refused commit far from here. §6.5, ADR 0011
+      # else: with no default, it surfaces as a refused commit far from here. ADR 0011
       - name: Test identity selection
         run: |
           "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
@@ -73,13 +75,13 @@ jobs:
             home/dot_config/git/config-company
 
       # Presence only — what the reason says is never judged, because a check that
-      # graded it would be satisfied by "# tool" and would have to be argued with. §6.1
+      # graded it would be satisfied by "# tool" and would have to be argued with.
       - name: Brewfile reason comments
         run: |
           # Both inventories: the convention applies to the work group unchanged, and that
-          # is the one file where the comments are themselves the leak surface (§6.1).
+          # is the one file where the comments are themselves the leak surface.
           if grep -vE '^[[:space:]]*(#|$)' Brewfile Brewfile.work | grep -vE '#[[:space:]]*[^[:space:]]'; then
-            echo 'The entries above carry no reason comment (§6.1).'
+            echo 'The entries above carry no reason comment.'
             exit 1
           fi
 
@@ -87,14 +89,14 @@ jobs:
       # never a second declaration of it — so every name in the declaration must resolve
       # to a Brewfile entry or to an Apple system application. The check is not
       # precautionary: `zen` was cut from the inventory and was still sitting fifth in the
-      # prior Dock declaration. §6.4
+      # prior Dock declaration.
       - name: Dock entry references
         run: |
           status=0
           # The bundle each declared cask installs, asked of Homebrew rather than guessed
           # from the cask's token: `telegram-desktop` and `microsoft-teams` are the
           # examples that defeat guessing, and drift asks the same question the same way
-          # for the same reason (§7). The App Store entries name their bundle directly.
+          # for the same reason. The App Store entries name their bundle directly.
           casks=$(sed -n 's/^cask "\([^"]*\)".*/\1/p' Brewfile)
           # shellcheck disable=SC2086
           cask_apps=$(brew info --cask --json=v2 $casks |
@@ -108,7 +110,8 @@ jobs:
             fi
             # Or an application macOS itself ships: under /System/Applications, or — as
             # Safari is — at a path there that Apple signs. The bundle is asked rather
-            # than a list of exceptions this file would then have to maintain (rule 6).
+            # than a list of exceptions this file would then have to maintain: guards
+            # derive from the machine, not from a list.
             if [ -d "/System/Applications/$name.app" ]; then
               continue
             fi
@@ -116,7 +119,7 @@ jobs:
               grep -qxF 'Authority=macOS Software Signing'; then
               continue
             fi
-            echo "Dock entry '$name' resolves to no Brewfile entry and no Apple system application (§6.4)."
+            echo "Dock entry '$name' resolves to no Brewfile entry and no Apple system application."
             status=1
           done < <(
             "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
@@ -124,7 +127,7 @@ jobs:
           )
           exit "$status"
 
-      # Presence only — the prose is never read. §4
+      # Presence only — the prose is never read.
       - name: Script headers
         run: |
           status=0

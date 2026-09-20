@@ -1,5 +1,5 @@
 #!/bin/bash
-# Exercises the rendered `drift` (§7) against stubbed inventories.
+# Exercises the rendered `drift` against stubbed inventories.
 #
 # Usage: tests/drift.sh <rendered-drift>
 #
@@ -7,7 +7,7 @@
 # bundle's provenance is decided — never a second list of what this machine should have.
 # That list is the Brewfile: the entries bent below are *read out of it* rather than named
 # here, so editing the inventory can never quietly turn a check into a no-op. The report
-# itself stays the oracle for machine state (§8).
+# itself stays the oracle for machine state.
 #
 # The one place this does reach into its subject is what the rendered script names in the
 # filesystem: the prefix cascade, which would shadow the stubs, and the two roots a Dock
@@ -139,7 +139,7 @@ drift() {
   PATH="$machine/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash "$machine/drift" 2>&1
 }
 
-# The Dock (§6.4). Its declaration is read out of the rendered command, like every other
+# The Dock. Its declaration is read out of the rendered command, like every other
 # inventory here, and the machine is then built from a *second* model of what that
 # declaration means — which is the point: if the command stopped dropping an uninstalled
 # application, or stopped generating a spacer, the two models would disagree and say so.
@@ -244,10 +244,10 @@ check "$(wc -l <"$machine/defaults" | tr -d ' ')" \
 
 # The fixture above cannot falsify the code that produced it: invert the boolean branch
 # and every assertion in this file still passes, while the P6 script writes the opposite
-# of §6.4 onto a real Mac. These three anchor the derivation to something outside it. The
-# entries are still read out of the rendered declaration rather than named here, so they
-# stay assertions about how a declared value becomes a string `defaults` answers with,
-# and never become a second copy of the table.
+# of the declaration onto a real Mac. These three anchor the derivation to something
+# outside it. The entries are still read out of the rendered declaration rather than named
+# here, so they stay assertions about how a declared value becomes a string `defaults`
+# answers with, and never become a second copy of the table.
 declared_bool() {
   awk -F"$tab" -v want="$1" '$3 == "bool" && $4 == want && $5 == "any" { print; exit }' "$machine/drift"
 }
@@ -361,7 +361,7 @@ says "$report" '^Diverged value' 'prints the diverged section'
 says "$report" "Default $scope $key: expected $expected, is bent" 'names the key, what it expected and what it found'
 
 # A system setting the machine does not have is a wrong setting, not an absence: macOS
-# always supplies its own value, so an unset key is diverged rather than missing (§6.4).
+# always supplies its own value, so an unset key is diverged rather than missing.
 tail -n +2 "$machine/defaults.declared" >"$machine/defaults"
 report=$(drift)
 check "$?" 1 'exits 1'

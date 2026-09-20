@@ -1,4 +1,4 @@
-# The personal identity (§6.5, ADR 0011). Included by ~/.gitconfig for repositories whose
+# The personal identity (ADR 0011). Included by ~/.gitconfig for repositories whose
 # remote is in this person's own github.com namespace, in either spelling.
 #
 # Cleartext, because it is already public on GitHub. It carries the address and the key,
