@@ -4,9 +4,10 @@
 
 set -euo pipefail
 
-# Verifies every P0 precondition (§2) in one pass: all failures are reported
-# together, each beside the remedy that fixes it. Running before any file is applied
-# means a refusal leaves $HOME completely untouched.
+# Verifies every P0 precondition (§2), and acquires the two of them it can: the run's
+# root privilege and the trust chain — Homebrew and the 1Password casks P3's templates
+# read through. Failures are reported together, each beside the remedy that fixes it.
+# Running before any file is applied means a refusal leaves $HOME completely untouched.
 #
 # Three P0 items are not verifiable at all — the GitHub key registration, the App Store
 # sign-in and the Apple Account sign-in — so they are not here. An unverifiable item is a
@@ -39,6 +40,35 @@ refuse_unless_ci() {
     refuse "$1" "$2"
   fi
 }
+
+print_items() {
+  local item
+  for item in "$@"; do
+    printf '  ✗ %s\n' "$item"
+  done
+}
+
+# Printing and exiting is a function because the gate stops in two places, not one: the
+# foundation below is what the acquisition itself stands on, so it cannot be collected
+# and reported alongside the items that only become checkable once it holds.
+settle() {
+  if [ ${#reported[@]} -gt 0 ]; then
+    printf '\nPreflight gate: reported, not refused (CI):\n\n'
+    print_items "${reported[@]}"
+  fi
+
+  if [ ${#refused[@]} -gt 0 ]; then
+    printf '\nPreflight gate: %d precondition(s) not met. Nothing has been written to %s.\n\n' \
+      "${#refused[@]}" "$HOME"
+    print_items "${refused[@]}"
+    printf '\nFix the items above, then run the command again.\n\n'
+    exit 1
+  fi
+}
+
+# The foundation: everything the acquisition and every later phase rests on. These are
+# still reported in one pass with each other — it is only the trust chain that had to
+# move behind them, because installing it is what needs them.
 
 # Administrator rights, first and once: P4 needs root, and this is the run's single
 # interactive moment (§1). Acquiring the privilege here means no later phase discovers
@@ -75,45 +105,61 @@ if ! xcode-select --print-path >/dev/null 2>&1; then
     "Run: xcode-select --install — wait for it to finish, then re-run."
 fi
 
-# 1Password and its CLI, both installed by hand before the run (§2). Both remedies name
-# Homebrew, which is therefore installed by hand too — and is still not an item of its
-# own: it is how these two are met, not a precondition of the run (§2). The vendor's
-# other route, a downloaded .pkg, is deliberately not offered: it leaves a copy P4's
-# `--adopt` cannot take over.
+settle
+
+# The trust chain: Homebrew, and through it the two 1Password casks. Acquired here rather
+# than asked of you, because a command you would have typed by hand is a command this run
+# can type for you — and because P4, which installs everything else, comes after the P3
+# that already needs `op` (§2).
+#
+# Nothing below can make the run unattended: signing in to 1Password and turning on its
+# two developer toggles are GUI work, so a fresh machine still stops here once. What this
+# removes is the part that was never GUI work, and every check below is unchanged — an
+# acquisition that fails refuses exactly as it did when you were the one installing.
+#
+# Cask installs download hundreds of megabytes before they ask for root, which outlives
+# the timestamp `sudo -v` just set, so the privilege is kept warm across the acquisition.
+{{ template "lib/keepalive.sh" . }}
+
+# A no-op wherever Homebrew already is, which includes every CI runner (§8) and every
+# re-run after the first.
+{{ template "lib/homebrew-install.sh" . }}
+
+# The casks themselves, skipped under CI: the runner wants neither, and its 1Password
+# items report rather than refuse anyway (§8).
+#
+# Tolerant by construction, and `|| true` is the whole handling: the checks below already
+# state what is missing and how to fix it, so a second reaction here would be the second
+# list this repository spends its rules preventing.
+if [ -z "${CI:-}" ]; then
+  for cask in 1password 1password-cli; do
+    if brew list --cask "$cask" >/dev/null 2>&1; then
+      continue
+    fi
+    printf 'Preflight gate: installing %s.\n' "$cask"
+    brew install --cask --adopt "$cask" || true
+  done
+fi
+
+# 1Password and its CLI. Still checked, and the remedies still name the commands: the
+# acquisition above is what normally satisfies them, not a guarantee that it did.
 if [ ! -d "/Applications/1Password.app" ]; then
-  refuse_unless_ci "1Password is not installed." \
-    "Install Homebrew (https://brew.sh), then run: brew install --cask 1password — then open it and sign in."
+  refuse_unless_ci "1Password is not installed, and the gate could not install it." \
+    "Run: brew install --cask 1password — then open it and sign in."
 fi
 
 if ! command -v op >/dev/null 2>&1; then
-  refuse_unless_ci "The 1Password CLI (op) is not on PATH." \
-    "Install Homebrew (https://brew.sh), then run: brew install --cask 1password-cli — then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
+  refuse_unless_ci "The 1Password CLI (op) is not on PATH, and the gate could not install it." \
+    "Run: brew install --cask 1password-cli — then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
 fi
 
 # The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
 # rewrite waits for — the socket's path is included at render time so both spell it once.
+# This is the one the acquisition can never satisfy: it is a toggle behind an unlock.
 {{ template "lib/agent-socket.sh" . }}
 if [ ! -S "$agent_socket" ]; then
   refuse_unless_ci "The 1Password SSH agent socket is missing ($agent_socket)." \
     "Unlock 1Password, then turn on Settings → Developer → Use the SSH agent."
 fi
 
-print_items() {
-  local item
-  for item in "$@"; do
-    printf '  ✗ %s\n' "$item"
-  done
-}
-
-if [ ${#reported[@]} -gt 0 ]; then
-  printf '\nPreflight gate: reported, not refused (CI):\n\n'
-  print_items "${reported[@]}"
-fi
-
-if [ ${#refused[@]} -gt 0 ]; then
-  printf '\nPreflight gate: %d precondition(s) not met. Nothing has been written to %s.\n\n' \
-    "${#refused[@]}" "$HOME"
-  print_items "${refused[@]}"
-  printf '\nFix the items above, then run the command again.\n\n'
-  exit 1
-fi
+settle

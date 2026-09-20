@@ -17,5 +17,6 @@ list next January is a decision and not an archaeology exercise.
 | [**docs/adr/**](docs/adr/) | The structural decisions, one file each. |
 | [**the map**](https://github.com/robocopklaus/dotfiles/issues/1) | Why the rules are the rules. |
 
-Start with the specification: it opens with the command and with the preflight you have
-to do by hand before you type it.
+Start with the specification: it opens with the command, and with the preflight — the
+preconditions of the run, the ones the gate installs for you and the ones it can only
+ask you for.

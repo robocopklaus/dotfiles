@@ -20,19 +20,12 @@ BREWFILE
 # with 41, which needs the same privilege for the same reason (ADR 0005).
 {{ template "lib/keepalive.sh" . }}
 
-# The prefix cascade, included at render time so it is written once and linted at every
-# call site (ADR 0005). A no-op before Homebrew exists.
-{{ template "lib/homebrew.sh" . }}
-if ! command -v brew >/dev/null 2>&1; then
-  printf 'P4: installing Homebrew.\n'
-  # Fetched into a variable first, so a failed download aborts here. Piped straight into
-  # bash it would be invisible: the substitution yields an empty script that exits 0.
-  installer=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
-  NONINTERACTIVE=1 /bin/bash -c "$installer"
-  # The installer's own prefix on Apple Silicon, which is the only architecture the gate
-  # admits — not a second cascade.
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+# Homebrew itself, included at render time so the fetch is written once and linted at
+# every call site (ADR 0005). Normally a no-op by the time P4 runs: the gate acquires
+# Homebrew to install the trust chain (§2). It stays here because P4 is the phase that
+# owns the inventory, and a phase that cannot run alone is a phase with a hidden
+# precondition.
+{{ template "lib/homebrew-install.sh" . }}
 
 # Both filters below read the entry shape §6.1 fixes: a type keyword at column zero, then
 # a double-quoted name. Homebrew offers no filter of its own, and the CI reason-comment

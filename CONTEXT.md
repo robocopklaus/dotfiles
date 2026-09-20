@@ -28,17 +28,25 @@ justification.
 _Avoid_: stage, step
 
 **Preflight**:
-The work done by hand on the fresh machine before the command is typed. The gate, not the
-table in the specification, is the normative statement of what it contains.
+The preconditions of the run. Most are work done by hand on the fresh machine before the
+command is typed; the ones a command can satisfy are acquired by the gate instead. The
+gate, not the table in the specification, is the normative statement of what it contains.
+_Avoid_: manual steps — not all of them are
 
 **Gate**:
-The phase that verifies every preflight item in one pass and acquires privilege, before a
-single file is written.
+The phase that acquires what a preflight item can be acquired by — privilege, and the
+trust chain — and verifies every one of them, before a single file is written. It stops
+at the foundation first, because that is what the acquisition stands on.
 
 **Epilogue**:
 The closing report at the run's tail. It re-derives what is missing by checking the world;
 it never replays what earlier phases recorded.
 _Avoid_: summary, final report
+
+**Trust chain**:
+Homebrew and the two 1Password casks: what everything else in the run is fetched and
+signed through. Acquired by the gate rather than asked of a human, because it is the only
+part of the preflight that is a command rather than a decision or a sign-in.
 
 **Convergence**:
 The property that repeated runs reach the same state. It bans recorded intermediate state:

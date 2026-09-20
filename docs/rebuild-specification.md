@@ -50,19 +50,21 @@ completes, or it stops with a precise instruction and you re-run it.
 
 ## 2. Before you type it — the preflight (P0)
 
-Everything below is done by hand, on the fresh machine, before the command. The **gate**
-(P2) is the normative source for this list — it is the thing that actually enforces. This
-table is a human summary; if it ever disagrees with the gate, the gate is right. In
-practice: run the command, and it will tell you exactly what is missing, all of it in one
-pass, before a single file is written.
+Everything below is a precondition of the run. Most of it is done by hand on the fresh
+machine, before the command — but not all of it any more: the gate **acquires** the two
+items it can install, and only refuses on what it cannot. The **gate** (P2) is the
+normative source for this list either way; it is the thing that actually enforces. This
+table is a human summary, and if it ever disagrees with the gate, the gate is right. In
+practice: run the command, and it will install what it can and tell you exactly what is
+left, before a single file is written.
 
 | # | Step | What the gate checks |
 | --- | --- | --- |
 | 1 | macOS installed, Apple Account signed in in System Settings | macOS >= 26, Apple Silicon |
 | 2 | Network | `github.com` reachable |
 | 3 | Xcode Command Line Tools — `xcode-select --install` | `xcode-select -p` |
-| 4 | 1Password and the 1Password CLI — `brew install --cask 1password 1password-cli` | app present, `op` on `PATH` |
-| 5 | Signed in to 1Password, unlocked, **SSH agent enabled** | agent socket exists |
+| 4 | 1Password and the 1Password CLI — **the gate installs both** | app present, `op` on `PATH` |
+| 5 | Signed in to 1Password, unlocked, **SSH agent enabled**, **CLI integration enabled** | agent socket exists |
 | 6 | Public key registered on GitHub under *SSH keys* **and** *SSH signing keys* | **not verifiable** → closing report |
 | 7 | Administrator rights | `sudo -v` |
 | — | Signed in with the Apple Account | **not verifiable** → tolerant `mas`, closing report |
@@ -76,36 +78,50 @@ column in this table. A list of fix commands maintained apart from the checks it
 would drift from them, and the copy that drifts is the one that waves you through.
 
 **Why there is no preflight *script*.** The tempting version — one curl-piped script that
-*performs* P0 rather than checking it — does not survive its own dependency order:
-installing 1Password wants Homebrew, Homebrew wants Command Line Tools, and that is
-precisely the wait this design refuses to automate, so the script would stop mid-run and
-fetch you anyway. Three of the seven items — the Apple ID, the 1Password unlock and agent
-toggle, the GitHub registration — are GUI work no script can perform at all, and they are
-the slow ones. It would also be a **second entry point**, fetched and trusted before the
-gate exists to check anything, and structurally the least-tested script in the repository,
-since CI's runner arrives warm and never exercises bare metal (§8). A script that *checks*
-P0 is worse still: it is a second copy of the gate's list, which is rule 1's failure mode
-in the one place it is most dangerous.
+*performs* P0 — is now partly real, and the part that came true came true inside the gate,
+which is the whole point. A separate script would be a **second entry point**, fetched and
+trusted before the gate exists to check anything, and structurally the least-tested script
+in the repository, since CI's runner arrives warm and never exercises bare metal (§8). It
+would also have to run before the Command Line Tools are verified, since nothing has
+checked anything yet — and Homebrew wants them. The gate has that order for free: it
+checks the foundation, then installs on top of it. And a script that *checks* P0 is worse
+still: it is a second copy of the gate's list, which is rule 1's failure mode in the one
+place it is most dangerous. What no script of either kind can do is the GUI work — the
+Apple ID, the 1Password sign-in and its two toggles, the GitHub registration — and those
+are the slow ones.
 
-**Why 1Password is a precondition and not a phase.** P3 writes an `~/.ssh/config` and a
-`~/.gitconfig` that are inert until 1Password is installed, signed in, unlocked and has
-the SSH agent toggled on — none of which a script can do. It is also the source of the
-work identity template (§6.5), which is rendered in P3, before P4 would have installed
-`op`. So both the app and the CLI are P0 items; both nonetheless stay declared in the
-Brewfile, and casks are installed with `--adopt` so Homebrew takes ownership of the
-hand-installed copy rather than colliding with it. One list, one truth.
+**Why 1Password is a precondition, and what the gate does about it.** P3 writes an
+`~/.ssh/config` and a `~/.gitconfig` that are inert until 1Password is installed, signed
+in, unlocked and has both developer toggles on. It is also the source of the work
+identity template (§6.5), rendered in P3 — before P4, which installs everything else,
+has run. So the app and the CLI are preconditions of the file phase, and cannot wait for
+the package phase.
 
-**Why Homebrew is not a preflight item.** Item 4 is satisfied with `brew`, which means
-Homebrew is installed by hand before the run — and it is still not a row of this table.
-The vendor's own instructions offer two ways to install the CLI, and the second one, a
-downloaded `.pkg`, leaves a copy under `/usr/local/bin` that P4's `--adopt` is in no
-position to take over: an unmanaged tail in the one place the trust chain starts. Naming
-`brew` in the remedy closes that door without opening a worse one. A row of its own would
-have to go one of two ways, and both are worse. With a gate check, the gate would refuse
-on something P4 installs unattended anyway — the FileVault argument, applied to the step
-most likely to already be there. Without one, the table would list an item the gate does
-not know, and the gate is what this list is a summary *of*. Homebrew is therefore not a
-precondition of the run; it is how two preconditions are met.
+That is an argument about *ordering*, and for a long time it was treated as an argument
+about *who installs them*. It is not (ADR 0012). The gate acquires them itself: it installs Homebrew
+if it is absent and then the two casks, before it runs the checks that ask for them. The
+checks are unchanged — an acquisition that fails refuses exactly as it did when the
+installation was yours to perform, with the same remedy naming the same command. Both
+casks stay declared in the Brewfile, and P4 installs them with `--adopt` like any other.
+One list, one truth.
+
+**Why that does not make the run unattended.** It cannot, and the gate does not pretend
+otherwise. Signing in to 1Password, turning on the SSH agent and turning on the CLI
+integration are GUI work no script performs, and P3 cannot render the work identity
+without them. A fresh machine therefore still stops at the gate exactly once. What the
+acquisition removes is the part that was never GUI work: three commands you would have
+typed by hand, in the right order, before the run would proceed. A command the run can
+type for you is not a precondition you should be holding.
+
+**Why the gate stops in two places.** The foundation — administrator rights, the
+architecture, the macOS version, the network and the Command Line Tools — is reported in
+one pass as before, and the run stops there if any of it is missing. It has to: the
+acquisition stands on all five. Only then does the trust chain arrive, and only then can
+the items that depend on it be checked. This is a real cost. A machine missing both the
+Command Line Tools and the 1Password sign-in now learns about them in two rounds rather
+than one, and the one-pass promise is narrower than it was: it holds within each stop, not
+across the run. The alternative was to keep asking a human for commands a machine can
+issue, which is a worse bargain.
 
 **Why the CLI integration toggle is not gated.** The `op` check verifies the binary on
 `PATH`, and the remedy tells you to turn on 1Password → Settings → Developer → Integrate
@@ -115,8 +131,7 @@ entire interactive budget on `sudo -v`. A check the gate cannot afford to run is
 check, so the toggle is unverifiable in the only sense this document uses the word. It
 needs no closing-report line either, because it is the one manual step that announces
 itself: the very next phase renders the work identity through `op`, and a missing toggle
-stops P3 with that template named in the error. The remedy carries it so a human reads it
-before that happens.
+stops P3 with that template named in the error.
 
 **Why Command Line Tools is a precondition and not an installation.** The prior setup
 polled for up to 3600 seconds waiting for CLT to appear mid-run. That poll is deleted.
@@ -144,7 +159,7 @@ order that a precondition justifies; it is never itself the justification.
 | --- | --- | --- | --- |
 | P0 | **Preflight** — human, before the command | fresh macOS | run refuses at P2 |
 | P1 | **Acquisition** — chezmoi binary + source clone | network | nothing installed yet; re-run |
-| P2 | **Gate** — verify P0, acquire privilege | P1 | abort before any file is written |
+| P2 | **Gate** — acquire privilege and the trust chain, verify P0 | P1 | abort before any file is written |
 | P3 | **Files** — managed dotfiles applied | P2 | abort |
 | P4 | **Packages** — Homebrew, formulae, casks, `mas`, out-of-band installers | P3, CLT, root | mixed — see below |
 | P5 | **Runtimes** — `mise install` | P4 (`mise`) | abort |
@@ -153,10 +168,13 @@ order that a precondition justifies; it is never itself the justification.
 | 9x | **Epilogue** — the closing report | — | never fails the run |
 
 **P2 — the gate.** A `run_before_` script, and the structural addition the prior setup
-lacked entirely. It checks **every** P0 item and reports **all** failures in one pass,
-each with its remedy (§2). Running before file application means a failed gate leaves the
-machine completely untouched. Under CI the 1Password items degrade from refusing to reporting
-(§8); every other precondition still refuses.
+lacked entirely. It checks **every** P0 item, each with its remedy (§2), and it acquires
+the two it can: root, and the trust chain — Homebrew and the two 1Password casks. It
+stops twice rather than once, because the foundation is what the acquisition stands on
+(§2). Running before file application means a failed gate leaves `$HOME` untouched; the
+acquisition does write to `/opt/homebrew` and `/Applications`, and says so as it happens.
+Under CI the 1Password items degrade from refusing to reporting and the casks are not
+installed (§8); every other precondition still refuses.
 
 **P3 — files before tools.** Configuration lands before the software it configures
 exists. This is deliberate: a config file is inert until its tool arrives, so the SSH
@@ -1029,7 +1047,10 @@ Two tiers.
 **rendered** scripts and the rendered `drift` (sources are `.tmpl`, so the tier renders
 them with `chezmoi execute-template` first — a template that fails to render is caught a
 step earlier than one that renders to broken shell); `tests/drift.sh`, which runs that
-rendered command against stubbed inventories; `tests/identity.sh`, which asks the real git,
+rendered command against stubbed inventories; `tests/gate.sh`, which runs the rendered gate against stubbed system commands to prove
+it refuses at the foundation *before* it acquires anything (ADR 0012) — only the cases
+that install nothing, since forcing the acquisition would install software to prove it
+can; `tests/identity.sh`, which asks the real git,
 against the rendered `~/.gitconfig`, which identity each shape of remote selects — a pattern
 that matches nothing is otherwise silent until a commit is refused somewhere else entirely
 (§6.5); the Brewfile reason-comment presence check;
