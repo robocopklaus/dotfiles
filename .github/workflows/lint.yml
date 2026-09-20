@@ -63,6 +63,12 @@ jobs:
       - name: Test the gate
         run: tests/gate.sh "$RUNNER_TEMP/rendered/run_before_20-gate.sh"
 
+      # The defaults phase's write spelling, against a `defaults` stub that refuses the
+      # wrong one the way the real binary does. A converged machine writes nothing at all,
+      # so the stub is also what supplies the drifted boolean the failure needed.
+      - name: Test the macOS defaults phase
+        run: tests/macos-defaults.sh "$RUNNER_TEMP/rendered/run_onchange_after_60-macos-defaults.sh"
+
       # Which identity a remote selects, asked of the real git against the rendered
       # configuration. A pattern that looks right and matches nothing is silent everywhere
       # else: with no default, it surfaces as a refused commit far from here. ADR 0011

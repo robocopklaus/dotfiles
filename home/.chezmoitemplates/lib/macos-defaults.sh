@@ -26,15 +26,24 @@ managed_defaults_run() {
   fi
 }
 
-# What the machine should hold, in the spelling `defaults read` answers in: booleans come
-# back as 1 and 0, and `${HOME}` is expanded here so the value written and the value
-# compared against are produced by the same line.
-managed_default_expected() {
-  local type=$1 value=$2
+# What is handed to `defaults write`, which is the declared value with `${HOME}` expanded
+# and nothing else. `-bool` takes `true`/`false`/`yes`/`no` and rejects `1`/`0` with its
+# usage text and exit 255 — the exact opposite of the spelling `defaults read` answers in,
+# so the two cannot share one function. Expanding here, on the way in, is what keeps the
+# string written and the string compared against produced by the same line.
+managed_default_written() {
+  local value=$1
   # The token is escaped rather than single-quoted so that the linter CI runs over these
   # rendered scripts reads it as the literal it is, instead of as an expansion
   # someone forgot to quote properly.
-  value=${value//\$\{HOME\}/$HOME}
+  printf '%s\n' "${value//\$\{HOME\}/$HOME}"
+}
+
+# What the machine should hold, in the spelling `defaults read` answers in: booleans come
+# back as 1 and 0.
+managed_default_expected() {
+  local type=$1 value=$2
+  value=$(managed_default_written "$value")
   if [ "$type" = 'bool' ] && [ "$value" = 'true' ]; then
     printf '1\n'
   elif [ "$type" = 'bool' ]; then
