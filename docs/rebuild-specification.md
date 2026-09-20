@@ -566,6 +566,7 @@ alone, and the boundary should not have to be renegotiated when one does.
 | `dot_editorconfig` | Editor defaults |
 | `dot_zshrc`, `dot_zprofile`, `dot_zsh_plugins.txt` | Shell; `zsh_plugins.txt` is antidote's declaration |
 | `private_dot_ssh/private_config` + `id_personal.pub`, `id_work.pub` | Templated (§6.5) |
+| `dot_config/1Password/ssh/agent.toml` | Which vaults the SSH agent may offer keys from; hand-written, and names no item (§6.5) |
 
 **On dominance.** `~/.claude/settings.json` is written back by its own application. It
 stays managed anyway: deliberate configuration is not discarded to protect a principle,
@@ -859,6 +860,15 @@ keys and three registrations at the one manual point of the rebuild — is real.
 key for the company identity was rejected for the same reason, with the account shared as
 well.
 
+**The agent is told which vaults to look in.** Its default covers the built-in vaults only
+— Personal, Private and Employee — and the keys for client project servers live in a shared
+vault, which the default never offers. `~/.config/1Password/ssh/agent.toml` names the two
+vaults, and nothing else: the file is an allowlist rather than an addition, so the built-in
+vault is named there too, and naming *vaults* instead of *items* is what keeps client names
+out of a public tree (ADR 0003). The ordering the file can also express is not used, because
+the live keys stay under the six-attempt limit an SSH server imposes by default — and the
+order of items in a vault is vault state, which this repository does not own.
+
 **No retired key is carried anywhere** — no line in `allowed_signers`, no registration
 left on the GitHub account. This is safe because nothing is lost: GitHub records a
 verification when it performs it and never revisits it, so existing commits keep their
@@ -874,7 +884,18 @@ transcribing the blob twice.
 **Rotation is not part of the rebuild and not on a schedule.** The keys never touch disk;
 they live in 1Password and are offered only through the agent, so there is no exposure
 that grows with time. Rotation happens once, by hand, at any convenient moment. P0 item 6
-says "register the public key on GitHub", which is true of whichever key exists.
+says "register the public key on GitHub", which is true of whichever key exists. The
+replacement is **verified before the old key goes** — an authentication that succeeds and a
+signature that verifies — so one account holds two keys for as long as that takes. The
+window is bounded by that verification and not by a date, and it is the only state in which
+two keys exist for one account (ADR 0008).
+
+**The key store is the company's, and that is a dependency on ownership.** There is one
+1Password account, the company's, and its Employee vault holds the personal identity's key
+as well as the client-issued one. This holds as long as the person owns the company. Deleting
+a 1Password account destroys its Employee vault outright, so if that ownership ever ends the
+key leaves the vault first — a deadline no phase can check, because the bootstrap runs while
+the machine is still here, and one whose cost is bounded by how cheap rotation is (ADR 0011).
 
 **The source remote is rewritten HTTPS → SSH after the agent is verified**, in P7's plain
 `run_after_` script (not `run_onchange_`, whose content hash says nothing about the

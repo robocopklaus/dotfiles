@@ -42,3 +42,27 @@ Both are silent. Neither announces itself at the moment it is made. Refusal is l
 **The quiet failure mode that the drift check was built for shrinks.** A skipped render used to mean client work was silently signed as personal; with no default it means client work does not commit. The check stays — it turns a stop into an explanation — but it is no longer the only thing standing between a missing render and a mislabelled history.
 
 **Matching must cover an account's full surface.** One issuing account may answer on several hosts and in both SSH and HTTPS remote forms. A pattern that covers one host, or only the SSH spelling, leaves the rest to the refusal — which is safe, but it is friction that was not chosen. The patterns are derived in the template from the hosts an identity declares, rather than written out by hand.
+
+## Addendum: the personal key is hosted by the company
+
+The decision above assumes a personal 1Password account beside the company one. There is
+none. A single account exists — the company's — and its built-in Employee vault holds every
+key, including the one the personal identity commits under. Privately this person uses Apple
+Passwords, which stores passwords and passkeys and holds no SSH keys at all; the
+Apple-native alternative puts the passphrase in the keychain and leaves the private key on
+disk, which is exactly the property ADR 0008 declines to give up.
+
+So *"the way of working is not [the company's]"* holds for this repository and not for the
+key. That is accepted rather than worked around, because the person owns the company: the
+administrator who could reach an Employee vault through account recovery is the person the
+vault belongs to. The dependency is on **ownership**, not on employment, and it ends when
+the ownership does — a planned event with notice, not a risk that arrives unannounced.
+
+**One consequence has a deadline and no gate.** Deleting a 1Password account destroys its
+Employee vault outright: the items are neither transferred nor recoverable. If the company
+is ever sold or wound down, the personal key leaves the vault *before* the account is
+deleted, or it is gone. No phase can check this — the bootstrap runs precisely because the
+machine is still here — and the cost of missing it is bounded by ADR 0008, where a lost key
+is a rotation and rotation is deliberately cheap. That is why this is a sentence in an ADR
+rather than a standing preflight item, which would report "not applicable" on every run the
+repository will ever make.
