@@ -125,7 +125,7 @@ order that a precondition justifies; it is never itself the justification.
 | P4 | **Packages** — Homebrew, formulae, casks, `mas`, out-of-band installers | P3, CLT, root | mixed — see below |
 | P5 | **Runtimes** — `mise install` | P4 (`mise`) | abort |
 | P6 | **System configuration** — macOS defaults, Dock | P4 (apps), non-root | abort |
-| P7 | **Integrations** — post-install wiring | P4 (casks) | tolerant |
+| P7 | **Integrations** — post-install wiring | P2 (the 1Password agent) | tolerant |
 | 9x | **Epilogue** — the closing report | — | never fails the run |
 
 **P2 — the gate.** A `run_before_` script, and the structural addition the prior setup
@@ -147,11 +147,12 @@ points during a bundle run, which is why the keepalive exists at all. The CLI sc
 the exception and takes no keepalive: its installer writes only under `$HOME` and refuses
 outright to run through `sudo`.
 
-**P7 — currently empty.** The phase stays in the model as the slot for post-install
-wiring, but nothing occupies it today: the one inherited integration was an `obsidian-cli`
-symlink, and Obsidian is out of scope (§6.3) while `obsidian-cli` is not declared
-anywhere in the inventory (§6.1). An integration that wires up a tool the repository does
-not install has nothing to do.
+**P7 — the source remote.** One thing occupies the phase: the chezmoi source remote is
+rewritten from HTTPS to SSH, once the 1Password agent is there to carry it (§6.5). The
+inherited integration that would otherwise have lived here was an `obsidian-cli` symlink,
+and Obsidian is out of scope (§6.3) while `obsidian-cli` is not declared anywhere in the
+inventory (§6.1) — an integration that wires up a tool the repository does not install has
+nothing to do.
 
 ### Failure behaviour
 
@@ -163,8 +164,9 @@ One rule: **a phase aborts the run only if a later phase depends on it.**
   nothing waits on. Collected failures surface in the closing report with an instruction
   to re-run.
 
-A tolerant phase must have tolerant dependents: P7 depends on P4's casks, so P7 skips
-cleanly when its app is absent rather than failing.
+A tolerant phase must have tolerant dependents: P7 depends on the 1Password agent, which
+the gate refuses on for a real Mac and merely reports under CI (§8), so P7 skips cleanly
+when the socket is absent rather than failing.
 
 ### The closing report re-derives; it never replays
 
@@ -202,11 +204,14 @@ output has two parts:
 ├── docs/adr/   docs/agents/
 ├── tests/
 │   ├── drift.sh                            drift's own logic, stubbed (§7)
+│   ├── identity.sh                         which identity a remote selects (§6.5)
 │   └── *.bats                              bats: idempotency only
 └── home/                                   ← the entire chezmoi source
     ├── .chezmoidata/macos-defaults.toml    the defaults declaration (§6.4)
     ├── .chezmoidata/dock.toml              the Dock declaration (§6.4)
-    ├── .chezmoitemplates/lib/               shared shell, included at render time
+    ├── .chezmoitemplates/lib/               shared shell and one shared read, at render time
+    │   ├── work-identity.json               the 1Password item, shared by five surfaces (§6.5)
+    │   ├── agent-socket.sh                  the agent's socket path, shared by 20 and 70
     │   ├── homebrew.sh                      the prefix cascade
     │   ├── keepalive.sh                     the sudo keepalive, shared by 40 and 41
     │   ├── macos-defaults.sh                the declaration, shared by 60 and drift
@@ -220,6 +225,7 @@ output has two parts:
     │   ├── run_onchange_after_50-mise.sh.tmpl           P5
     │   ├── run_onchange_after_60-macos-defaults.sh.tmpl P6
     │   ├── run_onchange_after_61-dock.sh.tmpl           P6
+    │   ├── run_after_70-remote.sh.tmpl                  P7  the source remote, → SSH
     │   └── run_after_99-report.sh.tmpl                  epilogue — invokes drift
     ├── dot_local/bin/executable_drift.tmpl              → ~/.local/bin/drift
     ├── dot_zprofile.tmpl
@@ -252,6 +258,10 @@ run it exactly once per machine, which is a `run_once_` wearing a different pref
 bans that: a machine whose CLI went missing would never get it back from the one command
 that is supposed to be the whole recovery mechanism. So it re-derives on every run, and its
 presence guard makes a converged run cost one `command -v`.
+
+**70 is `run_after_` for the neighbouring reason.** It inlines nothing either, and its
+content hash says nothing about the value the source remote currently holds — so the rewrite
+would be attempted once per machine and never looked at again (§6.5).
 
 **`9x` is deliberately outside the phase range.** The closing report is the run's
 epilogue, not a phase; numbering it `80` would imply a P8 that does not exist. It is
@@ -440,6 +450,10 @@ weekly use, held in a **second Brewfile, `Brewfile.work`**, at the repository ro
 the base one, inlined into the P4 Homebrew script and piped to a second
 `brew bundle --file=-`.
 
+The file carries one line that is not an entry: `databricks/tap`, which homebrew/core does
+not carry the CLI in. It sits in this file rather than beside the base tap for the reason
+the file exists — the deletion that removes the group removes its tap with it.
+
 **It rides the guard that already exists.** The include sits inside the *same*
 `op`-presence branch §6.5 puts on the work identity, so the identity and its tooling turn
 on and off as **one fact under one guard**. No flag, no chezmoi config value, no second
@@ -533,7 +547,7 @@ even though nothing managed sits outside `~/.config` and `$HOME` today. An edito
 `settings.json` under `~/Library/Application Support/` would qualify on its contents
 alone, and the boundary should not have to be renegotiated when one does.
 
-**Managed (12 paths):**
+**Managed (13 paths):**
 
 | Path | Reason |
 | --- | --- |
@@ -542,8 +556,9 @@ alone, and the boundary should not have to be renegotiated when one does.
 | `dot_config/oh-my-posh/config.omp.json` | Prompt definition |
 | `dot_config/mise/config.toml` | Runtime pins |
 | `dot_config/ccstatusline/settings.json` | Statusline definition |
-| `dot_gitconfig`, `dot_gitignore` | Global git behaviour |
-| `dot_config/git/allowed_signers`, `config-work` | Signing and the work identity; templated (§6.5) |
+| `dot_gitconfig`, `dot_gitignore` | Global git behaviour and the `includeIf` set that selects an identity; templated, because the client-issued half of that set is guarded (§6.5) |
+| `dot_config/git/allowed_signers`, `config-work` | Signing and the client-issued identity; templated (§6.5) |
+| `dot_config/git/config-personal`, `config-company` | The two cleartext identities, each included by remote (ADR 0011) |
 | `dot_claude/settings.json` | Permissions and hooks — see the dominance note |
 | `dot_mcp.json` | Fully hand-authored |
 | `dot_editorconfig` | Editor defaults |
@@ -750,7 +765,7 @@ found the layout converged. The alternative is a layout step that re-derives on 
 — which is what `9x` and `42` are, and what this one would become if the carry ever
 stopped reading as a footnote.
 
-### 6.5 Secrets, SSH and signing (ADR 0003, ADR 0008)
+### 6.5 Secrets, SSH and signing (ADR 0003, ADR 0008, ADR 0011)
 
 **1Password stays**, in all three roles: SSH agent for authentication, `op-ssh-sign` for
 commit and tag signing, and the store for tokens. Dropping it for on-disk keys would
@@ -764,11 +779,33 @@ would depend on an unlocked vault, so the bootstrap could fail for a reason unre
 anything it was asked to do. Correspondingly, `gh auth login` is neither a gate item nor a
 line in the closing report's static tail; nothing in the bootstrap depends on `gh`.
 
-**The one exception is the work identity**, rendered from a **single** 1Password item via
+**Three identities commit from this machine, and none of them is the default** (ADR 0011).
+The **personal** identity, the **company** identity — 21st digital, under which client work
+on github.com is done — and the **client-issued** identity, whose account and hosts belong
+to a client. They are selected by two rules, because two things are being decided. *Key
+material belongs to the account that verifies it*: personal and company share one github.com
+account and therefore one key; the client-issued identity has its own account and its own.
+*The address belongs to the engagement*: `user.email` is chosen per repository by
+`includeIf "hasconfig:remote.*.url:…"`, keyed on the remote, because the remote is what
+decides which account will verify the signature.
+
+`~/.gitconfig` carries no `user.email` at all. It holds what every identity shares —
+`user.name` and the signing setup — and `user.useConfigOnly = true`. A repository that no
+`includeIf` matches **refuses to commit** rather than falling back. Every default is wrong
+somewhere and wrong *silently*: a personal default signs paid work with a private address, a
+company default writes an employer into a repository that outlives the employment. Refusal
+is loud, arrives at the first commit, and costs one line to resolve. It also removes the
+need to enumerate client organisations in a public tree in order to avoid a default — which
+is the same relationship §6.5 exists to keep out of it.
+
+**The one exception is the client-issued identity** — the *work identity* in the tree,
+whose filenames stay neutral — rendered from a **single** 1Password item via
 `onepasswordRead` templates. Nothing in it is cryptographically secret — the signing key is
 a *public* key and the GHE host is a *public* DNS name. What is kept out of a public tree
-is the **client relationship**. So the unit is the whole identity, indivisible: host
-pattern, name, address, signing key, its `allowed_signers` line, and the ssh `Host` block.
+is the **client relationship**. So the unit is the whole identity, indivisible: its hosts —
+one issuing account answers on more than one, and the git and ssh patterns are derived from
+them rather than written out by hand (ADR 0011) — name, address, signing key, its
+`allowed_signers` line, and the ssh `Host` block.
 Half-evicting it — hiding the email, leaving the hostname — reveals the same fact for none
 of the benefit.
 
@@ -776,6 +813,14 @@ of the benefit.
 1Password item's own name and vault appear in the public tree as a pointer, so the item
 must not name the client either. The personal identity, its key and its `allowed_signers`
 line stay in cleartext — they are already public on GitHub.
+
+**The item is named once.** The five surfaces that render from it — the `includeIf` in
+`~/.gitconfig`, `config-work`, the `allowed_signers` line, the ssh `Host` block and
+`id_work.pub` — all read one `.chezmoitemplates` partial, which is the only place the item
+and its field names are written down. That is also why `~/.gitconfig` is templated at all:
+the condition that switches the identity on is the host pattern, which leaks exactly what
+the file it includes does, so it is rendered under the same guard and is simply absent on a
+machine without `op`, where the file it would point at is not written either.
 
 **An `op`-less machine degrades; it does not refuse.** The work-identity templates are
 guarded on `op` being present, so CI and any machine without 1Password render a
@@ -795,15 +840,22 @@ Two consequences, stated rather than discovered:
   the item holds all fields, so the cost is at most one unlock per apply. Rendering once
   into an unmanaged file would avoid it and is deliberately *not* done — that is the
   recorded intermediate state the convergence invariant bans.
-- **The quiet failure mode.** If the render is skipped, the files are silently
-  personal-only. So the work identity is a **dynamic check in the drift report**, not
-  something discovered at the first work commit.
+- **The failure mode, no longer a quiet one.** If the render is skipped, the client-issued
+  identity is absent — and because nothing defaults, the affected repository stops at its
+  first commit instead of signing as personal. The **dynamic check in the drift report**
+  stays: it turns that stop into an explanation, ahead of the moment it would otherwise be
+  met.
 
-**Keys: one per identity, doing both jobs.** Personal and work are each a single
-`ssh-ed25519` key used for authentication *and* signing. Splitting the two was rejected:
-both keys live in the same vault behind the same unlock, so the separation is nominal
-while the cost — two keys and three registrations at the one manual point of the
-rebuild — is real.
+**Keys: one per account, doing both jobs.** Each key is a single `ssh-ed25519` key used
+for authentication *and* signing. There are two, not three: personal and company work run
+through one github.com account and share its key, differing by address alone, while the
+client-issued identity has its own account and its own. ADR 0008 said *per identity*, which
+was written before the two came apart; the argument it rests on is unchanged and now cuts
+the same way twice. Splitting authentication from signing was rejected: both keys would live
+in the same vault behind the same unlock, so the separation is nominal while the cost — two
+keys and three registrations at the one manual point of the rebuild — is real. A separate
+key for the company identity was rejected for the same reason, with the account shared as
+well.
 
 **No retired key is carried anywhere** — no line in `allowed_signers`, no registration
 left on the GitHub account. This is safe because nothing is lost: GitHub records a
@@ -822,11 +874,15 @@ they live in 1Password and are offered only through the agent, so there is no ex
 that grows with time. Rotation happens once, by hand, at any convenient moment. P0 item 6
 says "register the public key on GitHub", which is true of whichever key exists.
 
-**The source remote is rewritten HTTPS → SSH after the agent is verified**, in a plain
+**The source remote is rewritten HTTPS → SSH after the agent is verified**, in P7's plain
 `run_after_` script (not `run_onchange_`, whose content hash says nothing about the
-remote's current value). The clone arrives over HTTPS because the repository is public;
-without the rewrite, the first `chezmoi git push` from a rebuilt machine prompts for a
-password that no longer exists.
+remote's current value). It rewrites only a remote that is still the HTTPS form of a
+GitHub clone, derives the SSH form from it rather than writing this repository's name out
+a second time, and leaves the remote alone when the agent socket is missing — which is
+what CI holds, where the gate reports the 1Password items rather than refusing them (§8).
+The clone arrives over HTTPS because the repository is public; without the rewrite, the
+first `chezmoi git push` from a rebuilt machine prompts for a password that no longer
+exists.
 
 **The repository is public**, and that is load-bearing: a private clone on a fresh Mac
 needs a credential typed by hand, before `gh` and before 1Password exist, and it fails
@@ -926,7 +982,10 @@ Two tiers.
 **rendered** scripts and the rendered `drift` (sources are `.tmpl`, so the tier renders
 them with `chezmoi execute-template` first — a template that fails to render is caught a
 step earlier than one that renders to broken shell); `tests/drift.sh`, which runs that
-rendered command against stubbed inventories; the Brewfile reason-comment presence check;
+rendered command against stubbed inventories; `tests/identity.sh`, which asks the real git,
+against the rendered `~/.gitconfig`, which identity each shape of remote selects — a pattern
+that matches nothing is otherwise silent until a commit is refused somewhere else entirely
+(§6.5); the Brewfile reason-comment presence check;
 the script-header presence check; and the Dock-entry reference check. Both tiers
 run on macOS for the same reason: the source tree is templated for darwin, so a Linux
 runner would render the branch this repository never applies and lint the wrong shell.
@@ -1058,3 +1117,4 @@ Stated rather than discovered later.
 | [0008](docs/adr/0008-one-key-per-identity-nothing-retired-is-carried.md) | One key per identity, for both roles; no retired key is carried |
 | [0009](docs/adr/0009-the-dock-is-reconciled-not-rebuilt.md) | The Dock is reconciled, not rebuilt |
 | [0010](docs/adr/0010-agent-tooling-is-restored-from-the-account.md) | Agent tooling is restored from the account, not declared |
+| [0011](docs/adr/0011-no-default-identity-keys-belong-to-accounts.md) | There is no default identity; keys belong to accounts, addresses to engagements |

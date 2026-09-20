@@ -2,7 +2,7 @@
 
 1Password remains the root of the machine's trust: the SSH agent for authentication, `op-ssh-sign` for commit and tag signing, and the store for every token. The repository itself declares **no secret**. Tokens are fetched by hand the first time a tool needs one, exactly as before.
 
-One thing does come out of 1Password at apply time: the **work identity** — the client's Git host, the account name and address, and its signing key. It is rendered from a single 1Password item into the four files that would otherwise carry it in a public tree.
+One thing does come out of 1Password at apply time: the **work identity** — the client's Git host, the account name and address, and its signing key. It is rendered from a single 1Password item into every file that would otherwise carry it in a public tree: the ssh `Host` block, `id_work.pub`, `config-work`, its line in `allowed_signers`, and the `includeIf` in `~/.gitconfig` that switches the identity on — the host pattern there leaks exactly what the file it includes does.
 
 The work identity is treated as one indivisible item. Nothing about it is cryptographically secret — both signing keys are public keys and the host is a public DNS name — so the thing being kept out of the tree is the client relationship, and half-evicting it reveals the same fact for none of the benefit. Its filenames leak too, so the client name disappears from those as well: `config-work`, `id_work.pub`.
 

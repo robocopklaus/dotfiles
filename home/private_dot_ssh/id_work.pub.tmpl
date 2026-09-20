@@ -1,0 +1,3 @@
+{{- if lookPath "op" -}}
+{{ (fromJson (includeTemplate "lib/work-identity.json" .)).key }}
+{{ end -}}
