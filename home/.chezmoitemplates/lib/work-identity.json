@@ -24,7 +24,7 @@ Every call site guards on `op` being on the path, so this template is reached on
 machine that has 1Password. It does not guard a second time: a template that refused here
 would be the refusal the gate already owns (§2).
 */ -}}
-{{- $item := "op://Private/work-identity" -}}
+{{- $item := "op://Employee/work-identity" -}}
 {{- $hosts := list -}}
 {{- range splitList "," (onepasswordRead (printf "%s/hosts" $item)) -}}
 {{-   $host := trim . -}}

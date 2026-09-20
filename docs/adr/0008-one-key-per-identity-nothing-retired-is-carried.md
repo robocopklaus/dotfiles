@@ -25,3 +25,22 @@ Locally, `git log --show-signature` reports pre-rotation commits as signed by an
 The preflight item that registers a public key is unchanged, and the specification stays free of a rotation procedure — the decision here is made once and does not re-enter the bootstrap.
 
 Keys registered on the GitHub account beyond the one the machine holds are **not** caught by the drift report. Detecting them needs an API token scope that the bootstrap deliberately does not depend on, and adding it would re-introduce the `gh` sign-in that was ruled out of the gate. Pruning the account is a manual act at review time, not an automated check.
+
+## Addendum: retirement is not simultaneous
+
+*"When a key is replaced, both entries go in the same act that adds the new one"* cannot be
+read literally, and following it literally would be wrong. A new key is registered before it
+is known to work, and removing the old one first means testing the replacement with nothing
+to fall back to. There is therefore a **verification window** in which one account holds two
+keys.
+
+The window is bounded by an act rather than by a date: the retired key goes as soon as the
+replacement is verified in **both** of its roles — an authentication that succeeds against
+the host, and a signature that verifies — and the two registrations a single key needs on
+GitHub are both in place. It is the only state in which two keys exist for one account.
+
+Nothing detects it, by the same argument that closes this ADR: keys registered on the
+account are outside the drift report, because catching them needs a token scope the
+bootstrap does not take. The window is therefore recorded here instead of checked, so that a
+second key found on an account reads as a step in progress rather than as the defect this
+ADR otherwise forbids.
