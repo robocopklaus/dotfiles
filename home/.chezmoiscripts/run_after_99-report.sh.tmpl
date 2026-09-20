@@ -1,0 +1,102 @@
+#!/bin/bash
+# Phase: 9x — the epilogue: the closing report
+# Requires: nothing — a missing `drift` shortens the report; it never fails the run (§3)
+
+# No `set -e`, alone among the scripts here: chezmoi aborts on a non-zero script, and
+# `drift` exits 1 on any finding (§7) — a true report rather than a failed run. §3 has the
+# reasoning; the last line of this file is what enforces it.
+set -uo pipefail
+
+# `run_after_` at a `9x` slot outside the phase range, for the reasons §4 gives: this
+# script re-derives on every run, so content-hash skipping would stop a converged machine
+# being told what it is still missing.
+
+# A heredoc rather than `printf`, here and at the tail: a format string that begins with a
+# dash is read as an option, so the rule for a banner is simply not to hand it to `printf`.
+cat <<'HEAD'
+
+----------------------------------------------------------------------
+The closing report
+----------------------------------------------------------------------
+HEAD
+
+# Dynamic — what is missing *right now*, re-checked rather than replayed. There is no
+# scratch file for the phases to append to: that is the recorded intermediate state the
+# convergence invariant bans, and it would go stale on the second run and then lie (§1,
+# §3).
+#
+# The same invocation a human types at a desk, with no extra flag: `drift` omits empty
+# sections, so nothing a brief mode would have to suppress is printed anyway (§7).
+#
+# The managed `.zshrc` puts `~/.local/bin` first on PATH (§6.3), but this script runs in
+# chezmoi's environment rather than a login shell, so that declaration has not been read
+# here. Seeding it is what lets the guard below see a `drift` that P3 did write.
+export PATH="$HOME/.local/bin:$PATH"
+
+printf '\n'
+if command -v drift >/dev/null 2>&1; then
+  # Its exit status is discarded rather than propagated: drift's 1 means "this machine
+  # disagrees with the repository", which is the message, not a malfunction.
+  drift || true
+else
+  printf 'drift is not on PATH, so nothing could be re-checked. Re-run the bootstrap.\n'
+fi
+
+# Static tail — what no script can perform and no script can verify.
+#
+# Everything above is derived from the machine. Everything below cannot be: it is GUI work
+# behind accounts, and a self-attested "have you signed in? [y/N]" would be a prompt
+# wearing a gate's clothes — it blocks the run while verifying nothing (§2). A manual step
+# is either verifiable, in which case the gate refuses on it, or it is not, in which case
+# it is a line here. There is no third category.
+#
+# Hand-written rather than derived from a declaration, and that is not rule 1 slipping:
+# nothing in the repository declares these, because the repository does nothing about them
+# (§6.3). A data file would be a first list, not a second one, with this script as its
+# only reader.
+cat <<'TAIL'
+
+----------------------------------------------------------------------
+The rest is yours — no script can do or check any of it
+----------------------------------------------------------------------
+
+Sign-ins other things depend on
+
+  GitHub          Register this machine's public key under BOTH "SSH keys" and
+                  "SSH signing keys" (P0 item 6). Authentication and signature
+                  verification are separate registrations of the same key, and
+                  the second one is the one that is silently forgotten.
+  App Store       Sign in, then re-run the bootstrap if the report above is
+                  short an App Store application: `mas` cannot install for an
+                  account that is not signed in, and the phase is tolerant.
+
+Things that restore themselves once you sign in
+
+  Nothing here is managed and nothing here is broken — signing in is the whole
+  restore, and this list exists so a rebuilt machine is not audited by memory.
+
+  1Password, Chrome (its extensions arrive with Chrome sync), VS Code (Settings
+  Sync carries settings, extensions and keybindings together), Raycast, Slack,
+  ChatGPT, Mimestream, Clockify, WhatsApp, GCal, Docker Desktop.
+
+  Agent skills and plugins too: they ride the claude.ai account rather than this
+  repository (ADR 0010), and no phase here installs any. Sync is not instant — a
+  newly enabled marketplace has taken roughly thirteen minutes to land — so an
+  empty ~/.claude/plugins/synced/ is not a failure for the first quarter hour.
+
+Credential files, by path — the values live in 1Password
+
+  These block a CLI and nothing else: no phase waits on them, which is why none
+  of them is a gate item. Fetch one the first time its tool asks for it.
+
+  ~/.ha-cli.env         `ha`   — homeassistant-cli
+  ~/.cloudflare         `cli4` — cloudflare-cli4
+  ~/.firefly_token      the Firefly III token
+  ~/.ghostfolio_token   the Ghostfolio token
+
+TAIL
+
+# The last line, and the reason there is no `set -e` above: whatever was reported, the run
+# ends having succeeded. The report is the deliverable; failing on it would make the one
+# script that tells the truth about the machine the one that hides the rest of the run.
+exit 0
