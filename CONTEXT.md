@@ -449,6 +449,10 @@ weekly use, held in a **second Brewfile, `Brewfile.work`**, at the repository ro
 the base one, inlined into the P4 Homebrew script and piped to a second
 `brew bundle --file=-`.
 
+The file carries one line that is not an entry: `databricks/tap`, which homebrew/core does
+not carry the CLI in. It sits in this file rather than beside the base tap for the reason
+the file exists — the deletion that removes the group removes its tap with it.
+
 **It rides the guard that already exists.** The include sits inside the *same*
 `op`-presence branch §6.5 puts on the work identity, so the identity and its tooling turn
 on and off as **one fact under one guard**. No flag, no chezmoi config value, no second
