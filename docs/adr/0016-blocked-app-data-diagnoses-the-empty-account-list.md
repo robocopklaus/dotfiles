@@ -1,13 +1,25 @@
-# Blocked app data is a gate item, and its remedy is typed by the human
+# Blocked app data is a diagnosis of the empty account list, and its remedy is typed
 
 `op` reads the account out of 1Password's own settings file, inside the app's group
 container. macOS can refuse the terminal that read. When it does, `op` reports no account
 with the CLI integration switched on, and ADR 0014's check — `op account list` — refuses
 with a remedy naming the toggle, which is not the fault.
 
-The gate therefore asks a second question ahead of it: is `$app_settings` present and
-unreadable? Its remedy is to re-run the command with `OP_BIOMETRIC_UNLOCK_ENABLED=true`
-in front of it, which makes `op` ask the running app rather than read the file.
+The gate therefore asks a second question *inside* that refusal, before it names a
+remedy: is `$app_settings` present and unreadable? If it is, the remedy is to re-run the
+command with `OP_BIOMETRIC_UNLOCK_ENABLED=true` in front of it, which makes `op` ask the
+running app rather than read the file.
+
+**Why inside and not beside.** This was first built as a check of its own, standing ahead
+of ADR 0014's, and that was wrong in a way worth recording: the variable does not make
+the file readable. It routes `op` around the file. A gate item conditioned on
+unreadability therefore still holds on the machine its own remedy has just repaired — it
+refuses a working machine, with an instruction already carried out, on every subsequent
+run. The condition that clears is the one that was actually wrong: no account came back.
+Unreadable app data is *why*, not *whether*.
+
+The general shape: a precondition is what the run needs to be true. A diagnosis is what
+distinguishes the ways it can be false. Only the first may hold the gate.
 
 **Why the permission is not the remedy.** Granting the access would be the honest fix and
 it is unreachable: macOS lists the terminal under none of Privacy & Security's panes —
@@ -25,10 +37,10 @@ the gate: on the run that needs it, the file does not exist yet. There is no arr
 of this repository that sets the variable for the run that is failing. Naming it in a
 remedy is not the lesser option; it is the only one.
 
-**Why it is a check of its own.** ADR 0014's check catches this machine already — the
-account list is empty either way. What it cannot do is tell the two apart, and the two
-want opposite things done to them. A remedy listing both causes would hand the reader the
-archaeology this repository exists to end.
+**Why the refusal branches at all.** ADR 0014's check catches this machine already — the
+account list is empty either way. What it cannot do on its own is tell the two apart, and
+the two want opposite things done to them. A remedy listing both causes would hand the
+reader the archaeology this repository exists to end.
 
 **Why the file and not the error message.** `op --debug` names the cause in words
 (`Skipped loading desktop app settings file … operation not permitted`). Those words are
