@@ -1,6 +1,6 @@
 # Load selected Oh My Zsh plugins without loading the full framework.
-# command-not-found needs the homebrew/command-not-found tap, which the
-# Brewfile declares.
+# command-not-found reads `brew command-not-found-init`, which ships with
+# Homebrew itself — the tap that once carried it is deprecated and empty.
 ohmyzsh/ohmyzsh path:plugins/colored-man-pages
 ohmyzsh/ohmyzsh path:plugins/command-not-found
 

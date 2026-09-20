@@ -1,5 +1,5 @@
 #!/bin/bash
-# Phase: P4 — packages: Homebrew, the tap, formulae and casks
+# Phase: P4 — packages: Homebrew, formulae and casks
 # Requires: P3, Xcode Command Line Tools, administrator rights
 
 set -euo pipefail
@@ -33,7 +33,7 @@ BREWFILE
 #
 # Homebrew itself and the formulae abort the run, because later phases depend on them:
 # P5 needs `mise`, P6 needs `dockutil`. `set -e` makes both fatal.
-printf 'P4: installing the tap and the formulae.\n'
+printf 'P4: installing the formulae.\n'
 printf '%s\n' "$brewfile" | grep -E '^(tap|brew) ' | brew bundle --file=-
 
 # Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
