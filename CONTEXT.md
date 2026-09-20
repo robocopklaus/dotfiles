@@ -45,6 +45,11 @@ The property that repeated runs reach the same state. It bans recorded intermedi
 no checkpoint file, no scratch file a phase appends to, nothing that can go stale and then
 lie.
 
+**Remedy**:
+The command or click path the gate prints beside a failed precondition. It lives in the
+gate script next to the check it serves, never in a list maintained apart from it, and it
+names one way — a remedy that offers a choice has handed the decision back.
+
 **Refuse**:
 To stop before changing anything, with a precise instruction. What the gate does to a
 failed precondition, and what `~/.gitconfig` does to a commit no identity matches.
