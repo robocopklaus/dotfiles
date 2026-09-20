@@ -56,6 +56,11 @@ jobs:
       - name: Test drift
         run: tests/drift.sh "$RUNNER_TEMP/rendered-bin/drift.sh"
 
+      # The gate's two stops, against stubbed system commands. Only the cases that
+      # install nothing are covered, on purpose — see the header of tests/gate.sh.
+      - name: Test the gate
+        run: tests/gate.sh "$RUNNER_TEMP/rendered/run_before_20-gate.sh"
+
       # Which identity a remote selects, asked of the real git against the rendered
       # configuration. A pattern that looks right and matches nothing is silent everywhere
       # else: with no default, it surfaces as a refused commit far from here. §6.5, ADR 0011
