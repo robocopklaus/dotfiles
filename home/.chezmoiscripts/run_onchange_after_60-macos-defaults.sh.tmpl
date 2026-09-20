@@ -31,7 +31,9 @@ while IFS=$'\t' read -r domain key type value scope; do
   fi
 
   printf 'P6: %s %s → %s\n' "$(managed_default_label "$scope" "$domain")" "$key" "$expected"
-  managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$expected"
+  # `$expected` is the read spelling and is only ever compared against; what is written is
+  # the declared value, which is the only spelling `defaults write` accepts for a bool.
+  managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$(managed_default_written "$value")"
   changed_domains+="$domain"$'\n'
 done <<<"$managed_defaults"
 
