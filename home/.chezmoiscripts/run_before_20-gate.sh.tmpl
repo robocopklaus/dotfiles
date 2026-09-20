@@ -158,6 +158,12 @@ fi
 # all: `~/.config/op/config` carries `"accounts": null` even on a working machine, because
 # the account is handed over by the app.
 #
+# Not `op whoami`, which is the tempting one and asks a different question: whether a
+# session is open. The run does not need one here — it is created at first use, when P3
+# renders the work identity and the app authenticates — so a machine with the integration
+# on and the vault simply not unlocked yet answers `account is not signed in`. Gating on
+# that refuses a correct machine (§2).
+#
 # This is checked rather than left to P3 because of what P3 does without it. chezmoi calls
 # `op signin`, and `op` with no account does not fail — it *asks*, for a sign-in address,
 # an email, a secret key and a password, in the middle of a run that §1 says has exactly
