@@ -80,6 +80,10 @@ _Avoid_: config, definition, spec
 Declared by this repository, and therefore restored by a rebuild and checked by drift.
 Everything else on the machine is a decision that has not been made yet.
 
+**CLI integration**:
+The 1Password setting that hands the account to `op`. Without it `op` holds no account at
+all, and asks for one — which is why it is a gate item rather than something P3 discovers.
+
 **Vault state**:
 What a 1Password item holds that no template reads. A rebuild does not restore it and
 drift cannot see it, so it is never where a fact about the machine lives. The item hands

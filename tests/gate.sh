@@ -6,11 +6,23 @@
 # machine missing it must be refused *before* anything is installed. That ordering is
 # invisible in a passing bootstrap and expensive to get wrong, which is what this covers.
 #
-# Deliberately narrow. Only the two cases that install nothing are here: forcing the
-# acquisition path would mean running `brew install --cask 1password` for real on any
-# machine that lacks it, and a test that installs software to prove it can is not a test.
-# The acquisition itself is reachable only on bare metal, which §8 already records as
-# knowingly unverified.
+# Every case runs with `CI` set, and that is load-bearing rather than incidental. With it
+# unset the gate reaches the acquisition, and the acquisition is not stubbable: the prefix
+# cascade puts the real Homebrew ahead of anything this file puts on the PATH, so the
+# casks are installed for real. That is not hypothetical — an earlier version of this file
+# ran one case with `CI` empty and installed 1Password on the CI runner, which put `op` on
+# the PATH and broke a later step that renders the work identity. A test that installs
+# software to prove it can is not a test.
+#
+# For the same reason the 1Password checks are not driven from here at all. The cascade
+# puts the real `op` ahead of any stub too, so a case about the CLI integration would be
+# asking what the machine running the test has configured rather than what the gate does —
+# passing on a laptop with a vault, failing on a runner without one, and proving nothing
+# either way. The integration check and the acquisition are both bare-metal behaviour,
+# which §8 already records as knowingly unverified.
+#
+# What is left is the part that is genuinely the gate's own: the order it does things in,
+# and what it declines to do under CI.
 set -uo pipefail
 
 gate=${1:?usage: tests/gate.sh <rendered gate>}
@@ -79,7 +91,8 @@ silent() { # haystack pattern name
 printf '\nThe foundation fails: the gate refuses before it acquires anything\n'
 home="$root/home-foundation"
 mkdir -p "$home"
-out=$(HOME="$home" PATH="$bin:$PATH" STUB_NO_CLT=1 CI='' bash "$gate" 2>&1)
+# The foundation refuses under CI too: only the 1Password items degrade (§8).
+out=$(HOME="$home" PATH="$bin:$PATH" STUB_NO_CLT=1 CI=1 bash "$gate" 2>&1)
 code=$?
 check 'exits 1' 1 "$code"
 says "$out" 'Command Line Tools' 'names the missing foundation item'
