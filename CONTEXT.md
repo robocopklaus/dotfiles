@@ -85,6 +85,12 @@ Everything else on the machine is a decision that has not been made yet.
 The 1Password setting that hands the account to `op`. Without it `op` holds no account at
 all, and asks for one — which is why it is a gate item rather than something P3 discovers.
 
+**App data access**:
+Whether the process that starts the run may read the 1Password app's own data. The CLI
+integration can be on and the handover still fail on it, which is why it is a gate item
+of its own.
+_Avoid_: permission, Full Disk Access, TCC
+
 **Vault state**:
 What a 1Password item holds that no template reads. A rebuild does not restore it and
 drift cannot see it, so it is never where a fact about the machine lives. The item hands
