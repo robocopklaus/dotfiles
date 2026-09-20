@@ -61,7 +61,7 @@ pass, before a single file is written.
 | 1 | macOS installed, Apple Account signed in in System Settings | macOS >= 26, Apple Silicon |
 | 2 | Network | `github.com` reachable |
 | 3 | Xcode Command Line Tools — `xcode-select --install` | `xcode-select -p` |
-| 4 | 1Password and the 1Password CLI installed by hand | app present, `op` on `PATH` |
+| 4 | 1Password and the 1Password CLI — `brew install --cask 1password 1password-cli` | app present, `op` on `PATH` |
 | 5 | Signed in to 1Password, unlocked, **SSH agent enabled** | agent socket exists |
 | 6 | Public key registered on GitHub under *SSH keys* **and** *SSH signing keys* | **not verifiable** → closing report |
 | 7 | Administrator rights | `sudo -v` |
@@ -94,6 +94,29 @@ work identity template (§6.5), which is rendered in P3, before P4 would have in
 `op`. So both the app and the CLI are P0 items; both nonetheless stay declared in the
 Brewfile, and casks are installed with `--adopt` so Homebrew takes ownership of the
 hand-installed copy rather than colliding with it. One list, one truth.
+
+**Why Homebrew is not a preflight item.** Item 4 is satisfied with `brew`, which means
+Homebrew is installed by hand before the run — and it is still not a row of this table.
+The vendor's own instructions offer two ways to install the CLI, and the second one, a
+downloaded `.pkg`, leaves a copy under `/usr/local/bin` that P4's `--adopt` is in no
+position to take over: an unmanaged tail in the one place the trust chain starts. Naming
+`brew` in the remedy closes that door without opening a worse one. A row of its own would
+have to go one of two ways, and both are worse. With a gate check, the gate would refuse
+on something P4 installs unattended anyway — the FileVault argument, applied to the step
+most likely to already be there. Without one, the table would list an item the gate does
+not know, and the gate is what this list is a summary *of*. Homebrew is therefore not a
+precondition of the run; it is how two preconditions are met.
+
+**Why the CLI integration toggle is not gated.** The `op` check verifies the binary on
+`PATH`, and the remedy tells you to turn on 1Password → Settings → Developer → Integrate
+with 1Password CLI — but nothing verifies the toggle. `op whoami` would, and it is
+declined: against a locked vault it raises a GUI unlock prompt, and §1 spends the run's
+entire interactive budget on `sudo -v`. A check the gate cannot afford to run is not a
+check, so the toggle is unverifiable in the only sense this document uses the word. It
+needs no closing-report line either, because it is the one manual step that announces
+itself: the very next phase renders the work identity through `op`, and a missing toggle
+stops P3 with that template named in the error. The remedy carries it so a human reads it
+before that happens.
 
 **Why Command Line Tools is a precondition and not an installation.** The prior setup
 polled for up to 3600 seconds waiting for CLT to appear mid-run. That poll is deleted.

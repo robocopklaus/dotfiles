@@ -45,8 +45,9 @@ printf '%s\n' "$brewfile" | grep -E '^(tap|brew) ' | brew bundle --file=-
 
 # Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
 # fresh bootstrap, and the failures are collected for the closing report (§3). `--adopt`
-# takes over the 1Password and `op` installed by hand before the run (§2) rather than
-# colliding with them.
+# takes over a hand-installed copy of any cask rather than colliding with it — a cask
+# already on disk otherwise aborts with "It seems there is already an App at ...", and on
+# the day of a rebuild an app fetched by hand before the run is exactly what is there.
 failed=()
 while IFS= read -r cask; do
   # Already Homebrew's: nothing to install and nothing to adopt. Skipping keeps a re-run

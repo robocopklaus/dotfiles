@@ -75,15 +75,19 @@ if ! xcode-select --print-path >/dev/null 2>&1; then
     "Run: xcode-select --install — wait for it to finish, then re-run."
 fi
 
-# 1Password and its CLI, both installed by hand before the run (§2)
+# 1Password and its CLI, both installed by hand before the run (§2). Both remedies name
+# Homebrew, which is therefore installed by hand too — and is still not an item of its
+# own: it is how these two are met, not a precondition of the run (§2). The vendor's
+# other route, a downloaded .pkg, is deliberately not offered: it leaves a copy P4's
+# `--adopt` cannot take over.
 if [ ! -d "/Applications/1Password.app" ]; then
   refuse_unless_ci "1Password is not installed." \
-    "Install it by hand from https://1password.com/downloads/mac and sign in."
+    "Install Homebrew (https://brew.sh), then run: brew install --cask 1password — then open it and sign in."
 fi
 
 if ! command -v op >/dev/null 2>&1; then
   refuse_unless_ci "The 1Password CLI (op) is not on PATH." \
-    "Install it from https://developer.1password.com/docs/cli/get-started, then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
+    "Install Homebrew (https://brew.sh), then run: brew install --cask 1password-cli — then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
 fi
 
 # The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
