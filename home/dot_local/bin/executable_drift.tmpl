@@ -1,21 +1,21 @@
 #!/bin/bash
-# drift — where does this machine disagree with the repository? (§7)
+# drift — where does this machine disagree with the repository?
 # Report only: it never writes. Exit 0 when clean, 1 on any drift.
 
 set -euo pipefail
 
 # Drift is never measured Mac-to-Mac. Everything below compares this machine against the
-# declarations carried in this file, which are the repository's (§7, ADR 0002).
+# declarations carried in this file, which are the repository's (ADR 0002).
 #
-# The Brewfile (§6.1) is inlined at render time, as the P4 scripts inline it — but for a
-# different reason. There it is `run_onchange_`'s content hash; here it is §7's: the one
-# command whose whole value is being run on a whim must not require the source tree to be
-# on disk, let alone a `cd` into it.
-# The work group (§6.1) is appended under the same `op` guard the P4 script inlines it
-# behind, and this file is rendered by chezmoi too — so the check and the applying script
-# evaluate one condition at one moment. That is why no special case for the group is
-# written anywhere below: on a company Mac the five are declared and installed, on CI they
-# are neither, and neither machine reports them under *Not in the repository*.
+# The Brewfile is inlined at render time, as the P4 scripts inline it — but for a
+# different reason. There it is `run_onchange_`'s content hash; here it is this command's:
+# the one command whose whole value is being run on a whim must not require the source
+# tree to be on disk, let alone a `cd` into it. The work group is appended under the same
+# `op` guard the P4 script inlines it behind, and this file is rendered by chezmoi too —
+# so the check and the applying script evaluate one condition at one moment. That is why
+# no special case for the group is written anywhere below: on a company Mac the five are
+# declared and installed, on CI they are neither, and neither machine reports them under
+# *Not in the repository*.
 brewfile=$(
   cat <<'BREWFILE'
 {{ include "../Brewfile" }}
@@ -27,7 +27,7 @@ BREWFILE
 # shell, which already has brew on PATH, and from the tail of a bootstrap, which does not.
 {{ template "lib/homebrew.sh" . }}
 
-# The managed defaults of §6.4, from the declaration P6 applies — the same table, read
+# The managed defaults, from the declaration P6 applies — the same table, read
 # here rather than copied (ADR 0002). A second list of expected values beside the script
 # that writes them would guarantee drift, which is an unusually poor property for a drift
 # detector.
@@ -45,8 +45,8 @@ diverged=()
 # the one failure a drift detector must not do quietly.
 incomplete=()
 
-# Declared, read from the entry shape §6.1 fixes — the same shape the P4 scripts and the
-# CI reason-comment check read.
+# Declared, read from the entry shape the Brewfile fixes — the same shape the P4 scripts
+# and the CI reason-comment check read.
 declared_taps=$(sed -n 's/^tap "\([^"]*\)".*/\1/p' <<<"$brewfile")
 declared_formulae=$(sed -n 's/^brew "\([^"]*\)".*/\1/p' <<<"$brewfile")
 declared_casks=$(sed -n 's/^cask "\([^"]*\)".*/\1/p' <<<"$brewfile")
@@ -163,11 +163,11 @@ done < <(
 )
 
 # Present and undeclared. Formulae are swept as leaves only: a dependency is not a
-# decision, and listing dependencies would bury the entries that are (§7, ADR 0002).
+# decision, and listing dependencies would bury the entries that are (ADR 0002).
 #
-# Taps are swept in one direction only, which is §7's sweep list rather than an oversight:
-# Homebrew's own taps come and go with Homebrew, so a tap nobody declared is not a
-# decision owed the way an application is.
+# Taps are swept in one direction only, which is this command's sweep list rather than an
+# oversight: Homebrew's own taps come and go with Homebrew, so a tap nobody declared is
+# not a decision owed the way an application is.
 while IFS= read -r entry; do
   [ -n "$entry" ] || continue
   unmanaged+=("$entry")
@@ -184,9 +184,10 @@ done < <(
 )
 
 # A dragged-in application is the one class of drift the Brewfile structurally cannot
-# catch (§7), so /Applications is swept for bundles that came from neither source. Each
+# catch, so /Applications is swept for bundles that came from neither source. Each
 # bundle's provenance is derived from the bundle itself rather than from a list of
-# exceptions this file would then have to maintain (rule 6).
+# exceptions this file would then have to maintain: guards derive from
+# the machine, not from a list.
 if [ "$homebrew" = 'no' ] || [ "$casks_known" = 'no' ]; then
   : # Without the installed casks there is nothing to weigh a bundle against, and the
     # caveat above already says so.
@@ -265,7 +266,7 @@ fi
 # Managed files, which `chezmoi status` covers completely (ADR 0002) — the one section
 # this command delegates outright rather than derives.
 #
-# Scripts are excluded: a `run_after_` script is pending by design on every run (§4), so
+# Scripts are excluded: a `run_after_` script is pending by design on every run, so
 # including them would report the bootstrap's own epilogue as drift, permanently.
 if ! command -v chezmoi >/dev/null 2>&1; then
   incomplete+=('chezmoi is not installed, so no managed file was checked.')
@@ -281,7 +282,7 @@ fi
 # Managed defaults, which chezmoi cannot see at all: it tracks the applying script's
 # content hash, not its effect, so a key changed in System Settings leaves `chezmoi
 # status` clean (ADR 0002). Only the keys the repository declares are read — never
-# `defaults read` over a whole domain (§7). A Mac holds thousands of defaults and about
+# `defaults read` over a whole domain. A Mac holds thousands of defaults and about
 # two dozen are decisions; enumerating the declaration bounds the comparison set to a
 # number that was chosen rather than discovered.
 while IFS=$'\t' read -r domain key type value scope; do
@@ -294,7 +295,7 @@ while IFS=$'\t' read -r domain key type value scope; do
   fi
 
   # A system setting you do not have is a *wrong* setting rather than an absence, because
-  # macOS always supplies its own value — so an unset key is diverged, not missing (§6.4).
+  # macOS always supplies its own value — so an unset key is diverged, not missing.
   diverged+=("Default $(managed_default_label "$scope" "$domain") $key: expected $expected, is ${current:-unset}")
 done <<<"$managed_defaults"
 
@@ -315,7 +316,7 @@ elif [ "$dock_current" != "$dock_expected" ]; then
 fi
 
 {{ if lookPath "op" }}
-# The client-issued identity (§6.5, ADR 0011). With no default identity, a skipped render
+# The client-issued identity (ADR 0011). With no default identity, a skipped render
 # no longer mislabels a commit — it stops one. This check turns that stop into an
 # explanation, ahead of the moment it would otherwise be met. It is rendered under the same
 # `op` guard as the templates it asks about, so it asks only on a machine those templates
@@ -358,7 +359,7 @@ if repo_remote=$(git remote get-url origin 2>/dev/null) && [ -n "$repo_remote" ]
 fi
 {{ end }}
 # Two things are deliberately not swept, and their absence is written down so it is not
-# read as an oversight and repaired (§7): `mise` runtimes, which `mise ls` already diffs
+# read as an oversight and repaired: `mise` runtimes, which `mise ls` already diffs
 # against its own configuration, and `chezmoi unmanaged` over $HOME, which reports every
 # file the repository has never claimed and so reports nothing.
 

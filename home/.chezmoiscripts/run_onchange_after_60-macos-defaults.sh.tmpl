@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # The declaration and the three things any consumer of it needs, included at render time
-# (§4, ADR 0005). The table is *in* this rendered script, so editing it re-triggers this
+# (ADR 0005). The table is *in* this rendered script, so editing it re-triggers this
 # phase by construction — the same binding 40 gets from inlining the Brewfile.
 {{ template "lib/macos-defaults.sh" . }}
 
@@ -15,7 +15,7 @@ set -euo pipefail
 # They are applied unconditionally: there is no flag to forget, and no
 # `CHEZMOI_APPLY_MACOS_DEFAULTS` to leave off. A gate that defaults to off means a
 # rebuilt machine comes up unconfigured, which is the rediscover-by-irritation loop the
-# repository exists to end (§6.4). What the flag actually guarded — a routine apply
+# repository exists to end. What the flag actually guarded — a routine apply
 # yanking the Dock and killing Finder mid-workday — is solved below instead.
 printf 'P6: applying the managed macOS defaults.\n'
 
@@ -35,7 +35,7 @@ while IFS=$'\t' read -r domain key type value scope; do
   changed_domains+="$domain"$'\n'
 done <<<"$managed_defaults"
 
-# An application is restarted only when a key in **its own** domain changed (§6.4). That
+# An application is restarted only when a key in **its own** domain changed. That
 # is what makes a mid-workday apply a no-op in practice, and it is the data declaration
 # above that makes the condition trivial to compute — a script could not answer it.
 #
@@ -43,7 +43,7 @@ done <<<"$managed_defaults"
 # among the seven cut, so no managed domain is left for it to be restarted for.
 # NSGlobalDomain, the two trackpad domains and `com.apple.screencapture` name no process
 # to restart either — the trackpad keys are read by the window server at login, and that
-# lag is accepted knowingly (§6.4).
+# lag is accepted knowingly.
 #
 # A here-string, not a pipe: `grep -q` exits at the first match, and with `pipefail` a
 # producer killed by the closed pipe would turn a successful match into a failure.
@@ -63,7 +63,7 @@ restart_if_changed com.apple.finder Finder
 
 # The Dock is the one domain this script does not restart itself. It has two managers —
 # this table and 61's layout — and restarting it here would be both a restart too early,
-# before the layout is written, and the first of two (§6.4, ADR 0009). So the change is
+# before the layout is written, and the first of two (ADR 0009). So the change is
 # recorded and 61 performs the single `killall Dock` at the end of P6.
 if domain_changed com.apple.dock; then
   : >"$dock_restart_request"

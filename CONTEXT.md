@@ -2,8 +2,9 @@
 
 This repository is the source two identical Apple Silicon Macs are rebuilt from, wiped
 and reinstalled at least once a year. This file is the glossary and nothing else: the
-words that carry a specific meaning here. The specification — what is managed and how the
-run works — is [README.md](README.md); the structural decisions are [docs/adr/](docs/adr/).
+words that carry a specific meaning here. What the repository manages is declared by the
+repository itself — the `Brewfile`, `home/.chezmoidata/`, and the managed files under
+`home/`. The structural decisions are recorded as ADRs under [docs/adr/](docs/adr/).
 
 ## The run
 
@@ -30,7 +31,7 @@ _Avoid_: stage, step
 **Preflight**:
 The preconditions of the run. Most are work done by hand on the fresh machine before the
 command is typed; the ones a command can satisfy are acquired by the gate instead. The
-gate, not the table in the specification, is the normative statement of what it contains.
+gate, not any summary of it, is the normative statement of what it contains.
 _Avoid_: manual steps — not all of them are
 
 **Gate**:
@@ -147,4 +148,4 @@ never disagree.
 
 **The map**:
 The GitHub issue and its tickets where the reasoning behind the rules lives. The
-specification states the rule; the map is why it is the rule.
+repository states the rule; the map is why it is the rule.

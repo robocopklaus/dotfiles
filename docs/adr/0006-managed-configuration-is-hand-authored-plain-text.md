@@ -12,11 +12,40 @@ The criterion has three clauses, and all three are load-bearing:
 
 The third clause restates ADR 0003 at the level of an individual file, deliberately and redundantly. A rule that requires a second document in order to avoid a catastrophic reading is not a rule.
 
-Where the criterion says no, the reason is recorded in one of three forms, and the distinction is documentary rather than mechanical — the repository does the same thing in all three cases, which is nothing:
+The rule is a property of the **file**, not of its directory, and it is written that way even though nothing managed sits outside `~/.config` and `$HOME` today. An editor's `settings.json` under `~/Library/Application Support/` would qualify on its contents alone, and the boundary should not have to be renegotiated when one does.
 
-- **Account-restored** — the settings return by signing in. Raycast, Slack, Chrome, ChatGPT, Mimestream, Clockify, WhatsApp, 1Password.
+## The managed set, and its reasons
+
+Paths are relative to `home/`. The reason belongs here rather than in the file: these are files rather than list entries, they share no comment syntax, and several are JSON, where a comment is a syntax error.
+
+| Path | Reason |
+| --- | --- |
+| `dot_config/ghostty/config` | Terminal; hand-written |
+| `dot_config/finicky/finicky.ts` | URL routing rules; all human |
+| `dot_config/oh-my-posh/config.omp.json` | Prompt definition |
+| `dot_config/mise/config.toml` | Runtime pins |
+| `dot_config/ccstatusline/settings.json` | Statusline definition |
+| `dot_gitconfig`, `dot_gitignore` | Global version-control behaviour and the `includeIf` set that selects an identity; templated, because the client-issued half of that set is guarded (ADR 0011) |
+| `dot_config/git/allowed_signers`, `config-work` | Signing and the client-issued identity; templated (ADR 0003) |
+| `dot_config/git/config-personal`, `config-company` | The two cleartext identities, each included by remote (ADR 0011) |
+| `dot_claude/settings.json` | Permissions and hooks — the dominance clause above is what admits it |
+| `dot_mcp.json` | Fully hand-authored |
+| `dot_editorconfig` | Editor defaults |
+| `dot_zshrc`, `dot_zprofile`, `dot_zsh_plugins.txt` | Shell; `zsh_plugins.txt` is antidote's declaration |
+| `private_dot_ssh/private_config` + `id_personal.pub`, `id_work.pub` | Templated (ADR 0003) |
+| `dot_config/1Password/ssh/agent.toml` | Which vaults the SSH agent may offer keys from; hand-written, and names no item (ADR 0003) |
+
+`~/.claude/settings.json` is written back by its own application. It stays managed anyway: deliberate configuration is not discarded to protect a principle, and write-back is just drift, which `drift` already surfaces (ADR 0002). Re-adoption is a deliberate `chezmoi add`.
+
+## Where the criterion says no
+
+The reason is recorded in one of five forms, and the distinction is documentary rather than mechanical — the repository does the same thing in every case, which is nothing:
+
+- **Account-restored** — the settings return by signing in. Raycast, Slack, Chrome (including its extensions, which Chrome sync installs), ChatGPT, Mimestream, Clockify, WhatsApp, 1Password, GCal, Docker Desktop, and the editor's whole surface: VS Code's Settings Sync carries its `settings.json`, extensions and keybindings together, so splitting the file out to manage it here would be the one entry whose two copies could disagree.
 - **Out of scope** — the configuration belongs to data this effort does not restore. Obsidian, whose four vaults all live under `~/Development/` and whose per-vault `.obsidian/` directories are already versioned with their own repositories; what remains at application level is a registry of absolute paths into those directories.
-- **Accepted lost** — a deliberate write-off. `gh`'s single alias, `codex`'s four lines.
+- **Accepted lost** — a deliberate write-off. `~/.config/gh/config.yml`, stock boilerplate around one human line, and `~/.codex/config.toml`, four hand-written lines under ninety-seven machine-appended ones whose project paths point into the out-of-scope zone anyway.
+- **Secrets, never managed** — `~/.ha-cli.env`, `~/.cloudflare`, `~/.firefly_token`, `~/.ghostfolio_token`. These satisfy the first two clauses completely; only the third stops them. Their *paths* appear in the closing report's static tail; their values never leave 1Password.
+- **No user-facing configuration at all** — `chezmoi`, `gh`, `jq`, `mas`, `dockutil`, `uv`, `zoxide`, `gogcli`, `cloudflare-cli4`, `homeassistant-cli`, `1password-cli`, `font-meslo-lg-nerd-font`, Pages, Numbers, 1Password for Safari. Named so the omission is a stated choice. The work group manages no configuration today either: those tools keep machine-written auth caches, which fail the dominance clause.
 
 The domain of the rule is the inventory from the content review, and a configuration inherits the group of its entry: client-tool configuration rides the client flag, base rides the base.
 
@@ -34,7 +63,7 @@ The domain of the rule is the inventory from the content review, and a configura
 
 The criterion's second clause trades a measurement for a judgement. The content review's bar was "it left a trace", checkable by anyone; "the human content dominates" is an eyeball call. This is accepted because every alternative rule is worse and the set is roughly a dozen small files, but it is the clause that will need re-reading if the set ever grows.
 
-Reasons live in the specification's table, not inside the managed files. The Brewfile's trailing-comment convention does not transfer: these are files rather than list entries, they have no common comment syntax, and several are JSON, where a comment is a syntax error. For the same reason there is no CI check — the Brewfile check enforces presence in one file with one syntax, and no equivalent shape exists here.
+Reasons live in this decision's table above, not inside the managed files. The Brewfile's trailing-comment convention does not transfer, for the reason given there. For the same reason there is no CI check — the Brewfile check enforces presence in one file with one syntax, and no equivalent shape exists here.
 
 The closing report's static tail, which ADR 0003 reserved for sign-ins that other things depend on, widens to admit two more sections: the account-restored applications, and the credential *paths* the command-line tools expect — paths only, never values, so a rebuild states that `ha` will want `~/.ha-cli.env` from 1Password. Most of the account-restored list is depended on by nothing; Slack and WhatsApp block no phase. The tail's admission rule therefore changes from *what the bootstrap needs* to *what the human would otherwise discover months later*, which is the cost of this decision and is stated rather than slipped in.
 

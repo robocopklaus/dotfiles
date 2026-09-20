@@ -1,6 +1,6 @@
 {{ if lookPath "op" -}}
 {{- $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
-# The client-issued identity's hosts (§6.5), rendered from one 1Password item together with
+# The client-issued identity's hosts, rendered from one 1Password item together with
 # the rest of it. One issuing account answers on more than one host, and a `Host` line takes
 # them all — they share an account, so they share the key it registers.
 #
@@ -14,6 +14,6 @@ Host{{ range $work.hosts }} {{ . }}{{ end }}
 {{ end -}}
 # Every host authenticates through the 1Password agent. Written in P3 and inert until
 # 1Password is unlocked with the agent turned on, which is the preflight item the gate
-# verifies rather than this file (§2, §3).
+# verifies rather than this file.
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

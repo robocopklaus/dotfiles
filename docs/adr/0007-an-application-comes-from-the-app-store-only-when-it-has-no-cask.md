@@ -14,7 +14,7 @@ Three reasons stack behind preferring Homebrew where both exist, and the third i
 
 ## The first clause is the same criterion as ADR 0006
 
-A Chrome extension is installed by signing into Chrome with the Google account; sync does the rest. An App Store purchase sits inertly in Purchased history and installs itself on no machine, ever. The repository therefore declares 1Password for Safari and says nothing about the Chrome extension of the same product — which reads as an inconsistency only until the criterion is named. It is *account-restored* in ADR 0006's sense, recorded in the specification's table with that word, and the repository does nothing about it because there is nothing to do.
+A Chrome extension is installed by signing into Chrome with the Google account; sync does the rest. An App Store purchase sits inertly in Purchased history and installs itself on no machine, ever. The repository therefore declares 1Password for Safari and says nothing about the Chrome extension of the same product — which reads as an inconsistency only until the criterion is named. It is *account-restored* in ADR 0006's sense, recorded in ADR 0006's table with that word, and the repository does nothing about it because there is nothing to do.
 
 This is the whole of the first clause: **the repository declares what does not come back by itself.** ADR 0006 reached it for configuration files; this decision reaches it for applications, and it is the same sentence both times.
 
@@ -24,7 +24,7 @@ Signing into Chrome is consequently not a preflight gate. ADR 0003's static tail
 
 `mas install` requires root, so `sudo -v` fires at the top of the preflight gate, before any file is written, with a keep-alive for the remainder of the run.
 
-This is in tension with ADR 0001's rule that nothing ever pauses, and the tension is stated rather than argued away. That rule was written against the 3600-second Command Line Tools poll: an unbounded wait on external state, which is why it became a precondition instead. A password prompt is bounded, immediate, and answerable without leaving the desk. The rebuild is not input-free, the specification says so plainly, and it names the one place it happens. The mandate this map serves is that the *review* happens at the desk before the wipe — not that the run is literally unattended.
+This is in tension with ADR 0001's rule that nothing ever pauses, and the tension is stated rather than argued away. That rule was written against the 3600-second Command Line Tools poll: an unbounded wait on external state, which is why it became a precondition instead. A password prompt is bounded, immediate, and answerable without leaving the desk. The rebuild is not input-free, and the gate names the one place it happens. The mandate this map serves is that the *review* happens at the desk before the wipe — not that the run is literally unattended.
 
 ## The drift report enumerates the App Store
 

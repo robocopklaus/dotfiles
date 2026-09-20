@@ -1,4 +1,4 @@
-# The Dock's layout (§6.4, ADR 0009).
+# The Dock's layout (ADR 0009).
 #
 # Beside `macos-defaults.toml` and deliberately not inside it. The two share the
 # `com.apple.dock` domain but not their shape: that table is flat `domain/key/type/value`
@@ -13,7 +13,7 @@
 # An entry is the application's **bundle name**, which is a *reference* to an application
 # the repository already declares and never a second declaration of it. CI enforces the
 # direction: every name here must resolve to a Brewfile entry or to an Apple system
-# application (§8). The check is not precautionary — `zen` was cut from the inventory and
+# application. The check is not precautionary — `zen` was cut from the inventory and
 # was still sitting fifth in the prior Dock declaration.
 #
 # The path is not declared: the name is looked for under `/Applications` and then

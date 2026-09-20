@@ -4,10 +4,10 @@
 
 set -euo pipefail
 
-# The Brewfile (§6.1) is inlined here at render time rather than read from disk at
+# The Brewfile is inlined here at render time rather than read from disk at
 # runtime, because `run_onchange_` hashes this rendered script: the inventory being *in*
 # the script is what makes any edit to it re-trigger the phase by construction. No
-# `sha256` comment, no `$CHEZMOI_SOURCE_DIR` lookup (§4).
+# `sha256` comment, no `$CHEZMOI_SOURCE_DIR` lookup.
 brewfile=$(
   cat <<'BREWFILE'
 {{ include "../Brewfile" }}
@@ -16,28 +16,28 @@ BREWFILE
 
 # P4 starts its own sudo keepalive. The gate already proved the privilege is available,
 # but each chezmoi script is a separate process, so a keepalive from P2 cannot be adopted
-# here — and cask installers prompt at unpredictable points during a run (§3). Shared
+# here — and cask installers prompt at unpredictable points during a run. Shared
 # with 41, which needs the same privilege for the same reason (ADR 0005).
 {{ template "lib/keepalive.sh" . }}
 
 # Homebrew itself, included at render time so the fetch is written once and linted at
 # every call site (ADR 0005). Normally a no-op by the time P4 runs: the gate acquires
-# Homebrew to install the trust chain (§2). It stays here because P4 is the phase that
+# Homebrew to install the trust chain. It stays here because P4 is the phase that
 # owns the inventory, and a phase that cannot run alone is a phase with a hidden
 # precondition.
 {{ template "lib/homebrew-install.sh" . }}
 
-# Both filters below read the entry shape §6.1 fixes: a type keyword at column zero, then
-# a double-quoted name. Homebrew offers no filter of its own, and the CI reason-comment
-# check reads the same shape.
+# Both filters below read the entry shape the Brewfile fixes: a type keyword at column
+# zero, then a double-quoted name. Homebrew offers no filter of its own, and the CI
+# reason-comment check reads the same shape.
 #
 # Homebrew itself and the formulae abort the run, because later phases depend on them:
-# P5 needs `mise`, P6 needs `dockutil` (§3). `set -e` makes both fatal.
+# P5 needs `mise`, P6 needs `dockutil`. `set -e` makes both fatal.
 printf 'P4: installing the tap and the formulae.\n'
 printf '%s\n' "$brewfile" | grep -E '^(tap|brew) ' | brew bundle --file=-
 
 # Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
-# fresh bootstrap, and the failures are collected for the closing report (§3). `--adopt`
+# fresh bootstrap, and the failures are collected for the closing report. `--adopt`
 # takes over a hand-installed copy of any cask rather than colliding with it — a cask
 # already on disk otherwise aborts with "It seems there is already an App at ...", and on
 # the day of a rebuild an app fetched by hand before the run is exactly what is there.
@@ -55,7 +55,7 @@ while IFS= read -r cask; do
 done < <(printf '%s\n' "$brewfile" | sed -n 's/^cask "\([^"]*\)".*/\1/p')
 
 # The `mas` lines are deliberately not installed here. They need an Apple ID, which is a
-# precondition of their own, so they are 41-mas (§4).
+# precondition of their own, so they are 41-mas.
 
 # Said by both reports below, and by neither of them twice.
 retry_note() {
@@ -68,17 +68,17 @@ if [ ${#failed[@]} -gt 0 ]; then
   retry_note
 fi
 {{ if lookPath "op" }}
-# The work group (§6.1), inlined the same way and piped to a second `brew bundle --file=-`.
-# It sits inside the *same* `op`-presence branch that renders the work identity (§6.5), so
+# The work group, inlined the same way and piped to a second `brew bundle --file=-`.
+# It sits inside the *same* `op`-presence branch that renders the work identity, so
 # the client relationship is one condition rather than two that can disagree. By P4 the
 # gate has already refused every real Mac lacking `op` (P0 item 4), which leaves CI as the
 # only renderer that omits the group.
 #
 # One invocation carries the whole file, casks included, where the base inventory splits
 # the two. Neither reason for the split reaches here: nothing later depends on these five,
-# so the failure rule of §3 is satisfied by capturing the exit code rather than by
+# so the failure rule is satisfied by capturing the exit code rather than by
 # installing one at a time, and none of them is the hand-installed copy `--adopt` exists
-# for (§2). `brew bundle` runs the rest of the file after an entry fails and names what
+# for. `brew bundle` runs the rest of the file after an entry fails and names what
 # failed, so the per-entry report the cask loop builds by hand is already there.
 work_brewfile=$(
   cat <<'BREWFILE'

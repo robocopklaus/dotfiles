@@ -6,9 +6,9 @@ set -euo pipefail
 
 # Separate from 40 because the precondition is: `mas install` needs root, and it installs
 # nothing unless the Apple ID is already signed in — one of the P0 items the gate cannot
-# verify (ADR 0007). A precondition of its own is a script of its own (§4).
+# verify (ADR 0007). A precondition of its own is a script of its own.
 #
-# The Brewfile (§6.1) is inlined here at render time for the reason 40 states: the
+# The Brewfile is inlined here at render time for the reason 40 states: the
 # inventory being *in* the rendered script is what makes `run_onchange_` re-trigger on any
 # edit to it, with no `sha256` comment and no runtime lookup.
 brewfile=$(
@@ -35,12 +35,13 @@ BREWFILE
 # attempted, which is the right answer when the machine cannot say what it already has.
 installed=$(mas list 2>/dev/null | awk '{print $1}') || installed=''
 
-# Reads the entry shape §6.1 fixes — `mas "Name", id: 123` — and yields `id name`. The
-# App Store population is closed by construction: an entry reaches this loop only through
-# the Brewfile, where `brew search --cask` has already shown no cask exists (ADR 0007).
+# Reads the entry shape the Brewfile fixes — `mas "Name", id: 123` — and yields `id name`.
+# The App Store population is closed by construction: an entry reaches this loop only
+# through the Brewfile, where `brew search --cask` has already shown no cask exists (ADR
+# 0007).
 #
 # Entries degrade instead of aborting, and are installed one at a time so a single failure
-# — most often no Apple ID signed in — cannot take the other three with it (§3).
+# — most often no Apple ID signed in — cannot take the other three with it.
 failed=()
 while read -r id name; do
   if printf '%s\n' "$installed" | grep -qx "$id"; then

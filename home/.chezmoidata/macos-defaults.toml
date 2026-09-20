@@ -1,4 +1,4 @@
-# The managed macOS defaults (§6.4).
+# The managed macOS defaults.
 #
 # Data, not a script. chezmoi hashes a script's *content* and not its *effect*, so a
 # default changed in System Settings afterwards is invisible to every check this
@@ -7,7 +7,7 @@
 #
 # Every entry is flat: domain, key, type, value. There is no nested-dictionary escape
 # hatch, and the one key that would have needed one was cut for exactly that reason
-# (§6.4). Flatness is what keeps this a table and the drift check derivable from it.
+#. Flatness is what keeps this a table and the drift check derivable from it.
 #
 # The bar for an entry: you would re-set it by hand on a fresh machine, and its absence
 # would annoy you within the first hour. This list is also the only lever on the drift
@@ -18,7 +18,7 @@
 # by the same line.
 
 # The Dock. `magnification`, `largesize`, `autohide-delay` and `autohide-time-modifier`
-# were cut (§6.4): the first two are cosmetic, the last two dead once autohide is off.
+# were cut: the first two are cosmetic, the last two dead once autohide is off.
 # `autohide` is declared `false` because that is what the live machine held — the prior
 # declaration was the stale half, not the machine.
 [[macosDefaults]]
@@ -42,7 +42,7 @@ value = "false"
 # Finder. `ShowExternalHardDrivesOnDesktop` and `ShowRecentTags` were cut as keys whose
 # absence was never consciously noticed, and
 # `DesktopViewSettings:IconViewSettings:arrangeBy` because it is a path into a nested
-# dictionary this table cannot express — the load-bearing cut (§6.4).
+# dictionary this table cannot express — the load-bearing cut.
 [[macosDefaults]]
 domain = "com.apple.finder"
 key = "_FXSortFoldersFirst"
@@ -103,7 +103,7 @@ currentHost = true
 
 # The trackpad, declared once for the built-in device and once for a Bluetooth one. Some
 # of these are read by the window server at login, so on a running machine the change may
-# lag until the next one; on a fresh bootstrap that is free (§6.4).
+# lag until the next one; on a fresh bootstrap that is free.
 [[macosDefaults]]
 domain = "com.apple.AppleMultitouchTrackpad"
 key = "Clicking"
@@ -159,7 +159,7 @@ key = "ApplePressAndHoldEnabled"
 type = "bool"
 value = "false"
 
-# Screenshots. §6.4 writes this path as `~/Downloads`; it is spelled with the expansion
+# Screenshots. The path reads `~/Downloads`; it is spelled with the expansion
 # token here because `defaults` stores the string it is handed verbatim, so a literal
 # tilde would send screenshots to a directory of that name.
 [[macosDefaults]]

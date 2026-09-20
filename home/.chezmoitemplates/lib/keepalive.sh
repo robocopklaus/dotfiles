@@ -1,6 +1,6 @@
 # The run's root privilege, kept warm for the calling script. Two reasons, and the gate
 # is the only call site that has just the second: each chezmoi script is a separate
-# process, so a privilege acquired in one cannot be adopted in another (§3) — and within
+# process, so a privilege acquired in one cannot be adopted in another — and within
 # one script, an installer that downloads for minutes before it asks for root can outlive
 # the timestamp that was taken for it.
 sudo -v

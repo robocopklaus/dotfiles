@@ -5,13 +5,13 @@
 set -euo pipefail
 
 # The source clone arrives over HTTPS, because the repository is public and a fresh Mac
-# has no credential to offer (§6.5). Nothing in the run needs more than that — but the
+# has no credential to offer. Nothing in the run needs more than that — but the
 # first `chezmoi git push` from a rebuilt machine would prompt for a password that no
 # longer exists, so the remote is moved onto the agent once the agent is there to carry it.
 #
 # `run_after_`, not `run_onchange_`: this script inlines nothing, so its content hash never
 # changes and says nothing about the remote's current value. Under `run_onchange_` it would
-# run once per machine and never look again (§4).
+# run once per machine and never look again.
 
 remote=$(git -C "$CHEZMOI_SOURCE_DIR" remote get-url origin 2>/dev/null) || remote=''
 
@@ -23,17 +23,18 @@ case $remote in
 esac
 
 # The agent is the whole reason for the rewrite, so its absence is the reason not to
-# perform it: a machine pointed at a remote it cannot authenticate to is worse off than one
-# still on HTTPS. Silently, and that is not a swallowed error — the gate refuses every real
-# Mac whose agent socket is missing (§2, P0 item 5), and only under CI does it report the
-# item instead (§8). CI is therefore the one machine that reaches this line, on every run.
+# perform it: a machine pointed at a remote it cannot authenticate to is worse off than
+# one still on HTTPS. Silently, and that is not a swallowed error — the gate refuses every
+# real Mac whose agent socket is missing (the gate's P0 item 5), and only under CI does it
+# report the item instead. CI is therefore the one machine that reaches this line, on
+# every run.
 {{ template "lib/agent-socket.sh" . }}
 if [ ! -S "$agent_socket" ]; then
   exit 0
 fi
 
 # Derived from the URL that is there, rather than written out a second time: the clone
-# already states which repository this is (rule 1).
+# already states which repository this is — one list, one truth.
 path=${remote#https://github.com/}
 path=${path%.git}
 printf 'P7: pointing the chezmoi source remote at git@github.com:%s.git.\n' "$path"

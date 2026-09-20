@@ -1,4 +1,4 @@
-# The managed defaults of §6.4, rendered from `.chezmoidata/macos-defaults.toml` — the
+# The managed defaults, rendered from `.chezmoidata/macos-defaults.toml` — the
 # one declaration the P6 script and `drift` both derive from (ADR 0002). Included at
 # render time, so the P6 script's `run_onchange_` hash moves whenever the table does.
 #
@@ -32,7 +32,7 @@ managed_defaults_run() {
 managed_default_expected() {
   local type=$1 value=$2
   # The token is escaped rather than single-quoted so that the linter CI runs over these
-  # rendered scripts (§8) reads it as the literal it is, instead of as an expansion
+  # rendered scripts reads it as the literal it is, instead of as an expansion
   # someone forgot to quote properly.
   value=${value//\$\{HOME\}/$HOME}
   if [ "$type" = 'bool' ] && [ "$value" = 'true' ]; then
@@ -49,11 +49,11 @@ managed_default_expected() {
 # and no managed value is the empty string, so the two cannot be confused.
 #
 # `defaults` itself is not guarded the way `drift` guards `brew`, `mas` and `chezmoi`
-# (§7). Those are installed software and can genuinely be absent; this is macOS, in the
+#. Those are installed software and can genuinely be absent; this is macOS, in the
 # same class as `sed` and `pkgutil`, which are not guarded either. And the two failures
 # point opposite ways: a `defaults` that could not run reports every managed key as
 # disagreeing, which is loud and sends you to re-run the bootstrap, where it would fail
-# again just as loudly. Under-reporting is the failure §7 will not have quietly.
+# again just as loudly. Under-reporting is the failure `drift` will not have quietly.
 managed_default_current() {
   local scope=$1 domain=$2 key=$3
   managed_defaults_run "$scope" read "$domain" "$key" 2>/dev/null || true

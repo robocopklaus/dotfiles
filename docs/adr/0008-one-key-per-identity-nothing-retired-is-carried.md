@@ -6,7 +6,7 @@ Both public keys are **files**: `id_personal.pub` beside `id_work.pub`. `user.si
 
 **No retired key is carried anywhere** — not as a line in `allowed_signers`, and not as a registration on the GitHub account. When a key is replaced, both entries go in the same act that adds the new one.
 
-Rotation is not a scheduled event. The keys never touch disk: they live in 1Password and are offered only through the agent, so there is no exposure that grows with time — which is the only thing a rotation schedule would buy. The replacement of the RSA key happens once, by hand, at any convenient moment. It is deliberately **not** part of the rebuild: the preflight item that registers a public key on GitHub already says "register the key", which is true of whichever key exists, so the specification describes no rotation procedure at all.
+Rotation is not a scheduled event. The keys never touch disk: they live in 1Password and are offered only through the agent, so there is no exposure that grows with time — which is the only thing a rotation schedule would buy. The replacement of the RSA key happens once, by hand, at any convenient moment. It is deliberately **not** part of the rebuild: the preflight item that registers a public key on GitHub already says "register the key", which is true of whichever key exists, so nothing here describes a rotation procedure at all.
 
 ## Considered options
 
@@ -22,7 +22,7 @@ Rotation is not a scheduled event. The keys never touch disk: they live in 1Pass
 
 Locally, `git log --show-signature` reports pre-rotation commits as signed by an unknown key, because the retired line is gone. On GitHub the badge is unaffected. This is reversible at any time from the signature blob itself, which is why the line is not kept on the chance that it is wanted.
 
-The preflight item that registers a public key is unchanged, and the specification stays free of a rotation procedure — the decision here is made once and does not re-enter the bootstrap.
+The preflight item that registers a public key is unchanged, and the repository stays free of a rotation procedure — the decision here is made once and does not re-enter the bootstrap.
 
 Keys registered on the GitHub account beyond the one the machine holds are **not** caught by the drift report. Detecting them needs an API token scope that the bootstrap deliberately does not depend on, and adding it would re-introduce the `gh` sign-in that was ruled out of the gate. Pruning the account is a manual act at review time, not an automated check.
 

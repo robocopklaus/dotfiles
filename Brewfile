@@ -1,4 +1,4 @@
-tap "homebrew/command-not-found"  # Backs the zsh command-not-found plugin (§6.3)
+tap "homebrew/command-not-found"  # Backs the zsh command-not-found plugin
 
 brew "chezmoi"             # Drives the entire bootstrap
 brew "git"                 # Version control
@@ -17,7 +17,7 @@ brew "homeassistant-cli"   # Home automation
 
 cask "1password"                 # Password manager; root of the bootstrap trust chain
 cask "1password-cli"             # op — renders the work identity; trust chain
-cask "claude"                    # Primary coding agent — the desktop application; the CLI has no cask (§6.1)
+cask "claude"                    # Primary coding agent — the desktop application; the CLI has no cask
 cask "visual-studio-code"        # Editor
 cask "ghostty"                   # Terminal
 cask "google-chrome"             # Browser

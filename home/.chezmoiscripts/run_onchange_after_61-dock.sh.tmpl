@@ -4,13 +4,13 @@
 
 set -euo pipefail
 
-# The declaration and everything a consumer of it needs, included at render time (§4,
-# ADR 0005). It is *in* this rendered script, so editing `dock.toml` re-triggers this
-# phase by construction — the same binding 40 gets from inlining the Brewfile.
+# The declaration and everything a consumer of it needs, included at render time (ADR
+# 0005). It is *in* this rendered script, so editing `dock.toml` re-triggers this phase by
+# construction — the same binding 40 gets from inlining the Brewfile.
 {{ template "lib/dock.sh" . }}
 
 # The marker 60 leaves when a key in `com.apple.dock` changed, so that the two managers of
-# that domain cost one restart rather than two (§6.4).
+# that domain cost one restart rather than two.
 {{ template "lib/dock-restart.sh" . }}
 
 # Reconciled, not rebuilt (ADR 0009): read the current tile sequence, compare it to the
@@ -58,7 +58,7 @@ if [ "$current" != "$expected" ]; then
 fi
 
 # The one restart, at the end of P6 and after the layout is written, covering both
-# managers of the domain: this step and the defaults table before it (§6.4). Every
+# managers of the domain: this step and the defaults table before it. Every
 # `dockutil` call above passes `--no-restart` for exactly this reason.
 if [ "$rebuilt" = 'yes' ] || [ -e "$dock_restart_request" ]; then
   rm -f "$dock_restart_request"

@@ -1,5 +1,5 @@
 {{/*
-The client-issued identity (§6.5, ADR 0003, ADR 0011), read from the single 1Password item
+The client-issued identity (ADR 0003, ADR 0011), read from the single 1Password item
 that carries it. This is the only place the item and its fields are named, and it serves
 the five surfaces that render from them: the `includeIf` sections in ~/.gitconfig,
 ~/.config/git/config-work, the work line in ~/.config/git/allowed_signers, the ssh `Host`
@@ -22,7 +22,7 @@ break at apply time, on the one machine that renders the populated branch.
 
 Every call site guards on `op` being on the path, so this template is reached only on a
 machine that has 1Password. It does not guard a second time: a template that refused here
-would be the refusal the gate already owns (§2).
+would be the refusal the gate already owns.
 */ -}}
 {{- $item := "op://Employee/work-identity" -}}
 {{- $hosts := list -}}
