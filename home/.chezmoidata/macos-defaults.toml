@@ -6,8 +6,8 @@
 # P6 script and `drift` derive from this one table, and nowhere else (ADR 0002).
 #
 # Every entry is flat: domain, key, type, value. There is no nested-dictionary escape
-# hatch, and the one key that would have needed one was cut for exactly that reason
-#. Flatness is what keeps this a table and the drift check derivable from it.
+# hatch, and the one key that would have needed one was cut for exactly that reason.
+# Flatness is what keeps this a table and the drift check derivable from it.
 #
 # The bar for an entry: you would re-set it by hand on a fresh machine, and its absence
 # would annoy you within the first hour. This list is also the only lever on the drift
@@ -16,6 +16,20 @@
 # `${HOME}` is the one token a value may carry. It is expanded where the value is used,
 # so the string the machine is given and the string `drift` compares against are produced
 # by the same line.
+
+# Finding the key for a new entry, cheapest rung first. A catalogue answers most of them
+# outright — macos-defaults.com, or nix-darwin's `system.defaults`, a typed list of the
+# keys someone has already reverse-engineered. Failing that, `defaults read` and
+# `defaults -currentHost read` before the click and after, then `diff`: the changed line
+# carries the key but not the domain, which is the nearest `^    <name> =` line above it.
+# An empty diff is an answer too — the setting is not `defaults`-backed at all, and
+# `sudo fs_usage -w -f filesys` while clicking names the file it does live in. Nothing
+# here is installed: every tool built for this job is broken on the current macOS,
+# unmaintained, or sandboxed out of `NSGlobalDomain`.
+#
+# A key that needs a nested dictionary is not an entry. The refusal is recorded where the
+# key was found — the Finder note below is the first — and the second such key is what
+# earns an ADR replacing this table's flat shape.
 
 # The Dock. `magnification`, `largesize`, `autohide-delay` and `autohide-time-modifier`
 # were cut: the first two are cosmetic, the last two dead once autohide is off.

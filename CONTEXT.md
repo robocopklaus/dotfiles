@@ -126,6 +126,8 @@ _Avoid_: enabled plugin, installed plugin
 
 **Managed default**:
 A macOS setting declared as data — domain, key, type, value — rather than as a command.
+Four fields and no fifth: a setting that needs a nested dictionary cannot be one, and that
+refusal is recorded beside the entries it was found among rather than worked around.
 
 **Reason**:
 The comment on a managed entry stating why it is here. It is what makes the annual review
