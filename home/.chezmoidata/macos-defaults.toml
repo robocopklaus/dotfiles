@@ -110,11 +110,13 @@ key = "Clicking"
 type = "bool"
 value = "true"
 
+# Tap-to-drag is off: three-finger drag above covers dragging, and having both turns a
+# resting finger into a drag that was never asked for.
 [[macosDefaults]]
 domain = "com.apple.AppleMultitouchTrackpad"
 key = "Dragging"
 type = "bool"
-value = "true"
+value = "false"
 
 [[macosDefaults]]
 domain = "com.apple.AppleMultitouchTrackpad"
@@ -128,11 +130,13 @@ key = "Clicking"
 type = "bool"
 value = "true"
 
+# Tap-to-drag is off: three-finger drag above covers dragging, and having both turns a
+# resting finger into a drag that was never asked for.
 [[macosDefaults]]
 domain = "com.apple.driver.AppleBluetoothMultitouch.trackpad"
 key = "Dragging"
 type = "bool"
-value = "true"
+value = "false"
 
 [[macosDefaults]]
 domain = "com.apple.driver.AppleBluetoothMultitouch.trackpad"
