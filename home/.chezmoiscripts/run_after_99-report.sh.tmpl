@@ -83,9 +83,12 @@ Things that restore themselves once you sign in
   ChatGPT, Mimestream, Clockify, WhatsApp, GCal, Docker Desktop.
 
   Agent skills and plugins too: they ride the claude.ai account rather than this
-  repository (ADR 0010), and no phase here installs any. Sync is not instant — a
-  newly enabled marketplace has taken roughly thirteen minutes to land — so an
-  empty ~/.claude/plugins/synced/ is not a failure for the first quarter hour.
+  repository (ADR 0010), and no phase here installs any. What carries them is the
+  marketplace being registered on the account, not a plugin being enabled on a
+  machine — a plugin enabled only here has no route to the next machine. Sync is
+  not instant — a newly registered marketplace has taken well over ten minutes to
+  land — so an empty ~/.claude/plugins/synced/ is not a failure for the first
+  quarter hour.
 
 Credential files, by path — the values live in 1Password
 

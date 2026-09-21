@@ -1,6 +1,8 @@
 # Agent tooling is restored from the account, not declared
 
-The repository declares **no** agent skills and **no** plugins. The claude.ai account is the restore mechanism: skills and plugins enabled there sync down to `~/.claude/skills/synced/` and `~/.claude/plugins/synced/` after login, refresh themselves roughly every ten minutes, and require no local declaration to load. A wipe costs nothing, because nothing on the agent-tooling surface was ever local truth.
+The repository declares **no** agent skills and **no** plugins. The claude.ai account is the restore mechanism: a marketplace **registered on the account**, and the plugins enabled from it, sync down to `~/.claude/skills/synced/` and `~/.claude/plugins/synced/` after login, refresh themselves without being asked, and require no local declaration to load. A wipe costs nothing, because nothing on the agent-tooling surface was ever local truth.
+
+*Registered* is the load-bearing word, and it is not the word this decision was first written with. See *The account carries the source* below, which is what the first rebuild under this decision cost to learn.
 
 This is the same shape as the secrets decision: zero declarations, with one named exception if it proves necessary.
 
@@ -16,7 +18,35 @@ This repository therefore declares only what neither of the first two can hold. 
 
 The second row carries an unstated precondition: a project's `.claude/settings.json` travels with the clone only where the project is a clone. `~/Development/21st-brain` is not — it is an empty directory holding nothing but `.claude/`, created as a scope anchor and backed by no remote. Nothing pinned to it survives a wipe. This does not change the decision, because the entry pinned there is carried by the first row instead, but it is why the row is a claim about repositories and not about directories.
 
+It carries a second one, and the table's `none` is only true where that one holds too: the clone brings the *enablement*, not the *source*. A checked-in `.claude/settings.json` that names `"obsidian@obsidian-skills": true` says nothing about where `obsidian-skills` is fetched from, and on a fresh machine that enablement points at nothing. A project is self-supporting only when it checks in `extraKnownMarketplaces` beside `enabledPlugins`. Measured: `mi-casa` and `vault` check in the enablement and not the source, so the registration they depend on lives only in one machine's user settings. Repositories remain out of scope, so this is reported rather than repaired — but the row may not claim a cost of none without naming the condition.
+
 Scope follows the domain, not the habit: tooling that applies regardless of what is being worked on is enabled on the account; tooling that only makes sense inside one domain is installed `--scope project`, which writes to that project's checked-in `.claude/settings.json` and travels with the clone. `mattpocock-skills` is domain-independent and belongs to the account. The Cloudflare set and the Obsidian plugin are domain-specific and belong to the projects that use them.
+
+## The account carries the source
+
+The account carries the **source**; the project carries the **selection**. A marketplace
+wanted on more than one machine, or by more than one project, is registered on the
+account. Which plugins are on where stays in the project's checked-in
+`.claude/settings.json`. Registering a marketplace is not enabling a plugin: it says only
+that a source is known, and it is the half that a second machine cannot reconstruct for
+itself.
+
+This is not how the decision was first written, and the difference cost a rebuild.
+`mattpocock-skills` was installed user-scoped and enabled — it loaded every day — while
+`anthropics/claude-plugins-official` was registered nowhere. There was no route for it to
+travel, so the Mac Studio came up without it, silently, and it was noticed by hand weeks
+later when the skill was reached for. The original text said *enabled on the account*,
+which is satisfied by a machine that is about to lose the plugin.
+
+Two properties of claude.ai make the wrong reading easy, both measured:
+
+- The organisation's admin surface and the account's are different scopes. A marketplace
+  added to the first applies to everyone in the organisation; `"scope": "account"` comes
+  from the second, under Customize → Plugins.
+- The curated list under *Browse Anthropic sources* holds six vertical marketplaces and
+  **not** `claude-plugins-official`. Anthropic's own plugin marketplace is reachable only
+  through *Add marketplace*, which takes a GitHub `owner/repo` or a Git URL — the same
+  door `skills-leadership` went through.
 
 Claude Code is the only agent this repository provisions. `~/.cursor/skills/` is Cursor's surface and is not managed.
 
@@ -46,6 +76,12 @@ The Obsidian plugin is installed twice on the live machine — user-scoped *and*
 
 The one candidate exception is closed, and there is no exception. `skills-leadership` is a private repository, and the account carries it: registered from claude.ai as `21stdigital/skills-leadership`, it reached `~/.claude/plugins/synced/` in about thirteen minutes and loads as `leadership-toolkit@synced`. The ticket's premise — that nothing obvious would hold the credentials — had an answer the local setup obscured. The local declaration reaches the repository over SSH; claude.ai reaches it over its own GitHub authorization, and records the source as `github` rather than the SSH URL. The credential was never the marketplace's property, only the client's.
 
+`skills-leadership` has since been taken off the account and moved to project scope, and the paragraph above stays where it is: what it measured — the account can carry a private GitHub repository — is still true, and the boundary below rests on it. What changed is a fact about the world, not this decision. It does move `leadership-toolkit` onto the one row this ADR already warns about, because `~/Development/21st-brain` is not a clone; making it one, with both keys checked in, is what would carry it.
+
 That fixes the boundary of this decision more precisely than "private or public": the account path is a **GitHub** path. A marketplace on a private host that is not GitHub has no demonstrated route onto the account, and would be the next candidate for a named exception. There is none today.
 
 So this repository declares nothing on the agent-tooling surface, without qualification, and `extraKnownMarketplaces` leaves the managed `settings.json` with no entry held back.
+
+`chezmoi apply` strips `enabledPlugins` from the managed `~/.claude/settings.json`, because Claude Code writes that key into a file this repository hand-authors. That is the intended behaviour and not a defect to be engineered around: the key is the local truth this decision refuses to keep, and losing it on every apply is what pushes the act back onto the account. A `modify_` script that preserved foreign keys would be machinery built to defeat the decision. `autoMode.environment`, written into the same file, is derived from whatever project was last worked in and may die with it.
+
+Two measurements from the second rebuild, recorded because the obvious checks mislead. `anthropics/claude-plugins-official` took well over ten minutes to finish registering — most of the thirteen minutes noted above was the marketplace, not the plugin — so a first quarter hour that shows nothing is still not evidence. And on the Mac Studio, `~/.claude/plugins/synced/*/.marketplaces.json` lists only the organisation's library: the account marketplace does not appear there although its plugin arrived and loads. The presence of the plugin in the bucket is the evidence that the path works. That file is not.
