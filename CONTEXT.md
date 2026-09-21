@@ -22,6 +22,12 @@ The single command that carries a freshly installed machine to a working one, an
 recovery mechanism there is. Re-running it is always safe.
 _Avoid_: install, install script, provisioning run
 
+**Update**:
+The everyday movement of the repository onto a machine already running — one command that
+pulls and applies. The source clone is two things at once: the repository you develop and
+the source this machine reads. `git pull` moves only the first.
+_Avoid_: pull, sync
+
 **Phase**:
 One step of the bootstrap, cut by a precondition and never by numeric convention. Its
 number records an order that a precondition justifies; the number is never itself the
@@ -128,7 +134,9 @@ a decision rather than an archaeology exercise, so an entry without one is incom
 **Drift**:
 The disagreement between a machine and this repository — something missing, something
 undeclared, or a managed value diverged. Never measured between two machines: the
-repository is the shared reference. Also the name of the command that reports it.
+repository is the shared reference. The reference is the repository as this machine last
+applied it, because the command carries the declarations it was rendered with — which is
+why an update comes before a reading. Also the name of the command that reports it.
 _Avoid_: doctor, diff, divergence
 
 ## Identities

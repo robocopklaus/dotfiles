@@ -14,9 +14,12 @@ reason.
 
 ## The steps
 
-1. **Run `drift`.** Its second section, *Not in the repository*, is the year's agenda:
-   everything the machine acquired that nothing declares. Each entry is a decision owed —
-   adopt it with a reason, or let the wipe take it.
+1. **Run `chezmoi update`, then `drift`.** The update first, or the agenda is read
+   against the repository as this machine last applied it: an entry already adopted from
+   the other Mac reports as undeclared, and the year's agenda gains a phantom. Then
+   `drift`'s second section, *Not in the repository*, is the year's agenda: everything the
+   machine acquired that nothing declares. Each entry is a decision owed — adopt it with a
+   reason, or let the wipe take it.
 
 2. **Re-derive usage from the machine, not from the file.** Nothing in this repository
    stores a "last confirmed" date; a field nobody updates does not degrade to "no

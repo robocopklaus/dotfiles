@@ -55,6 +55,22 @@ Phases are cut by precondition, never by numeric convention.
 The run stops once, at the gate. After that it either completes, or it stops with a
 precise instruction and you run it again.
 
+## When the repository moves: `chezmoi update`
+
+```sh
+chezmoi update
+```
+
+The repository moves without this machine — a pull request merged, or the other Mac. This
+is the command that brings it here: it pulls and applies in one step. A `git pull` in the
+source tree moves the repository you *develop* and leaves the machine where it was, and
+nothing on the machine says so — `drift` carries the declarations it was rendered with, so
+a machine the repository has moved past reports clean.
+
+Re-running the bootstrap command is not this command. `chezmoi init` clones only when the
+source directory holds no repository, so on a machine that already has one it re-applies
+the state it already had. It recovers a broken machine; it does not update a stale one.
+
 ## Afterwards: `drift`
 
 ```sh
