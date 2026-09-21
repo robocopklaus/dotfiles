@@ -76,6 +76,21 @@ label() {
   sed "/^\$/d; s/^/$1 /"
 }
 
+# A formula from a third-party tap is the other inventory `absent` cannot answer, for the
+# opposite reason: the two questions are asked of two commands that spell one formula
+# differently. `brew list --formula` answers `databricks`, `brew leaves` answers
+# `databricks/tap/databricks`, and the Brewfile declares the short name — so the missing
+# sweep matches and this one would not, reporting a declared formula as a decision owed on
+# every run. The tap prefix is cut before comparing; the qualified name is what gets
+# reported, because it is the name the remedy would be typed against.
+leaves_absent() {
+  local leaf
+  while IFS= read -r leaf; do
+    [ -n "$leaf" ] || continue
+    listed "${leaf##*/}" "$2" || printf 'Formula %s\n' "$leaf"
+  done <<<"$1"
+}
+
 # App Store entries key on the id and report the name, so they are the one inventory
 # `absent` cannot answer: a renamed app is the same entry, a reused name is not.
 mas_absent() {
@@ -178,7 +193,7 @@ while IFS= read -r entry; do
   unmanaged+=("$entry")
 done < <(
   if [ "$leaves_known" = 'yes' ]; then
-    absent "$leaves" "$declared_formulae" | label 'Formula'
+    leaves_absent "$leaves" "$declared_formulae"
   fi
   if [ "$casks_known" = 'yes' ]; then
     absent "$installed_casks" "$declared_casks" | label 'Cask'

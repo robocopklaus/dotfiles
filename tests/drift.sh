@@ -311,6 +311,11 @@ printf '\nA machine holding more than the repository declares\n'
 dependency=$(head -1 "$machine/formulae")
 grep -vxF "$dependency" "$machine/formulae" >"$machine/leaves"
 printf 'undeclared-formula\n' >>"$machine/leaves"
+# A declared formula that `brew leaves` fully qualifies, because it came from a
+# third-party tap. `brew list --formula` and the Brewfile both spell it short, so the two
+# sweeps are asked about one formula in two spellings.
+tapped=$(tail -1 "$machine/formulae")
+printf 'third-party/tap/%s\n' "$tapped" >>"$machine/leaves"
 printf 'undeclared-cask\n' >>"$machine/casks"
 printf '424242 Undeclared App\n' >>"$machine/mas"
 report=$(drift)
@@ -320,6 +325,7 @@ says "$report" 'Formula undeclared-formula' 'names the undeclared leaf'
 says "$report" 'Cask undeclared-cask' 'names the undeclared cask'
 says "$report" 'App Store Undeclared App (424242)' 'names the undeclared App Store entry'
 silent "$report" "Formula $dependency" 'says nothing about a declared formula that is not a leaf'
+silent "$report" "third-party/tap/$tapped" 'says nothing about a declared formula its tap qualifies'
 
 printf '\nApplications, by where each bundle came from\n'
 mkdir -p "$machine/Applications/Dragged In.app/Contents"
