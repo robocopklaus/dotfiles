@@ -10,7 +10,12 @@ set -euo pipefail
 # The Brewfile is inlined at render time, as the P4 scripts inline it — but for a
 # different reason. There it is `run_onchange_`'s content hash; here it is this command's:
 # the one command whose whole value is being run on a whim must not require the source
-# tree to be on disk, let alone a `cd` into it. The work group is appended under the same
+# tree to be on disk, let alone a `cd` into it. The price is that this command ages with
+# the apply that rendered it: on a machine the repository has moved past it compares
+# against declarations that are no longer the repository's, and reports no drift. That is
+# what `chezmoi update` is the everyday verb for, and why the annual review runs it first.
+#
+# The work group is appended under the same
 # `op` guard the P4 script inlines it behind, and this file is rendered by chezmoi too —
 # so the check and the applying script evaluate one condition at one moment. That is why
 # no special case for the group is written anywhere below: on a company Mac the five are
