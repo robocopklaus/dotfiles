@@ -3,29 +3,34 @@
   "lines": [
     [
       {
-        "id": "1",
-        "type": "model",
-        "color": "cyan"
-      },
-      {
         "id": "3",
-        "type": "context-percentage",
+        "type": "context-length",
         "color": "brightBlack"
       },
       {
-        "id": "5",
-        "type": "session-cost",
-        "color": "magenta"
-      },
-      {
-        "id": "7",
-        "type": "session-clock",
-        "color": "yellow"
+        "id": "1",
+        "type": "context-window",
+        "color": "cyan"
       },
       {
         "id": "77b45754-5c94-470c-bef0-4d73c29ae8b9",
-        "type": "block-timer",
+        "type": "reset-timer",
         "backgroundColor": "bgBrightGreen"
+      },
+      {
+        "id": "eaa46d4b-ba63-4f31-a36f-08a1f8eb5009",
+        "type": "weekly-usage",
+        "backgroundColor": "bgBrightBlue"
+      },
+      {
+        "id": "db9492a9-9874-4475-ab62-6be2ef736833",
+        "type": "model",
+        "backgroundColor": "bgRed"
+      },
+      {
+        "id": "5",
+        "type": "session-name",
+        "color": "magenta"
       }
     ],
     [],
@@ -34,8 +39,14 @@
   "flexMode": "full-minus-40",
   "compactThreshold": 60,
   "colorLevel": 2,
+  "defaultPadding": " ",
+  "defaultPaddingSide": "both",
   "inheritSeparatorColors": false,
   "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "terminalWidthCacheTtlSeconds": 5,
+  "customCommandCacheTtlSeconds": 0,
+  "minimalistMode": false,
   "powerline": {
     "enabled": true,
     "separators": [
@@ -50,8 +61,8 @@
     "endCaps": [
       ""
     ],
+    "theme": "onedark",
     "autoAlign": true,
-    "theme": "onedark"
-  },
-  "defaultPadding": " "
+    "continueThemeAcrossLines": false
+  }
 }
