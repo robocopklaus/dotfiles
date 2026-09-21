@@ -110,6 +110,14 @@ wipe still silently deletes things, which is the loop this repository ends.
 An entry the inventory names but neither Homebrew nor the App Store can carry, installed
 by its own vendor script.
 
+**Account marketplace**:
+A plugin source registered on the claude.ai account, rather than known only to one
+machine. It is what carries agent tooling across a wipe, and registering it is a separate
+act from enabling a plugin from it — the mistake ADR 0010 was written before, and
+amended after. This repository declares none of them; the word exists so the decision can
+say which act it means.
+_Avoid_: enabled plugin, installed plugin
+
 **Managed default**:
 A macOS setting declared as data — domain, key, type, value — rather than as a command.
 

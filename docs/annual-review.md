@@ -50,8 +50,9 @@ reason.
 
 6. **Curate the claude.ai account.** It is the restore mechanism for the entire
    agent-tooling surface (ADR 0010), and this repository checks nothing about it. A plugin
-   installed locally but never enabled on the account does not survive a wipe, silently —
-   the same failure this repository exists to end, moved one level up.
+   whose marketplace is registered nowhere but on this machine does not survive a wipe,
+   silently — the same failure this repository exists to end, moved one level up. Enabling
+   is not registering: read the account's marketplaces, not the machine's enabled plugins.
 
 7. **Then wipe**, and run the bootstrap command.
 
