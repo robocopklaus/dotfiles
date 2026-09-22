@@ -18,7 +18,18 @@ BREWFILE
 # but each chezmoi script is a separate process, so a keepalive from P2 cannot be adopted
 # here — and cask installers prompt at unpredictable points during a run. Shared
 # with 41, which needs the same privilege for the same reason (ADR 0005).
+#
+# Started only where the gate acquired the privilege, and `sudo -n true` is how that is
+# asked: the machine, not a variable a separate process could not have received anyway.
+# The gate acquires root only for a run that installs something (ADR 0012, amended), and
+# this phase must not go behind that decision — `run_onchange_` re-triggers on any edit to
+# the inventory, including one that installs nothing, so an unconditional `sudo -v` here
+# would put a password prompt in the middle of a run the gate had already cleared. Where
+# it was not acquired there is nothing to keep warm either: every install below skips what
+# is already present.
+if sudo -n true 2>/dev/null; then
 {{ template "lib/keepalive.sh" . }}
+fi
 
 # Homebrew itself, included at render time so the fetch is written once and linted at
 # every call site (ADR 0005). Normally a no-op by the time P4 runs: the gate acquires

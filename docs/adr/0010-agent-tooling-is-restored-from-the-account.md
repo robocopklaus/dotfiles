@@ -85,3 +85,13 @@ So this repository declares nothing on the agent-tooling surface, without qualif
 `chezmoi apply` strips `enabledPlugins` from the managed `~/.claude/settings.json`, because Claude Code writes that key into a file this repository hand-authors. That is the intended behaviour and not a defect to be engineered around: the key is the local truth this decision refuses to keep, and losing it on every apply is what pushes the act back onto the account. A `modify_` script that preserved foreign keys would be machinery built to defeat the decision. `autoMode.environment`, written into the same file, is derived from whatever project was last worked in and may die with it.
 
 Two measurements from the second rebuild, recorded because the obvious checks mislead. `anthropics/claude-plugins-official` took well over ten minutes to finish registering — most of the thirteen minutes noted above was the marketplace, not the plugin — so a first quarter hour that shows nothing is still not evidence. And on the Mac Studio, `~/.claude/plugins/synced/*/.marketplaces.json` lists only the organisation's library: the account marketplace does not appear there although its plugin arrived and loads. The presence of the plugin in the bucket is the evidence that the path works. That file is not.
+
+## Amendment: there is now a `modify_` script, and it is the one this decision asked for
+
+The Consequences above say that a `modify_` script "that preserved foreign keys would be machinery built to defeat the decision". That sentence still holds exactly as written, and `home/dot_claude/modify_settings.json.tmpl` now exists without contradicting it.
+
+The script emits the declared keys and **only** the declared keys, reordered to match the machine's copy. So `enabledPlugins`, `autoMode.environment` and anything else Claude Code writes into the file are still stripped by `chezmoi apply`, and still reported by `drift` before they are. Nothing is preserved; nothing this decision refuses to keep is kept.
+
+What it removes is the key *reordering*, which changes no value and which made `chezmoi status` report the file forever — a finding always present and never meaningful. The distinction is the whole point: preserving a foreign key would hide a decision owed to the repository, and reordering the declared ones hides nothing.
+
+The reasoning is ADR 0006's, amended; this note exists so that a reader who arrives here — at the decision that owns this file's foreign keys — is not left with the older answer.
