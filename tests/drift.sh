@@ -361,6 +361,17 @@ check "$?" 1 'exits 1'
 says "$report" '^Diverged value' 'prints the diverged section'
 says "$report" '.gitconfig' 'names the diverged file'
 
+printf '\nManaged files, from inside a chezmoi run\n'
+# The same stub, asked from the one position the epilogue runs in. `chezmoi status` cannot
+# answer there — the chezmoi that invoked the script holds the persistent state lock — and
+# it would have nothing to say if it could: every managed file has just been written, so
+# the comparison is of fresh writes against themselves. Measured both ways, on a rebuild's
+# apply and on an update's, and empty after each. Silence here is the command's scope
+# rather than a gap in its reach, which is what separates it from the cases at the tail.
+report=$(CHEZMOI=1 drift)
+silent "$report" '.gitconfig' 'says nothing about a file the apply has just written'
+silent "$report" 'incomplete' 'calls that scope rather than a gap in its own reach'
+
 printf '\nManaged defaults\n'
 : >"$machine/chezmoi-status"
 # The key bent is whichever the declaration carries first, read back out of the report
@@ -475,11 +486,14 @@ mv "$machine/bin/mas.gone" "$machine/bin/mas"
 
 # An inventory nobody could read must not read as an empty inventory: every cask would
 # otherwise be missing, and every application a stranger.
-printf '#!/bin/bash\nexit 1\n' >"$machine/bin/brew"
+printf '#!/bin/bash\nprintf "brew: the cellar could not be read\\n" >&2\nexit 1\n' >"$machine/bin/brew"
 chmod +x "$machine/bin/brew"
 report=$(drift)
 check "$?" 1 'exits 1'
 says "$report" 'brew leaves did not answer' 'names the sweep that did not run'
+# What the command itself said, carried into the line. Discarding it is what left #99
+# able to name its symptom and only guess at its cause.
+says "$report" 'the cellar could not be read' 'carries what the command itself said'
 silent "$report" 'Application Dragged In.app' 'sweeps no application on claims it could not read'
 
 printf '\n'

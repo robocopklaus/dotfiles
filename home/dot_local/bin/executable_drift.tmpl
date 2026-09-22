@@ -108,15 +108,26 @@ mas_absent() {
 # entirely, rather than letting an empty answer report the whole inventory as missing.
 answer=''
 answered='no'
+# Where a failed question's own words are caught. A scratch file rather than a descriptor
+# dance, because `answer` has to survive the call and wrapping it in a command
+# substitution would put it in a subshell. It is the only file this command writes, it is
+# not on the machine this command reports on, and it goes with the process.
+said_file=$(mktemp "${TMPDIR:-/tmp}/drift.XXXXXX")
+trap 'rm -f "$said_file"' EXIT
 ask() {
-  local unanswered=$1
+  local unanswered=$1 said
   shift
-  if answer=$("$@" 2>/dev/null); then
+  if answer=$("$@" 2>"$said_file"); then
     answered='yes'
   else
     answer=''
     answered='no'
-    incomplete+=("$unanswered")
+    # What it said, not only that it failed. The anticipated wording names the question;
+    # the cause is whatever the command chose to say, and discarding it left one report
+    # able to state its symptom and only guess at its cause. One line: this is a report,
+    # not a log.
+    said=$(head -1 "$said_file")
+    incomplete+=("$unanswered${said:+ ($said)}")
   fi
 }
 
@@ -288,7 +299,19 @@ fi
 #
 # Scripts are excluded: a `run_after_` script is pending by design on every run, so
 # including them would report the bootstrap's own epilogue as drift, permanently.
-if ! command -v chezmoi >/dev/null 2>&1; then
+# Not asked from inside a chezmoi run at all, which `CHEZMOI` marks — chezmoi sets it and
+# this repository never writes it, so it is environmental fact rather than a flag someone
+# can set wrongly, exactly as `CI` is. Two reasons, and the second is the load-bearing
+# one: `chezmoi status` cannot answer there, because the chezmoi that invoked the epilogue
+# holds the persistent state lock; and it would have nothing to say if it could, since
+# every managed file has just been written and the comparison is then of fresh writes
+# against themselves. Measured after a rebuild's apply and after an update's, empty after
+# both. So this is silence by scope, not an unanswered question, and it stays out of
+# `incomplete` — a standing line there would be the finding that is always present and
+# never means anything. Managed files are the subject of a `drift` run from a shell.
+if [ "${CHEZMOI:-}" = 1 ]; then
+  :
+elif ! command -v chezmoi >/dev/null 2>&1; then
   incomplete+=('chezmoi is not installed, so no managed file was checked.')
 else
   ask 'chezmoi status did not answer, so no managed file was checked.' \
