@@ -43,7 +43,10 @@ _Avoid_: manual steps — not all of them are
 **Gate**:
 The phase that acquires what a preflight item can be acquired by — privilege, and the
 trust chain — and verifies every one of them, before a single file is written. It stops
-at the foundation first, because that is what the acquisition stands on.
+at the foundation first, because that is what the acquisition stands on. What it acquires
+is asked of what the run is about to do rather than of which verb was typed: the privilege
+is for installing, so a run with nothing to install never asks for it. Derived from the
+machine on every run, never from a record of when the gate last ran.
 
 **Epilogue**:
 The closing report at the run's tail. It re-derives what is missing by checking the world;
@@ -86,6 +89,14 @@ _Avoid_: config, definition, spec
 **Managed**:
 Declared by this repository, and therefore restored by a rebuild and checked by drift.
 Everything else on the machine is a decision that has not been made yet.
+
+**Canonical form**:
+What a managed file's declaration states, where that is a value rather than a sequence of
+bytes. For JSON it is the parsed value: key order, insignificant whitespace and the
+trailing newline are outside it, because none of them is a decision anyone made. It exists
+so that an application rewriting a file it shares with this repository produces no finding
+when it changes no value, and still produces one when it changes any.
+_Avoid_: normalised, formatted
 
 **CLI integration**:
 The 1Password setting that hands the account to `op`. Without it `op` holds no account at

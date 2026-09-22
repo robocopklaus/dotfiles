@@ -50,6 +50,15 @@ jobs:
           "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
             < home/dot_local/bin/executable_drift.tmpl > "$RUNNER_TEMP/rendered-bin/drift.sh"
 
+      # The modify_ script is shell the repository owns too, and it runs on every
+      # `chezmoi status`, so it is rendered and linted with the rest rather than being the
+      # one script nobody checks (ADR 0006, amended).
+      - name: Render the claude settings modify script
+        run: |
+          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+            < home/dot_claude/modify_settings.json.tmpl \
+            > "$RUNNER_TEMP/rendered-bin/modify-claude-settings.sh"
+
       - name: Shellcheck rendered scripts
         run: shellcheck "$RUNNER_TEMP"/rendered/*.sh "$RUNNER_TEMP"/rendered-bin/*.sh tests/*.sh
 
@@ -58,10 +67,15 @@ jobs:
       - name: Test drift
         run: tests/drift.sh "$RUNNER_TEMP/rendered-bin/drift.sh"
 
-      # The gate's two stops, against stubbed system commands. Only the cases that
+      # The gate's three stops, against stubbed system commands. Only the cases that
       # install nothing are covered, on purpose — see the header of tests/gate.sh.
       - name: Test the gate
         run: tests/gate.sh "$RUNNER_TEMP/rendered/run_before_20-gate.sh"
+
+      # Both halves of the canonical form: a rewrite that changes no value produces no
+      # finding, and one that changes any value still does (ADR 0006, amended).
+      - name: Test the claude settings canonical form
+        run: tests/claude-settings.sh "$RUNNER_TEMP/rendered-bin/modify-claude-settings.sh"
 
       # The defaults phase's write spelling, against a `defaults` stub that refuses the
       # wrong one the way the real binary does. A converged machine writes nothing at all,

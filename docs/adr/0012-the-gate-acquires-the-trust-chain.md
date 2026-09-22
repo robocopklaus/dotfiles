@@ -23,3 +23,43 @@ The gate checks the preconditions of the run. It now also installs two of them �
 **A refusal no longer leaves the machine untouched.** `$HOME` is still untouched, which is what P3 depends on. But `/opt/homebrew` and `/Applications` may have gained contents before the gate refused on a toggle. The gate prints what it installs as it installs it, so the change is visible rather than merely true.
 
 **CI skips the casks.** The runner arrives with Homebrew and wants neither 1Password, and its 1Password checks already report rather than refuse. So the acquisition is exercised on bare metal only — the same blind spot CI already records for everything bound to a fresh machine.
+
+## Amendment: the privilege is acquired for installing, so a run that installs nothing does not ask
+
+`run_before_20-gate.sh` is a `run_before_` script, and `run_before_` is a hook on *apply*. An update is an apply, so once `chezmoi update` became the documented everyday verb the gate moved in front of it too — asking for an administrator password to pull in a documentation commit. Nobody decided that; the mechanism decided it, because apply is the one verb a rebuild and an update share.
+
+The measurement that settles it: **nothing in this repository ever runs a command as root.** The only `sudo` in the tree is `sudo -v` in this gate and `sudo -n true` in `lib/keepalive.sh`. No phase is prefixed with it. `run_after_42-claude-code.sh` refuses it outright, `41-mas` states that `mas install` must not carry it, and P6's `defaults write` and `dockutil` are user-scope throughout. The privilege has exactly one consumer: Homebrew's own cask installers, which ask macOS for root themselves when a cask ships a `pkg`.
+
+So the question in front of the acquisition is not *which verb was typed* and not *is this a rebuild*. It is **will this run install anything** — and that is asked of the machine.
+
+### Why not a record of when the gate last ran
+
+The tempting cheap version is a stored "the gate passed recently" marker, and it is the dangerous one. A field nobody updates does not degrade to no information, it degrades to a confident lie, and this repository bans recorded intermediate state under convergence for that reason. Nothing here stores anything: the answer is recomputed from the machine on every single run, and a machine that has drifted back to missing software is asked for the password again, correctly.
+
+### What asks, and what it asks with
+
+The gate inlines the inventory at render time — the same `include` the P4 scripts and `drift` use, so this is one list read a fourth time and not a fourth list — and puts it to `brew bundle check`. Homebrew's own answer to "is everything in this Brewfile installed", rather than a second implementation of `drift`'s sweep sitting inside a gate. No Homebrew at all is the fresh machine and the answer is yes without asking further, which is what a rebuild needs and is why this cannot wave one through.
+
+A reader who finds `brew bundle check` inside a *gate* will reasonably wonder what it is doing there. It is standing in for the sentence above: the privilege exists for installers, so the gate asks whether there will be any.
+
+### What did not become conditional
+
+Everything else. Architecture, macOS version, network reachability, the Xcode Command Line Tools, 1Password.app, `op` on `PATH`, `op account list`, the SSH agent socket: all of them run on every apply, unchanged. They are non-interactive and cost nothing, and the 1Password items in particular are not stale-proof the way the architecture is — the SSH agent toggle can genuinely be off on a Friday when it was on on Tuesday, and P3's templates read through it on every apply. Pruning them would have been optimising the free half of the complaint. Exactly one thing is conditional, which is what makes this explainable.
+
+The ordering invariant this decision rests on is also unchanged: the acquisition still happens in the gate, before a single file is written, so no later phase discovers a missing privilege halfway through a bundle. Acquiring lazily inside the install phases would have been tidier to write and would have broken that, moving the run's one interactive moment into its middle.
+
+### The phases follow the gate, they do not re-decide it
+
+P4 starts a keepalive of its own, because each chezmoi script is a separate process and a warm loop cannot be adopted across one. That keepalive opens with `sudo -v`, so left unconditional it would undo this decision from the other end. The two questions are not the same question: the gate asks whether anything is *missing*, while `run_onchange_` re-triggers on whether the inventory *changed* — and an edit that installs nothing, a reason comment or a removed entry, separates them. The gate would then correctly acquire no privilege and P4 would ask for a password in the middle of the run, which is precisely the failure the ordering above exists to prevent.
+
+So 40 and 41 start their keepalive only where the privilege is already warm, asked with `sudo -n true`. That is the gate's decision read back off the machine rather than derived a second time, and reading it is what keeps the two from disagreeing: asking the inventory question in three places would be three chances to answer it differently, and the copy that answers differently is the one that waves a run through. Where the gate acquired nothing, these phases have nothing to spend it on either — both install loops already skip what is present.
+
+The residual case is a privilege that expires between the gate and P4. Those phases then install without a warm loop, and a long cask download can meet a prompt — which is the behaviour this repository had before the keepalive existed, so this decision does not make it worse. The alternative, reaching for root again on the strength of a guess, is the thing this amendment exists to stop.
+
+### Consequences
+
+`chezmoi update` becomes available to a shell with no controlling terminal, on any run that installs nothing — which is most of them. It is not unconditionally available, and that is deliberate rather than a gap: an update that pulls a `Brewfile` change genuinely does install software, and installing software needs a human. The refusal says so in those words and names the installs, instead of reporting a failed precondition; the remedy is to run it again in a terminal window. Refusing whole is the alternative to a partial apply that leaves the machine in a state no verb produced.
+
+The gate gains a dependency on Homebrew being on `PATH` before it can ask its question. The foundation section two checks earlier already establishes the machine it runs on, and the prefix cascade is included ahead of the question, so a machine without Homebrew answers "yes, installs are pending" rather than failing to answer.
+
+The everyday run no longer starts its keepalive loop or its `sudo -v`, so the two seconds and the password prompt both go. That is the whole user-visible change, and it is the one the issue asked for.

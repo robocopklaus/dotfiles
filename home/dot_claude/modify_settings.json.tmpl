@@ -1,0 +1,63 @@
+#!/bin/bash
+# The declaration of ~/.claude/settings.json, emitted in the machine's key order.
+#
+# Claude Code rewrites this file and emits the same keys in its own order, which made
+# `chezmoi status` report MM forever over a difference that changes no value — a finding
+# always present and never meaningful, which is the failure ADR 0002 rejects by name. So a
+# managed file's declaration may be a value rather than a sequence of bytes: its *canonical
+# form*, defined once in CONTEXT.md and decided in ADR 0006, amended.
+#
+# This is a chezmoi `modify_` script, so the machine's copy arrives on stdin and what is
+# written to stdout becomes the target. Emitting the declared value *in the machine's
+# order* makes the comparison chezmoi already performs the right comparison, which is why
+# `drift` learns nothing here: normalising inside the detector would make it smarter than
+# the declaration and would apply invisibly to every JSON file the repository manages.
+#
+# It emits the declared keys and only the declared keys. That is the opposite of the
+# `modify_` script ADR 0010 rejected, which was one that *preserved* foreign keys:
+# `enabledPlugins` and `autoMode.environment` are still stripped on apply and still
+# reported before they are, because a foreign key is a decision owed to the repository.
+# Reordering the declared keys hides nothing; preserving an undeclared one would hide
+# exactly the thing worth seeing.
+
+set -euo pipefail
+
+declared=$(
+  cat <<'DECLARED'
+{{ template "claude-settings.json" . }}
+DECLARED
+)
+
+live=$(cat)
+
+# Homebrew's prefix, and only when it is needed: this script runs on every `chezmoi
+# status`, so the cascade's `brew shellenv` is not paid by the login shell that already
+# has jq on PATH (ADR 0005).
+if ! command -v jq >/dev/null 2>&1; then
+{{ template "lib/homebrew.sh" . }}
+fi
+
+# No jq, or nothing readable as JSON on the machine — a file that does not exist yet is
+# the ordinary case on a rebuild. The declaration is emitted unchanged, which is the
+# behaviour of every day before this script existed.
+if ! command -v jq >/dev/null 2>&1 || ! printf '%s' "$live" | jq -e . >/dev/null 2>&1; then
+  printf '%s\n' "$declared"
+  exit 0
+fi
+
+# Declared keys first in the order the machine holds them, then the declared keys the
+# machine does not have, in the order this repository declares them. Applied recursively,
+# because an application that reorders a file's top level reorders the objects inside it
+# too. Arrays fall through untouched: order inside an array is a value, not a spelling.
+printf '%s' "$declared" | jq --argjson live "$live" '
+  def ordered($live):
+    if (type == "object") and (($live | type) == "object")
+    then
+      . as $declared
+      | ($live | keys_unsorted) as $liveKeys
+      | (($liveKeys | map(. as $k | select($declared | has($k))))
+         + (($declared | keys_unsorted) | map(. as $k | select(($liveKeys | index($k)) == null))))
+      | reduce .[] as $key ({}; .[$key] = ($declared[$key] | ordered($live[$key])))
+    else . end;
+  ordered($live)
+'

@@ -28,7 +28,7 @@ Paths are relative to `home/`. The reason belongs here rather than in the file: 
 | `dot_gitconfig`, `dot_gitignore` | Global version-control behaviour and the `includeIf` set that selects an identity; templated, because the client-issued half of that set is guarded (ADR 0011) |
 | `dot_config/git/allowed_signers`, `config-work` | Signing and the client-issued identity; templated (ADR 0003) |
 | `dot_config/git/config-personal`, `config-company` | The two cleartext identities, each included by remote (ADR 0011) |
-| `dot_claude/settings.json` | Permissions and hooks — the dominance clause above is what admits it |
+| `.chezmoitemplates/claude-settings.json`, emitted by `dot_claude/modify_settings.json.tmpl` | Permissions and hooks — the dominance clause above is what admits it. Its declaration is a value rather than a sequence of bytes; see the amendment below |
 | `dot_mcp.json` | Fully hand-authored |
 | `dot_editorconfig` | Editor defaults |
 | `dot_zshrc`, `dot_zprofile`, `dot_zsh_plugins.txt` | Shell; `zsh_plugins.txt` is antidote's declaration |
@@ -74,3 +74,39 @@ Credential files are not preflight gates. They block a command-line tool, never 
 Installed agent skills and plugins are outside this decision. They are not configuration but installed artifacts — a third package source alongside Homebrew and the App Store, which the content review never covered — and they are settled separately.
 
 `~/.config/gws` belongs to a tool cut four months ago, and nothing on the machine will ever remove it. Confining the rule to the inventory means such residue is not tracked, not cleaned, and not pretended about; the rebuild is what collects it. That is an argument for the annual wipe rather than a gap in this decision.
+
+## Amendment: a declaration may be a value rather than a sequence of bytes
+
+The decision above predicted that an application writing back to a managed file "is just drift, which `drift` already surfaces". Measured on `~/.claude/settings.json`, that prediction is right about the file and wrong about the finding. Claude Code rewrites the file and emits the same keys in its own order — `permissions, attribution, includeCoAuthoredBy` in this repository, `attribution, includeCoAuthoredBy, permissions` on the machine — so `chezmoi status` reports `MM` on every run, forever, over a difference that changes no value. A finding that is always present and never means anything is the "report nobody reads because it looks like coverage" failure ADR 0002 rejects by name, arriving inside the detector rather than around it.
+
+The criterion is untouched. Plain text, human content dominates, never a secret: the file satisfies all three and stays managed for the reasons already given. What the decision never stated is that the thing it declares is not always a sequence of bytes.
+
+So: **a managed file's declaration may be a value.** For JSON it is the parsed value — key order, insignificant whitespace and the trailing newline are outside it, because none of them is a decision anyone made. `CONTEXT.md` carries the term as *canonical form*. The boundary is exact and it is the whole amendment: a rewrite that changes **no value** produces no finding; a rewrite that adds, removes or changes **any** value still produces one, unchanged from today.
+
+### The mechanism, and why it is not in `drift`
+
+`home/dot_claude/modify_settings.json.tmpl` is a chezmoi `modify_` script. It receives the machine's copy on stdin and emits **the repository's declared value, in the machine's key order**. The comparison `chezmoi status` already performs then becomes the right comparison without `drift` learning anything: a pure reorder yields a target identical to the machine's copy and goes clean, and today's undeclared `modelSettings` block yields a target that lacks it and reports, exactly as an undeclared value should.
+
+Normalising inside `drift` was the obvious alternative and is rejected. It would make the detector smarter than the declaration, and it would apply invisibly to every JSON file the repository ever manages — a transformation nobody declared, in the one command whose findings are supposed to mean something. The transformation belongs in the declaration's own home, which is what a `modify_` script is.
+
+The declared value moves to `home/.chezmoitemplates/claude-settings.json`, because a `modify_` script and a plain source file cannot both target one path. It is still hand-authored plain text and still the single declaration; only its address changed.
+
+### This is not the `modify_` script ADR 0010 rejected
+
+ADR 0010 says, of this same file: "A `modify_` script that preserved foreign keys would be machinery built to defeat the decision." That still holds, and this script is its opposite. It emits the declared keys and **only** the declared keys, so `enabledPlugins`, `autoMode.environment` and anything else Claude Code writes into the file are stripped by `chezmoi apply` exactly as they are today, and reported by `drift` before they are. What ADR 0010 forbade was **preservation**; what this builds is **ordering**. The foreign key is why the distinction matters: preserving one hides a decision, reordering the declared ones hides nothing.
+
+### Scope: one file, no shared layer
+
+One script, for one file. ccstatusline was the candidate second consumer and the measurement says no: its machine copy and its declaration agree on all fourteen keys *and* on their order, so it never triggered the defect. Generality arrives with a second real consumer; when a second file starts reordering, that is when a shared template arrives, and it will be a better template for having two real cases instead of one and a guess.
+
+### Consequences
+
+`home/dot_claude/settings.json` was committed without a final newline, against the `insert_final_newline = true` this repository declares in `home/dot_editorconfig` and is itself edited under. The machine's copy has one. The collision is dissolved rather than worked around, and it takes both halves: the declaration is now committed *with* its final newline, which it could not be before — under a byte comparison that newline was itself a permanent finding — and the script emits one, because the trailing newline is outside the canonical form. `.editorconfig` governs what this repository writes; the canonical form governs what a comparison means. They stop disagreeing because they were answering different questions all along.
+
+The canonical form is defined wider than the script implements, and the gap is stated rather than left to be discovered. The script reorders keys and nothing else: the indentation and the trailing newline agree because `jq`'s two-space output happens to be what Claude Code writes today, not because the script reproduces whatever it finds. An application that changed its indentation would bring the finding straight back, and that is the day this script learns to reproduce it. The definition is not narrowed to fit the implementation — it is what the declaration *means* — and building indentation detection for an application that has never varied it would be the speculative generality this repository declines everywhere else.
+
+`~/.config/ccstatusline/settings.json` keeps its missing final newline, and this is the stated remainder. It is committed as its application writes it, it is byte-identical to the machine's copy, and giving it a newline would trade a standing editorconfig violation for a standing `drift` finding — the worse of the two, and for a file that has no `modify_` script to make the newline free. It becomes free on the day that file earns one.
+
+`jq` becomes a dependency of `chezmoi apply`, not only of `drift` and the bootstrap's scripts. It is declared in the `Brewfile` as a bootstrap dependency already, and the script degrades rather than fails without it: with no `jq` on PATH it emits the declared value unchanged, which is the behaviour of every day before this amendment.
+
+The `modelSettings` block on the machine today is left undeclared on purpose. It is a real value the repository does not state, which is precisely the finding this amendment preserves the ability to make — adopting it is a separate decision, taken by a deliberate edit to the declaration.
