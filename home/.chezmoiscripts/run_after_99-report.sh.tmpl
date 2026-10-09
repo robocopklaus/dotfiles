@@ -3,8 +3,8 @@
 # Requires: nothing — a missing `drift` shortens the report; it never fails the run
 
 # The epilogue draws only banners, so the rest of `lib/ui.sh` is never called here and the
-# linter would report every line of it as unreachable.
-# shellcheck disable=SC2317
+# linter would report every function in it as unused and every line as unreachable.
+# shellcheck disable=SC2317,SC2329
 
 # No `set -e`, alone among the scripts here: chezmoi aborts on a non-zero script, and
 # `drift` exits 1 on any finding — a true report rather than a failed run. The epilogue
