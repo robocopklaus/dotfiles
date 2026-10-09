@@ -69,6 +69,12 @@ jobs:
       - name: Test the macOS defaults phase
         run: tests/macos-defaults.sh "$RUNNER_TEMP/rendered/run_onchange_after_60-macos-defaults.sh"
 
+      # The Dock phase's PATH, under a shell that never loaded Homebrew — a bootstrap's.
+      # A routine apply inherits a login shell that already has, which is why the missing
+      # load surfaced only on a fresh machine.
+      - name: Test the Dock phase
+        run: tests/dock.sh "$RUNNER_TEMP/rendered/run_onchange_after_61-dock.sh"
+
       # Which identity a remote selects, asked of the real git against the rendered
       # configuration. A pattern that looks right and matches nothing is silent everywhere
       # else: with no default, it surfaces as a refused commit far from here. ADR 0011
