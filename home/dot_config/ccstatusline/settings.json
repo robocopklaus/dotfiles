@@ -14,7 +14,7 @@
       },
       {
         "id": "77b45754-5c94-470c-bef0-4d73c29ae8b9",
-        "type": "reset-timer",
+        "type": "session-usage",
         "backgroundColor": "bgBrightGreen"
       },
       {
