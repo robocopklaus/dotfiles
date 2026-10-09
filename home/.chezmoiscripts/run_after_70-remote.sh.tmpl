@@ -37,5 +37,8 @@ fi
 # already states which repository this is — one list, one truth.
 path=${remote#https://github.com/}
 path=${path%.git}
-printf 'P7: pointing the chezmoi source remote at git@github.com:%s.git.\n' "$path"
-git -C "$CHEZMOI_SOURCE_DIR" remote set-url origin "git@github.com:$path.git"
+{{ template "lib/ui.sh" . }}
+
+ui_header 'P7  integrations'
+ui_step "source remote → git@github.com:$path.git" \
+  git -C "$CHEZMOI_SOURCE_DIR" remote set-url origin "git@github.com:$path.git"

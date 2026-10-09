@@ -19,9 +19,11 @@ set -euo pipefail
 # `mise` is a formula, so it is on PATH only through Homebrew's (ADR 0005).
 {{ template "lib/homebrew.sh" . }}
 
-printf 'P5: installing the declared runtimes.\n'
+{{ template "lib/ui.sh" . }}
+
+ui_header 'P5  runtimes'
 
 # P5 aborts on failure and needs no `if` to do it: `set -e` is the whole mechanism.
 # The collect-and-report shape 40 and 41 carry is for a phase installing many independent
 # things; this is one command over one declaration.
-mise install
+ui_step 'runtimes' mise install

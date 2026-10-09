@@ -21,13 +21,18 @@ set -euo pipefail
 # `mas` phase is tolerant of a missing account on its own, and the closing report already
 # asks for the sign-in the phase needs.
 
-refused=()
-reported=()
+{{ template "lib/ui.sh" . }}
+
+ui_header 'P2  gate'
+
+refused=0
+reported=0
 
 # Each check states its own remedy at the call site. A remedy list maintained apart
 # from the checks it serves would drift, and the copy that drifts waves you through.
 refuse() {
-  refused+=("$1"$'\n'"    $2")
+  ui_fail "$1" "$2"
+  refused=$((refused + 1))
 }
 
 # Under CI the 1Password items degrade from refusing to reporting.
@@ -35,33 +40,26 @@ refuse() {
 # it from op's absence would wave through the fresh Mac the gate exists for.
 refuse_unless_ci() {
   if [ -n "${CI:-}" ]; then
-    reported+=("$1"$'\n'"    $2")
+    ui_fail "$1" "$2"
+    reported=$((reported + 1))
   else
     refuse "$1" "$2"
   fi
 }
 
-print_items() {
-  local item
-  for item in "$@"; do
-    printf '  ✗ %s\n' "$item"
-  done
-}
-
-# Printing and exiting is a function because the gate stops in two places, not one: the
-# foundation below is what the acquisition itself stands on, so it cannot be collected
-# and reported alongside the items that only become checkable once it holds.
+# Each item is printed as it is checked, so what is left is the verdict. It is a function
+# because the gate stops in two places, not one: the foundation below is what the
+# acquisition itself stands on, so it cannot be settled alongside the items that only
+# become checkable once it holds.
 settle() {
-  if [ ${#reported[@]} -gt 0 ]; then
-    printf '\nPreflight gate: reported, not refused (CI):\n\n'
-    print_items "${reported[@]}"
+  if [ "$reported" -gt 0 ]; then
+    printf '\nPreflight gate: %d item(s) reported, not refused (CI).\n' "$reported"
   fi
 
-  if [ ${#refused[@]} -gt 0 ]; then
-    printf '\nPreflight gate: %d precondition(s) not met. Nothing has been written to %s.\n\n' \
-      "${#refused[@]}" "$HOME"
-    print_items "${refused[@]}"
-    printf '\nFix the items above, then run the command again.\n\n'
+  if [ "$refused" -gt 0 ]; then
+    printf '\nPreflight gate: %d precondition(s) not met. Nothing has been written to %s.\n' \
+      "$refused" "$HOME"
+    printf 'Fix the items above, then run the command again.\n\n'
     exit 1
   fi
 }
@@ -72,35 +70,45 @@ settle() {
 
 # Administrator rights, first and once: P4 needs root, and this is the run's single
 # interactive moment. Acquiring the privilege here means no later phase discovers
-# its absence halfway through a bundle.
-printf 'Preflight gate: checking administrator rights — macOS may ask for your password.\n'
-if ! sudo -v; then
+# its absence halfway through a bundle. Never folded, so the password prompt is seen.
+ui_note 'Checking administrator rights — macOS may ask for your password.'
+if sudo -v; then
+  ui_ok 'Administrator rights'
+else
   refuse "Administrator rights are not available (sudo -v failed)." \
     "Run the bootstrap from an account with administrator rights."
 fi
 
 # macOS 26 or newer on Apple Silicon
 architecture=$(uname -m)
-if [ "$architecture" != "arm64" ]; then
+if [ "$architecture" = "arm64" ]; then
+  ui_ok 'Apple Silicon'
+else
   refuse "This is not an Apple Silicon Mac (uname -m reports $architecture)." \
     "Rebuild on an Apple Silicon Mac — this repository manages no Intel machine."
 fi
 
 macos_version=$(sw_vers -productVersion)
-if [ "${macos_version%%.*}" -lt 26 ]; then
+if [ "${macos_version%%.*}" -ge 26 ]; then
+  ui_ok "macOS $macos_version"
+else
   refuse "macOS $macos_version is older than the macOS 26 this repository targets." \
     "Update first: System Settings → General → Software Update."
 fi
 
 # Network
-if ! curl -fsS --max-time 10 -o /dev/null https://github.com; then
+if curl -fsS --max-time 10 -o /dev/null https://github.com; then
+  ui_ok 'github.com is reachable'
+else
   refuse "github.com is not reachable." \
     "Join a network that reaches github.com, then re-run."
 fi
 
 # Xcode Command Line Tools. Checked, never installed and never waited on: the
 # prior setup's 3600s poll for them is deliberately not carried over.
-if ! xcode-select --print-path >/dev/null 2>&1; then
+if xcode-select --print-path >/dev/null 2>&1; then
+  ui_ok 'Xcode Command Line Tools'
+else
   refuse "The Xcode Command Line Tools are not installed." \
     "Run: xcode-select --install — wait for it to finish, then re-run."
 fi
@@ -136,19 +144,22 @@ if [ -z "${CI:-}" ]; then
     if brew list --cask "$cask" >/dev/null 2>&1; then
       continue
     fi
-    printf 'Preflight gate: installing %s.\n' "$cask"
-    brew install --cask --adopt "$cask" || true
+    ui_step "cask $cask" brew install --cask --adopt "$cask" || true
   done
 fi
 
 # 1Password and its CLI. Still checked, and the remedies still name the commands: the
 # acquisition above is what normally satisfies them, not a guarantee that it did.
-if [ ! -d "/Applications/1Password.app" ]; then
+if [ -d "/Applications/1Password.app" ]; then
+  ui_ok '1Password'
+else
   refuse_unless_ci "1Password is not installed, and the gate could not install it." \
     "Run: brew install --cask 1password — then open it and sign in."
 fi
 
-if ! command -v op >/dev/null 2>&1; then
+if command -v op >/dev/null 2>&1; then
+  ui_ok '1Password CLI'
+else
   refuse_unless_ci "The 1Password CLI (op) is not on PATH, and the gate could not install it." \
     "Run: brew install --cask 1password-cli — then turn on 1Password → Settings → Developer → Integrate with 1Password CLI."
 fi
@@ -198,7 +209,11 @@ fi
 # question macOS leaves answerable: the file can be stat'd while opening it is refused.
 #
 # Asked of the file rather than of `op --debug`, whose wording is 1Password's to change.
-if command -v op >/dev/null 2>&1 && [ -z "$(op account list </dev/null 2>/dev/null)" ]; then
+if ! command -v op >/dev/null 2>&1; then
+  : # Refused above, and there is nothing to ask an absent CLI.
+elif [ -n "$(op account list </dev/null 2>/dev/null)" ]; then
+  ui_ok '1Password CLI integration'
+else
   if [ -e "$app_settings" ] && ! head -c 1 "$app_settings" >/dev/null 2>&1; then
     refuse_unless_ci "1Password's app data cannot be read, so op is handed no account." \
       "Re-run the command you started with, with OP_BIOMETRIC_UNLOCK_ENABLED=true in front of it — that makes op ask the running app instead of reading the file. Nothing in the run can set it for you: chezmoi reads the 1Password item itself, so the variable has to be in the environment the command is typed into. macOS does not offer this permission under Privacy & Security; the terminal is not listed there at all."
@@ -211,7 +226,9 @@ fi
 # The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
 # rewrite waits for. This is the one the acquisition can never satisfy: it is a toggle
 # behind an unlock.
-if [ ! -S "$agent_socket" ]; then
+if [ -S "$agent_socket" ]; then
+  ui_ok '1Password SSH agent'
+else
   refuse_unless_ci "The 1Password SSH agent socket is missing ($agent_socket)." \
     "Unlock 1Password, then turn on Settings → Developer → Use the SSH agent."
 fi

@@ -16,10 +16,14 @@ set -euo pipefail
 # that domain cost one restart rather than two.
 {{ template "lib/dock-restart.sh" . }}
 
+{{ template "lib/ui.sh" . }}
+
+ui_header 'P6  system configuration · Dock'
+
 # Reconciled, not rebuilt (ADR 0009): read the current tile sequence, compare it to the
 # expected one, and go near `dockutil` only on mismatch. On a converged machine this
-# prints nothing, changes nothing and restarts nothing — which is what makes a routine
-# apply something you do not learn to avoid.
+# prints only its header, changes nothing and restarts nothing — which is what makes a
+# routine apply something you do not learn to avoid.
 #
 # The expected sequence is the declaration rendered against this machine: an application
 # that never installed drops out, and its category keeps its spacer only if something
@@ -27,17 +31,16 @@ set -euo pipefail
 expected=$(dock_expected_sequence)
 current=$(dock_current_sequence)
 
-rebuilt='no'
-if [ "$current" != "$expected" ]; then
-  printf 'P6: the Dock does not match the declaration; rebuilding it.\n'
-  printf 'P6:   expected: %s\n' "$(dock_sequence_label "$expected")"
-  printf 'P6:   actual:   %s\n' "$(dock_sequence_label "$current")"
-
-  # Clear and re-add, which is the destructive rebuild the prior setup ran on *every*
-  # apply. Behind the comparison it is a different thing: it fires only when the Dock has
-  # genuinely diverged, so the plist backup and its five-deep prune are gone with the
-  # reason they existed (ADR 0009).
-  dockutil --remove all --no-restart >/dev/null
+# Clear and re-add, which is the destructive rebuild the prior setup ran on *every*
+# apply. Behind the comparison below it is a different thing: it fires only when the Dock
+# has genuinely diverged, so the plist backup and its five-deep prune are gone with the
+# reason they existed (ADR 0009).
+#
+# Each failure is returned by hand, because this runs as a step, where `set -e` does not
+# reach.
+rebuild() {
+  local kind path view sort display
+  dockutil --remove all --no-restart >/dev/null || return
 
   # Each call reads from /dev/null, not from the here-string the loop is walking: a child
   # that touched stdin would eat the rest of the sequence and leave a Dock that is half
@@ -45,18 +48,24 @@ if [ "$current" != "$expected" ]; then
   while IFS=$'\t' read -r kind path view sort display; do
     case $kind in
       app)
-        dockutil --add "$path" --no-restart >/dev/null </dev/null
+        dockutil --add "$path" --no-restart >/dev/null </dev/null || return
         ;;
       spacer)
-        dockutil --add '' --type small-spacer --section apps --no-restart >/dev/null </dev/null
+        dockutil --add '' --type small-spacer --section apps --no-restart >/dev/null </dev/null || return
         ;;
       folder)
         dockutil --add "$path" --view "$view" --sort "$sort" --display "$display" \
-          --no-restart >/dev/null </dev/null
+          --no-restart >/dev/null </dev/null || return
         ;;
     esac
   done <<<"$expected"
+}
 
+rebuilt='no'
+if [ "$current" != "$expected" ]; then
+  ui_step 'Dock layout' rebuild
+  ui_note "was:  $(dock_sequence_label "$current")"
+  ui_note "now:  $(dock_sequence_label "$expected")"
   rebuilt='yes'
 fi
 
@@ -65,7 +74,7 @@ fi
 # `dockutil` call above passes `--no-restart` for exactly this reason.
 if [ "$rebuilt" = 'yes' ] || [ -e "$dock_restart_request" ]; then
   rm -f "$dock_restart_request"
-  printf 'P6: restarting the Dock.\n'
   # macOS brings it straight back, and it is not worth failing the phase over.
   killall Dock >/dev/null 2>&1 || true
+  ui_ok 'Dock restarted'
 fi

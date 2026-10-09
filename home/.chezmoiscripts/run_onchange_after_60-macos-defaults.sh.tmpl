@@ -12,12 +12,15 @@ set -euo pipefail
 # Where a change to `com.apple.dock` is left for 61 to act on, rather than acted on here.
 {{ template "lib/dock-restart.sh" . }}
 
+{{ template "lib/ui.sh" . }}
+
+ui_header 'P6  system configuration · macOS defaults'
+
 # They are applied unconditionally: there is no flag to forget, and no
 # `CHEZMOI_APPLY_MACOS_DEFAULTS` to leave off. A gate that defaults to off means a
 # rebuilt machine comes up unconfigured, which is the rediscover-by-irritation loop the
 # repository exists to end. What the flag actually guarded — a routine apply
 # yanking the Dock and killing Finder mid-workday — is solved below instead.
-printf 'P6: applying the managed macOS defaults.\n'
 
 # Only the keys that disagree are written, and the domains they belong to are collected.
 # A converged machine writes nothing, so it also restarts nothing.
@@ -30,10 +33,10 @@ while IFS=$'\t' read -r domain key type value scope; do
     continue
   fi
 
-  printf 'P6: %s %s → %s\n' "$(managed_default_label "$scope" "$domain")" "$key" "$expected"
   # `$expected` is the read spelling and is only ever compared against; what is written is
   # the declared value, which is the only spelling `defaults write` accepts for a bool.
-  managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$(managed_default_written "$value")"
+  ui_step "$(managed_default_label "$scope" "$domain") $key → $expected" \
+    managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$(managed_default_written "$value")"
   changed_domains+="$domain"$'\n'
 done <<<"$managed_defaults"
 
@@ -56,9 +59,9 @@ domain_changed() {
 restart_if_changed() {
   local domain=$1 app=$2
   domain_changed "$domain" || return 0
-  printf 'P6: restarting %s, whose domain changed.\n' "$app"
   # macOS brings it back immediately, and it is not worth failing the phase over.
   killall "$app" >/dev/null 2>&1 || true
+  ui_ok "$app restarted"
 }
 
 restart_if_changed com.apple.finder Finder
