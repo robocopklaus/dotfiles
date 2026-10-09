@@ -77,6 +77,8 @@ printf '  %s\n' \
 ui_note 'Allow 15 minutes before an empty plugin list means anything.'
 
 printf '\nFrom 1Password, when the tool first asks\n'
+# The tilde is text for a human, not a path for the shell to expand.
+# shellcheck disable=SC2088
 printf '  %-16s%s\n' '~/.cloudflare' 'cli4'
 printf '\n'
 
