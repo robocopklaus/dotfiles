@@ -50,6 +50,12 @@ The closing report at the run's tail. It re-derives what is missing by checking 
 it never replays what earlier phases recorded.
 _Avoid_: summary, final report
 
+**Remainder**:
+The part of the epilogue that no script can do or check: the sign-ins, what restores
+itself once they are done, and the credential files a tool will ask for. Written by hand,
+never derived.
+_Avoid_: static tail, handover, checklist
+
 **Trust chain**:
 Homebrew and the two 1Password casks: what everything else in the run is fetched and
 signed through. Acquired by the gate rather than asked of a human, because it is the only
