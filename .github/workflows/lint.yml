@@ -75,6 +75,12 @@ jobs:
       - name: Test the Dock phase
         run: tests/dock.sh "$RUNNER_TEMP/rendered/run_onchange_after_61-dock.sh"
 
+      # The progress view, folded under a pseudo-terminal and unfolded without one. The
+      # runner has no terminal, so every phase CI runs takes the unfolded path, and without
+      # this step the folded one — every bootstrap at a desk — is never exercised. ADR 0017
+      - name: Test the progress view
+        run: tests/ui.sh
+
       # Which identity a remote selects, asked of the real git against the rendered
       # configuration. A pattern that looks right and matches nothing is silent everywhere
       # else: with no default, it surfaces as a refused commit far from here. ADR 0011

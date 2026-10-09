@@ -101,8 +101,8 @@ out=$(HOME="$home" PATH="$bin:$PATH" STUB_NO_CLT=1 CI=1 bash "$gate" 2>&1)
 code=$?
 check 'exits 1' 1 "$code"
 says "$out" 'Command Line Tools' 'names the missing foundation item'
-silent "$out" 'Installing Homebrew' 'installs no Homebrew'
-silent "$out" 'Preflight gate: installing' 'installs no cask'
+silent "$out" '▸ Homebrew' 'installs no Homebrew'
+silent "$out" '▸ cask' 'installs no cask'
 # The second stop is never reached, so nothing it would have said may appear.
 silent "$out" 'SSH agent socket' 'never reaches the trust-chain checks'
 
@@ -113,7 +113,7 @@ out=$(HOME="$home" PATH="$bin:$PATH" CI=1 bash "$gate" 2>&1)
 code=$?
 check 'exits 0' 0 "$code"
 says "$out" 'reported, not refused' 'reports the 1Password items'
-silent "$out" 'Preflight gate: installing' 'installs no cask'
+silent "$out" '▸ cask' 'installs no cask'
 silent "$out" 'precondition(s) not met' 'refuses nothing'
 
 printf '\n%d passed, %d failed\n\n' "$pass" "$fail"

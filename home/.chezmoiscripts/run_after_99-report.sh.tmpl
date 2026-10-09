@@ -2,6 +2,10 @@
 # Phase: 9x — the epilogue: the closing report
 # Requires: nothing — a missing `drift` shortens the report; it never fails the run
 
+# The epilogue draws only banners, so the rest of `lib/ui.sh` is never called here and the
+# linter would report every line of it as unreachable.
+# shellcheck disable=SC2317
+
 # No `set -e`, alone among the scripts here: chezmoi aborts on a non-zero script, and
 # `drift` exits 1 on any finding — a true report rather than a failed run. The epilogue
 # never fails the run; the last line of this file is what enforces it.
@@ -11,14 +15,9 @@ set -uo pipefail
 # script re-derives on every run, so content-hash skipping would stop a converged machine
 # being told what it is still missing.
 
-# A heredoc rather than `printf`, here and at the tail: a format string that begins with a
-# dash is read as an option, so the rule for a banner is simply not to hand it to `printf`.
-cat <<'HEAD'
+{{ template "lib/ui.sh" . }}
 
-----------------------------------------------------------------------
-The closing report
-----------------------------------------------------------------------
-HEAD
+ui_header 'The closing report'
 
 # Dynamic — what is missing *right now*, re-checked rather than replayed. There is no
 # scratch file for the phases to append to: that is the recorded intermediate state the
@@ -53,11 +52,11 @@ fi
 # truth* slipping: nothing in the repository declares these, because the repository does
 # nothing about them. A data file would be a first list, not a second one, with this
 # script as its only reader.
-cat <<'TAIL'
+ui_header 'The rest is yours — no script can do or check any of it'
 
-----------------------------------------------------------------------
-The rest is yours — no script can do or check any of it
-----------------------------------------------------------------------
+# A heredoc rather than `printf`: a format string that begins with a dash is read as an
+# option, so the rule for a block of prose is simply not to hand it to `printf`.
+cat <<'TAIL'
 
 Sign-ins other things depend on
 

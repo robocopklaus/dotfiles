@@ -32,7 +32,9 @@ if command -v claude >/dev/null 2>&1; then
   exit 0
 fi
 
-printf 'P4: installing the Claude Code CLI.\n'
+{{ template "lib/ui.sh" . }}
+
+ui_header 'P4  packages · Claude Code CLI'
 
 # Fetched into a variable first, for the reason 40 states: piped straight into bash a
 # failed download is invisible, because the substitution yields an empty script that
@@ -41,7 +43,10 @@ printf 'P4: installing the Claude Code CLI.\n'
 # Tolerant end to end, because nothing later in the run depends on the CLI — P5, P6 and P7
 # take their preconditions from 40 and 41. A failure is reported and the run carries
 # on to the phases that do block.
-if ! { installer=$(curl -fsSL https://claude.ai/install.sh) && /bin/bash -c "$installer"; }; then
-  printf '\nP4: the Claude Code CLI did not install.\n'
-  printf '\nRe-run the bootstrap to retry; the closing report re-derives what is missing.\n\n'
+install_cli() {
+  local installer
+  installer=$(curl -fsSL https://claude.ai/install.sh) && /bin/bash -c "$installer"
+}
+if ! ui_step 'Claude Code CLI' install_cli; then
+  ui_note 'Re-run the bootstrap to retry; the closing report re-derives what is missing.'
 fi
