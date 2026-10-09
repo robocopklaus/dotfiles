@@ -4,6 +4,9 @@
 
 set -euo pipefail
 
+# `dockutil` is a formula, so it is on PATH only through Homebrew's (ADR 0005).
+{{ template "lib/homebrew.sh" . }}
+
 # The declaration and everything a consumer of it needs, included at render time (ADR
 # 0005). It is *in* this rendered script, so editing `dock.toml` re-triggers this phase by
 # construction — the same binding 40 gets from inlining the Brewfile.

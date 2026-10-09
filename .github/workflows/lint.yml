@@ -69,6 +69,12 @@ jobs:
       - name: Test the macOS defaults phase
         run: tests/macos-defaults.sh "$RUNNER_TEMP/rendered/run_onchange_after_60-macos-defaults.sh"
 
+      # The Dock phase's PATH, under a shell that never loaded Homebrew — a bootstrap's.
+      # A routine apply inherits a login shell that already has, which is why the missing
+      # load surfaced only on a fresh machine.
+      - name: Test the Dock phase
+        run: tests/dock.sh "$RUNNER_TEMP/rendered/run_onchange_after_61-dock.sh"
+
       # Which identity a remote selects, asked of the real git against the rendered
       # configuration. A pattern that looks right and matches nothing is silent everywhere
       # else: with no default, it surfaces as a refused commit far from here. ADR 0011
@@ -90,6 +96,31 @@ jobs:
             echo 'The entries above carry no reason comment.'
             exit 1
           fi
+
+      # Homebrew moves packages between kinds: `azure-cli` left homebrew/core for
+      # homebrew/cask, and the declaration as a formula surfaced only as a failed install
+      # on a bootstrap. The taps are read out of the inventories and trusted as P4 trusts
+      # them, so a tapped formula resolves here as it does there. The runner image does
+      # not refresh Homebrew's package data on its own, and a check against the image's
+      # copy would miss exactly the moves it is here for, so it is refreshed first.
+      - name: Brewfile entries resolve
+        run: |
+          status=0
+          brew update --quiet
+          for tap in $(sed -n 's/^tap "\([^"]*\)".*/\1/p' Brewfile Brewfile.work); do
+            brew trust --tap "$tap"
+            brew tap "$tap"
+          done
+          for inventory in Brewfile Brewfile.work; do
+            while read -r kind name; do
+              if ! error=$(brew info --"$kind" --json=v2 "$name" 2>&1 >/dev/null); then
+                echo "$inventory: '$name' is declared as a $kind and is not one."
+                printf '%s\n' "$error" | sed 's/^/  /'
+                status=1
+              fi
+            done < <(sed -n 's/^brew "\([^"]*\)".*/formula \1/p; s/^cask "\([^"]*\)".*/cask \1/p' "$inventory")
+          done
+          exit "$status"
 
       # A Dock entry is a reference to an application the repository already declares,
       # never a second declaration of it — so every name in the declaration must resolve
