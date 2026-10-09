@@ -8,9 +8,9 @@
 
 tap "databricks/tap"  # Backs the Databricks CLI below, which homebrew/core does not carry
 
-brew "azure-cli"    # Azure CLI — client cloud platform
 brew "databricks"   # Databricks CLI — client data platform
 brew "jira-cli"     # Jira CLI — client ticket tracker
 
+cask "azure-cli"         # Azure CLI — client cloud platform; moved from homebrew/core to a cask
 cask "gcloud-cli"        # Google Cloud CLI — client cloud platform; ships as a cask, not a formula
 cask "microsoft-teams"   # Client chat and meetings
