@@ -2,8 +2,9 @@
 # Phase: 9x — the epilogue: the closing report
 # Requires: nothing — a missing `drift` shortens the report; it never fails the run
 
-# The epilogue draws only banners, so the rest of `lib/ui.sh` is never called here and the
-# linter would report every function in it as unused and every line as unreachable.
+# The epilogue draws only headers and notes, so the rest of `lib/ui.sh` is never called
+# here and the linter would report every function in it as unused and every line as
+# unreachable.
 # shellcheck disable=SC2317,SC2329
 
 # No `set -e`, alone among the scripts here: chezmoi aborts on a non-zero script, and
@@ -40,66 +41,46 @@ else
   printf 'drift is not on PATH, so nothing could be re-checked. Re-run the bootstrap.\n'
 fi
 
-# Static tail — what no script can perform and no script can verify.
+# The remainder — what no script can perform and no script can verify.
 #
 # Everything above is derived from the machine. Everything below cannot be: it is GUI work
 # behind accounts, and a self-attested "have you signed in? [y/N]" would be a prompt
 # wearing a gate's clothes — it blocks the run while verifying nothing. A manual step
 # is either verifiable, in which case the gate refuses on it, or it is not, in which case
-# it is a line here. There is no third category.
+# it is a line here. There is no third category (ADR 0015).
 #
-# Hand-written rather than derived from a declaration, and that is not *one list, one
-# truth* slipping: nothing in the repository declares these, because the repository does
-# nothing about them. A data file would be a first list, not a second one, with this
-# script as its only reader.
+# It says what to do and leaves the why where it is recorded: the gate's comments for the
+# Apple Account and the App Store, ADR 0006 for what restores itself and for the
+# credential files, ADR 0010 for agent tooling.
+#
+# Hand-written rather than derived from a declaration: nothing the run reads declares
+# these, because the repository does nothing about them. ADR 0006 records the decision
+# that put them here, not a list this one must match.
+#
+# No glyph marks an item: nothing can tick it, and ✓ and ✗ mean the run checked. Columns
+# are padded by hand to fit 80, since `lib/ui.sh` does no width detection (ADR 0017).
 ui_header 'The rest is yours — no script can do or check any of it'
 
-# A heredoc rather than `printf`: a format string that begins with a dash is read as an
-# option, so the rule for a block of prose is simply not to hand it to `printf`.
-cat <<'TAIL'
+printf '\nSign in\n'
+# Authentication and signature verification are separate registrations of the same key,
+# and the second one is the one that is silently forgotten.
+printf '  %-16s%s\n' 'GitHub' 'register the key under both SSH keys and SSH signing keys'
+printf '  %-16s%s\n' 'Apple Account' 'System Settings'
+printf '  %-16s%s\n' 'App Store' 'the App Store app'
+ui_note 'Re-run the bootstrap if an App Store app is missing above.'
 
-Sign-ins other things depend on
+printf '\nRestores itself once you sign in\n'
+printf '  %s\n' \
+  '1Password, Chrome, VS Code, Raycast, Slack, ChatGPT, Mimestream,' \
+  'Clockify, WhatsApp, GCal, Docker Desktop' \
+  'Agent skills and plugins, via the claude.ai account'
+ui_note 'Allow 15 minutes before an empty plugin list means anything.'
 
-  GitHub          Register this machine's public key under BOTH "SSH keys" and
-                  "SSH signing keys" (P0 item 6). Authentication and signature
-                  verification are separate registrations of the same key, and
-                  the second one is the one that is silently forgotten.
-  Apple Account   Sign in under System Settings if you have not already. The gate
-                  does not check it: a freshly set up machine has no
-                  `MobileMeAccounts` domain to read even when it is signed in, so
-                  the check refused correctly prepared machines and is gone.
-  App Store       Sign in, then re-run the bootstrap if the report above is
-                  short an App Store application: `mas` cannot install for an
-                  account that is not signed in, and the phase is tolerant.
-
-Things that restore themselves once you sign in
-
-  Nothing here is managed and nothing here is broken — signing in is the whole
-  restore, and this list exists so a rebuilt machine is not audited by memory.
-
-  1Password, Chrome (its extensions arrive with Chrome sync), VS Code (Settings
-  Sync carries settings, extensions and keybindings together), Raycast, Slack,
-  ChatGPT, Mimestream, Clockify, WhatsApp, GCal, Docker Desktop.
-
-  Agent skills and plugins too: they ride the claude.ai account rather than this
-  repository (ADR 0010), and no phase here installs any. What carries them is the
-  marketplace being registered on the account, not a plugin being enabled on a
-  machine — a plugin enabled only here has no route to the next machine. Sync is
-  not instant — a newly registered marketplace has taken well over ten minutes to
-  land — so an empty ~/.claude/plugins/synced/ is not a failure for the first
-  quarter hour.
-
-Credential files, by path — the values live in 1Password
-
-  These block a CLI and nothing else: no phase waits on them, which is why none
-  of them is a gate item. Fetch one the first time its tool asks for it.
-
-  ~/.ha-cli.env         `ha`   — homeassistant-cli
-  ~/.cloudflare         `cli4` — cloudflare-cli4
-  ~/.firefly_token      the Firefly III token
-  ~/.ghostfolio_token   the Ghostfolio token
-
-TAIL
+printf '\nFrom 1Password, when the tool first asks\n'
+# The tilde is text for a human, not a path for the shell to expand.
+# shellcheck disable=SC2088
+printf '  %-16s%s\n' '~/.cloudflare' 'cli4'
+printf '\n'
 
 # The last line, and the reason there is no `set -e` above: whatever was reported, the run
 # ends having succeeded. The report is the deliverable; failing on it would make the one
