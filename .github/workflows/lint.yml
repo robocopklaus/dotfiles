@@ -99,18 +99,20 @@ jobs:
 
       # Homebrew moves packages between kinds: `azure-cli` left homebrew/core for
       # homebrew/cask, and the declaration as a formula surfaced only as a failed install
-      # on a bootstrap. The taps are read out of the inventories, so a tapped formula
-      # resolves here as it does there.
+      # on a bootstrap. The taps are read out of the inventories and trusted as P4 trusts
+      # them, so a tapped formula resolves here as it does there.
       - name: Brewfile entries resolve
         run: |
           status=0
           for tap in $(sed -n 's/^tap "\([^"]*\)".*/\1/p' Brewfile Brewfile.work); do
+            brew trust --tap "$tap"
             brew tap "$tap"
           done
           for inventory in Brewfile Brewfile.work; do
             while read -r kind name; do
-              if ! brew info --"$kind" --json=v2 "$name" >/dev/null 2>&1; then
+              if ! error=$(brew info --"$kind" --json=v2 "$name" 2>&1 >/dev/null); then
                 echo "$inventory: '$name' is declared as a $kind and is not one."
+                printf '%s\n' "$error" | sed 's/^/  /'
                 status=1
               fi
             done < <(sed -n 's/^brew "\([^"]*\)".*/formula \1/p; s/^cask "\([^"]*\)".*/cask \1/p' "$inventory")
