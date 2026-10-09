@@ -13,6 +13,8 @@
 set -uo pipefail
 
 script=${1:?usage: tests/dock.sh <rendered 61-dock.sh>}
+# The line itself, unexpanded: it is matched as text, never run.
+# shellcheck disable=SC2016
 sentinel='expected=$(dock_expected_sequence)'
 
 if ! grep -qxF "$sentinel" "$script"; then
@@ -26,6 +28,8 @@ trap 'rm -f "$preamble"' EXIT
 # that misses runs the whole phase against the real Dock.
 awk -v stop="$sentinel" '$0 == stop { exit } { print }' "$script" >"$preamble"
 
+# The child shell expands "$1", not this one.
+# shellcheck disable=SC2016
 if env -i HOME="$HOME" PATH=/usr/bin:/bin:/usr/sbin:/sbin \
   bash -c 'source "$1" && command -v brew >/dev/null' _ "$preamble"; then
   printf 'ok - Homebrew is on PATH before the Dock phase calls dockutil\n'
