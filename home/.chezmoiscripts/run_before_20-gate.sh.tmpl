@@ -48,9 +48,11 @@ print_items() {
   done
 }
 
-# Printing and exiting is a function because the gate stops in two places, not one: the
-# foundation below is what the acquisition itself stands on, so it cannot be collected
-# and reported alongside the items that only become checkable once it holds.
+# Printing and exiting is a function because the gate stops in three places, not one.
+# Each stop is what the next one stands on: the foundation is what the privilege question
+# can be asked on at all, the privilege is what the acquisition spends, and the items
+# below only become checkable once that acquisition has run. None of them can be collected
+# and reported alongside the next.
 settle() {
   if [ ${#reported[@]} -gt 0 ]; then
     printf '\nPreflight gate: reported, not refused (CI):\n\n'
@@ -69,15 +71,6 @@ settle() {
 # The foundation: everything the acquisition and every later phase rests on. These are
 # still reported in one pass with each other — it is only the trust chain that had to
 # move behind them, because installing it is what needs them.
-
-# Administrator rights, first and once: P4 needs root, and this is the run's single
-# interactive moment. Acquiring the privilege here means no later phase discovers
-# its absence halfway through a bundle.
-printf 'Preflight gate: checking administrator rights — macOS may ask for your password.\n'
-if ! sudo -v; then
-  refuse "Administrator rights are not available (sudo -v failed)." \
-    "Run the bootstrap from an account with administrator rights."
-fi
 
 # macOS 26 or newer on Apple Silicon
 architecture=$(uname -m)
@@ -107,6 +100,97 @@ fi
 
 settle
 
+# Will this run install anything? The privilege below is acquired for exactly one
+# consumer: Homebrew's cask installers, which ask macOS for root themselves when a cask
+# ships a `pkg`. Nothing in this repository ever runs a command as root — `sudo -v` here
+# and `sudo -n true` in the keepalive are the only invocations in the tree, P4 states that
+# `mas install` must not carry it, and P6 writes user-scope defaults.
+#
+# So the question in front of the acquisition is not which verb was typed, and not whether
+# this is a rebuild. "Has the gate run recently" would be recorded state, and a field
+# nobody updates degrades into a confident lie rather than into no information, so this is
+# recomputed from the machine on every run (ADR 0012, amended).
+#
+# Asked with `brew bundle check` — Homebrew's own answer to whether its inventory is
+# installed, rather than a second implementation of drift's sweep living inside a gate.
+# `--no-upgrade` is load-bearing and was measured: without it an *outdated* entry answers
+# the same as a missing one, something is almost always outdated, and the gate would go on
+# asking for the password every time while appearing to be fixed. It is also the truthful
+# question, because P4 installs what is missing and never upgrades a cask.
+# `HOMEBREW_NO_AUTO_UPDATE` keeps a network fetch out of a check that has to stay cheap.
+#
+# The inventory is inlined at render time — the same `include` P4 and drift read, so this
+# is the one list consulted once more rather than a second list — and the work group rides
+# the same `op` guard it rides everywhere else.
+brewfile=$(
+  cat <<'BREWFILE'
+{{ include "../Brewfile" }}
+{{ if lookPath "op" }}{{ include "../Brewfile.work" }}{{ end }}
+BREWFILE
+)
+
+# Homebrew's prefix, so the question can be asked at all (ADR 0005) — and only when it is
+# not already answerable. The cascade prepends its own prefix, which would put the
+# machine's real Homebrew in front of whatever the caller had on PATH; skipping it when
+# `brew` is already there keeps the gate asking the Homebrew it was handed, and keeps
+# `brew shellenv` off the everyday path.
+if ! command -v brew >/dev/null 2>&1; then
+{{ template "lib/homebrew.sh" . }}
+fi
+
+check_output=''
+pending_installs='yes'
+if command -v brew >/dev/null 2>&1; then
+  if check_output=$(printf '%s\n' "$brewfile" |
+    HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --file=- --no-upgrade --verbose 2>&1); then
+    pending_installs='no'
+  fi
+  # Named in the words `brew bundle check` used, so a refusal states what it is refusing
+  # over. The parse is cosmetic and its failure costs only words: the answer above is the
+  # exit status, never the wording, so a phrasing change by Homebrew makes the refusal say
+  # less and never makes it decide differently.
+  pending_summary=$(sed -n 's/^→ *\(.*\) needs to be installed.*/\1/p' <<<"$check_output" |
+    paste -sd, - | sed 's/,/, /g')
+else
+  # No Homebrew at all is the fresh machine, and it is the first thing a rebuild installs.
+  pending_summary='Homebrew, and the inventory it carries'
+fi
+
+# Administrator rights, once, and only for a run that installs something. An update that
+# only moves files needs no password, which is what makes the everyday verb usable from a
+# shell with nobody sitting at it. Still acquired here rather than lazily inside P4, so
+# that no later phase discovers its absence halfway through a bundle: the run's one
+# interactive moment stays in front of the run.
+if [ "$pending_installs" = 'yes' ]; then
+  printf 'Preflight gate: this run installs software — macOS may ask for your password.\n'
+  if ! sudo -v; then
+    # Two causes, and the machine is asked which before a remedy is named, as ADR 0016
+    # does for the empty account list. The missing terminal is the everyday one now: an
+    # update pulled something that installs, in a context with nobody to ask.
+    #
+    # Asked of stdin, and the limit is known rather than overlooked: `sudo` prompts on
+    # /dev/tty, so a command whose stdin is redirected from a file *in* a terminal window
+    # is told there is no terminal when there is one. That case is reachable only once
+    # `sudo -v` has already failed, so it costs a remedy that names the wrong fix, never a
+    # wrong outcome — and the run is refused either way.
+    #
+    # /dev/tty is the truer question and is deliberately not asked, because nothing can
+    # take it away from a test: a case driving this branch would pass in CI and fail for
+    # anyone running the suite from a terminal window, which is the machine-dependent test
+    # tests/gate.sh exists to avoid writing. Sudo's own wording is not parsed either, for
+    # the reason ADR 0016 gives for not parsing `op --debug`: it is the vendor's to change.
+    if [ ! -t 0 ]; then
+      refuse "This run installs software, and there is no terminal to ask for the administrator password in.${pending_summary:+ Pending: $pending_summary}" \
+        "Run the command again in a terminal window."
+    else
+      refuse "Administrator rights are not available (sudo -v failed)." \
+        "Run the bootstrap from an account with administrator rights."
+    fi
+  fi
+fi
+
+settle
+
 # The trust chain: Homebrew, and through it the two 1Password casks. Acquired here rather
 # than asked of you, because a command you would have typed by hand is a command this run
 # can type for you — and because P4, which installs everything else, comes after the P3
@@ -119,26 +203,32 @@ settle
 #
 # Cask installs download hundreds of megabytes before they ask for root, which outlives
 # the timestamp `sudo -v` just set, so the privilege is kept warm across the acquisition.
-{{ template "lib/keepalive.sh" . }}
+# Skipped entirely when nothing is pending, which is the everyday update: the two casks
+# are inventory entries, so `brew bundle check` answering "satisfied" is already the
+# statement that they are installed. There is nothing here to acquire and no privilege
+# with which to acquire it.
+if [ "$pending_installs" = 'yes' ]; then
+  {{ template "lib/keepalive.sh" . }}
 
-# A no-op wherever Homebrew already is, which includes every CI runner and every
-# re-run after the first.
-{{ template "lib/homebrew-install.sh" . }}
+  # A no-op wherever Homebrew already is, which includes every CI runner and every
+  # re-run after the first.
+  {{ template "lib/homebrew-install.sh" . }}
 
-# The casks themselves, skipped under CI: the runner wants neither, and its 1Password
-# items report rather than refuse anyway.
-#
-# Tolerant by construction, and `|| true` is the whole handling: the checks below already
-# state what is missing and how to fix it, so a second reaction here would be the second
-# list this repository spends its rules preventing.
-if [ -z "${CI:-}" ]; then
-  for cask in 1password 1password-cli; do
-    if brew list --cask "$cask" >/dev/null 2>&1; then
-      continue
-    fi
-    printf 'Preflight gate: installing %s.\n' "$cask"
-    brew install --cask --adopt "$cask" || true
-  done
+  # The casks themselves, skipped under CI: the runner wants neither, and its 1Password
+  # items report rather than refuse anyway.
+  #
+  # Tolerant by construction, and `|| true` is the whole handling: the checks below
+  # already state what is missing and how to fix it, so a second reaction here would be
+  # the second list this repository spends its rules preventing.
+  if [ -z "${CI:-}" ]; then
+    for cask in 1password 1password-cli; do
+      if brew list --cask "$cask" >/dev/null 2>&1; then
+        continue
+      fi
+      printf 'Preflight gate: installing %s.\n' "$cask"
+      brew install --cask --adopt "$cask" || true
+    done
+  fi
 fi
 
 # 1Password and its CLI. Still checked, and the remedies still name the commands: the

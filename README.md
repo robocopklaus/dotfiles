@@ -67,6 +67,11 @@ source tree moves the repository you *develop* and leaves the machine where it w
 nothing on the machine says so — `drift` carries the declarations it was rendered with, so
 a machine the repository has moved past reports clean.
 
+It asks for an administrator password only when it is about to install something, because
+that is the only thing the password is ever spent on. An update that moves files needs no
+terminal at all; one that pulls a `Brewfile` change refuses, says what it would install,
+and asks to be run again in a terminal window.
+
 Re-running the bootstrap command is not this command. `chezmoi init` clones only when the
 source directory holds no repository, so on a machine that already has one it re-applies
 the state it already had. It recovers a broken machine; it does not update a stale one.

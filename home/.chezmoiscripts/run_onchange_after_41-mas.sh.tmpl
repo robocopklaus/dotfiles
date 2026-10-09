@@ -21,7 +21,14 @@ BREWFILE
 # below and must not be: the App Store session belongs to the logged-in user, and mas
 # run as root would look for root's. The privilege is held warm rather than invoked —
 # the installs themselves reach for it, which is why root is this script's precondition.
+#
+# Conditional for the reason 40 states: the gate acquires root only for a run that
+# installs something, and a phase that reached for it anyway would prompt in the middle of
+# a run the gate had cleared. The loop below skips every entry already installed, so where
+# the gate acquired nothing there is nothing here to spend it on.
+if sudo -n true 2>/dev/null; then
 {{ template "lib/keepalive.sh" . }}
+fi
 
 # `mas` is a formula, so it is on PATH only through Homebrew's (ADR 0005).
 {{ template "lib/homebrew.sh" . }}
