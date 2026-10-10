@@ -1,0 +1,16 @@
+#!/bin/bash
+# borders runs this at launch; `brew services restart borders` to pick up a change.
+#
+# Only the focused window is outlined: the inactive colour is fully transparent, so the
+# outline marks one window rather than framing all of them. Cyan is the accent of
+# Ghostty's Material Design Colors theme.
+
+options=(
+  style=round
+  width=6.0
+  hidpi=on
+  active_color=0xff00bcd4
+  inactive_color=0x00000000
+)
+
+borders "${options[@]}"

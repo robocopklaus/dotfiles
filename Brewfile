@@ -1,4 +1,5 @@
 tap "jurplel/tap"  # Backs InstantSpaceSwitcher below, which homebrew/cask does not carry
+tap "felixkratz/formulae"  # Backs borders below, which homebrew/core does not carry
 
 brew "chezmoi"             # Drives the entire bootstrap
 brew "git"                 # Version control
@@ -13,6 +14,7 @@ brew "oh-my-posh"          # Prompt, rendered by every shell
 brew "zoxide"              # z — directory jumping
 brew "cloudflare-cli4"     # Personal infrastructure
 brew "gogcli"              # Google Suite CLI — Gmail, Calendar, Drive, Docs, Sheets
+brew "borders", start_service: true  # Outlines the focused window; background service, so no launch record by design
 
 cask "1password"                 # Password manager; root of the bootstrap trust chain
 cask "1password-cli"             # op — renders the work identity; trust chain
