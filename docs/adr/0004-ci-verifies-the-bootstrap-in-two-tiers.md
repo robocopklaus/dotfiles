@@ -14,7 +14,7 @@ This is the mechanism that makes the mode switch real. Reviewing at the desk and
 
 **Stripping the runner to approximate a fresh Mac.** Rejected. `macos-26` arrives with Homebrew, Command Line Tools and several runtimes preinstalled, and the image changes monthly; chasing it would make the runner the second system this ADR cut the Linux tier to avoid. Uninstalling only Homebrew was the narrower version and is also declined — installing Homebrew is the most widely exercised step in the whole bootstrap and the least plausible place for a rebuild to die.
 
-**A `--skip-gate` flag so CI can pass the preflight gate.** Rejected, as ADR 0003 rejected its sibling: a flag is a second truth that can be set wrongly. **Letting CI enter at P1 and never run the gate** was rejected for the opposite reason — the gate would become the only phase CI never exercises, and it is among the most likely to be wrong.
+**A `--skip-gate` flag so CI can pass the preflight gate.** Rejected, as ADR 0003 rejected its sibling: a flag is a second truth that can be set wrongly. **Letting CI enter at the Acquisition phase and never run the gate** was rejected for the opposite reason — the gate would become the only phase CI never exercises, and it is among the most likely to be wrong.
 
 **Deriving CI from the absence of `op`.** Rejected, though it reads like the natural extension of ADR 0003. A genuinely fresh Mac has no `op` either, and that machine must be refused; a signal that cannot tell the two apart would wave through exactly the case the gate exists for.
 

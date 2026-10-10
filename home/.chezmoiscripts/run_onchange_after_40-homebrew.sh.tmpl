@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phase: P4 — packages: Homebrew, formulae and casks
-# Requires: P3, Xcode Command Line Tools, administrator rights
+# Phase: Packages — Homebrew, formulae and casks
+# Requires: the Files phase, Xcode Command Line Tools, administrator rights
 
 set -euo pipefail
 
@@ -16,17 +16,17 @@ BREWFILE
 
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P4  packages · Homebrew'
+ui_header 'Packages · Homebrew'
 
-# P4 starts its own sudo keepalive. The gate already proved the privilege is available,
-# but each chezmoi script is a separate process, so a keepalive from P2 cannot be adopted
+# The Packages phase starts its own sudo keepalive. The gate already proved the privilege is available,
+# but each chezmoi script is a separate process, so a keepalive from the gate cannot be adopted
 # here — and cask installers prompt at unpredictable points during a run. Shared
 # with 41, which needs the same privilege for the same reason (ADR 0005).
 {{ template "lib/keepalive.sh" . }}
 
 # Homebrew itself, included at render time so the fetch is written once and linted at
-# every call site (ADR 0005). Normally a no-op by the time P4 runs: the gate acquires
-# Homebrew to install the trust chain. It stays here because P4 is the phase that
+# every call site (ADR 0005). Normally a no-op by the time the Packages phase runs: the gate acquires
+# Homebrew to install the trust chain. It stays here because the Packages phase is the phase that
 # owns the inventory, and a phase that cannot run alone is a phase with a hidden
 # precondition.
 {{ template "lib/homebrew-install.sh" . }}
@@ -61,7 +61,7 @@ bundle() {
 # reason-comment check reads the same shape.
 #
 # Homebrew itself and the formulae abort the run, because later phases depend on them:
-# P5 needs `mise`, P6 needs `dockutil`. `set -e` makes both fatal.
+# The Runtimes phase needs `mise`, the System settings phase needs `dockutil`. `set -e` makes both fatal.
 ui_step 'formulae' bundle "$(grep -E '^(tap|brew) ' <<<"$brewfile")"
 
 # Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
@@ -96,8 +96,8 @@ fi
 {{ if lookPath "op" }}
 # The work group, inlined the same way and piped to a second `brew bundle --file=-`.
 # It sits inside the *same* `op`-presence branch that renders the work identity, so
-# the client relationship is one condition rather than two that can disagree. By P4 the
-# gate has already refused every real Mac lacking `op` (P0 item 4), which leaves CI as the
+# the client relationship is one condition rather than two that can disagree. By the Packages phase the
+# gate has already refused every real Mac lacking `op`, which leaves CI as the
 # only renderer that omits the group.
 #
 # One invocation carries the whole file, casks included, where the base inventory splits

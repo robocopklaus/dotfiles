@@ -3,7 +3,8 @@
 # Data, not a script. chezmoi hashes a script's *content* and not its *effect*, so a
 # default changed in System Settings afterwards is invisible to every check this
 # repository has — unless the expected value is declared as something readable. Both the
-# P6 script and `drift` derive from this one table, and nowhere else (ADR 0002).
+# System settings phase's defaults script and `drift` derive from this one table, and
+# nowhere else (ADR 0002).
 #
 # Every entry is flat: domain, key, type, value. There is no nested-dictionary escape
 # hatch, and the one key that would have needed one was cut for exactly that reason

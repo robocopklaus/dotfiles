@@ -1,11 +1,11 @@
 #!/bin/bash
-# Phase: P4 — packages: the App Store entries
-# Requires: P4 (40-homebrew, for mas), root, an Apple ID signed in to the App Store
+# Phase: Packages — the App Store entries
+# Requires: the Packages phase (40-homebrew, for mas), root, an Apple ID signed in to the App Store
 
 set -euo pipefail
 
 # Separate from 40 because the precondition is: `mas install` needs root, and it installs
-# nothing unless the Apple ID is already signed in — one of the P0 items the gate cannot
+# nothing unless the Apple ID is already signed in — one of the preflight items the gate cannot
 # verify (ADR 0007). A precondition of its own is a script of its own.
 #
 # The Brewfile is inlined here at render time for the reason 40 states: the
@@ -19,7 +19,7 @@ BREWFILE
 
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P4  packages · App Store'
+ui_header 'Packages · App Store'
 
 # The keepalive, shared with 40 (ADR 0005). `mas install` is not prefixed with `sudo`
 # below and must not be: the App Store session belongs to the logged-in user, and mas

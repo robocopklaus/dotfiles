@@ -248,7 +248,7 @@ check "$(wc -l <"$machine/defaults" | tr -d ' ')" \
   'reads every declared default and no other'
 
 # The fixture above cannot falsify the code that produced it: invert the boolean branch
-# and every assertion in this file still passes, while the P6 script writes the opposite
+# and every assertion in this file still passes, while the System settings phase's script writes the opposite
 # of the declaration onto a real Mac. These three anchor the derivation to something
 # outside it. The entries are still read out of the rendered declaration rather than named
 # here, so they stay assertions about how a declared value becomes a string `defaults`

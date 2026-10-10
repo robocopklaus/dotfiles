@@ -1,5 +1,5 @@
 # The Dock declaration, rendered from `.chezmoidata/dock.toml` — the one
-# declaration the P6 layout script and `drift` both reconcile against (ADR 0009).
+# declaration the System settings phase's layout script and `drift` both reconcile against (ADR 0009).
 # Included at render time, so 61's `run_onchange_` hash moves whenever the declaration
 # does, and the check and the application stay one mechanism rather than two lists.
 

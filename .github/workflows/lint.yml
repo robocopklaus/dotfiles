@@ -105,7 +105,7 @@ jobs:
 
       # Homebrew moves packages between kinds: `azure-cli` left homebrew/core for
       # homebrew/cask, and the declaration as a formula surfaced only as a failed install
-      # on a bootstrap. The taps are read out of the inventories and trusted as P4 trusts
+      # on a bootstrap. The taps are read out of the inventories and trusted as the Packages phase trusts
       # them, so a tapped formula resolves here as it does there. The runner image does
       # not refresh Homebrew's package data on its own, and a check against the image's
       # copy would miss exactly the moves it is here for, so it is refreshed first.

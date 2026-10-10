@@ -1,15 +1,15 @@
 #!/bin/bash
-# Phase: P2 — gate
-# Requires: P1 (chezmoi binary and source clone)
+# Phase: Gate
+# Requires: the Acquisition phase (chezmoi binary and source clone)
 
 set -euo pipefail
 
-# Verifies every P0 precondition, and acquires the two of them it can: the run's
-# root privilege and the trust chain — Homebrew and the 1Password casks P3's templates
+# Verifies every preflight precondition, and acquires the two of them it can: the run's
+# root privilege and the trust chain — Homebrew and the 1Password casks the Files phase's templates
 # read through. Failures are reported together, each beside the remedy that fixes it.
 # Running before any file is applied means a refusal leaves $HOME completely untouched.
 #
-# Three P0 items are not verifiable at all — the GitHub key registration, the App Store
+# Three preflight items are not verifiable at all — the GitHub key registration, the App Store
 # sign-in and the Apple Account sign-in — so they are not here. An unverifiable item is a
 # line in the closing report, never a gate check and never a "have you signed in? [y/N]"
 # prompt.
@@ -17,13 +17,13 @@ set -euo pipefail
 # The Apple Account joined them by evidence, not by argument. The gate read the
 # `MobileMeAccounts` domain, which a freshly set up machine does not have even when it is
 # signed in: that domain is written when iCloud first stores something in it, not at
-# sign-in. So it refused a correctly prepared machine, and refused it for nothing — P4's
+# sign-in. So it refused a correctly prepared machine, and refused it for nothing — the Packages phase's
 # `mas` phase is tolerant of a missing account on its own, and the closing report already
 # asks for the sign-in the phase needs.
 
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P2  gate'
+ui_header 'Gate'
 
 refused=0
 reported=0
@@ -68,7 +68,7 @@ settle() {
 # still reported in one pass with each other — it is only the trust chain that had to
 # move behind them, because installing it is what needs them.
 
-# Administrator rights, first and once: P4 needs root, and this is the run's single
+# Administrator rights, first and once: the Packages phase needs root, and this is the run's single
 # interactive moment. Acquiring the privilege here means no later phase discovers
 # its absence halfway through a bundle. Never folded, so the password prompt is seen.
 ui_note 'Checking administrator rights — macOS may ask for your password.'
@@ -117,8 +117,8 @@ settle
 
 # The trust chain: Homebrew, and through it the two 1Password casks. Acquired here rather
 # than asked of you, because a command you would have typed by hand is a command this run
-# can type for you — and because P4, which installs everything else, comes after the P3
-# that already needs `op`.
+# can type for you — and because the Packages phase, which installs everything else, comes after
+# the Files phase that already needs `op`.
 #
 # Nothing below can make the run unattended: signing in to 1Password and turning on its
 # two developer toggles are GUI work, so a fresh machine still stops here once. What this
@@ -174,12 +174,12 @@ fi
 # the account is handed over by the app.
 #
 # Not `op whoami`, which is the tempting one and asks a different question: whether a
-# session is open. The run does not need one here — it is created at first use, when P3
+# session is open. The run does not need one here — it is created at first use, when the Files phase
 # renders the work identity and the app authenticates — so a machine with the integration
 # on and the vault simply not unlocked yet answers `account is not signed in`. Gating on
 # that refuses a correct machine.
 #
-# This is checked rather than left to P3 because of what P3 does without it. chezmoi calls
+# This is checked rather than left to the Files phase because of what the Files phase does without it. chezmoi calls
 # `op signin`, and `op` with no account does not fail — it *asks*, for a sign-in address,
 # an email, a secret key and a password, in the middle of a run that has exactly
 # one interactive moment. Then it times out. A precondition whose absence turns the run
@@ -223,7 +223,7 @@ else
   fi
 fi
 
-# The 1Password SSH agent, which P3's ~/.ssh/config is written against and P7's remote
+# The 1Password SSH agent, which the Files phase's ~/.ssh/config is written against and the Integrations phase's remote
 # rewrite waits for. This is the one the acquisition can never satisfy: it is a toggle
 # behind an unlock.
 if [ -S "$agent_socket" ]; then

@@ -1,11 +1,11 @@
 #!/bin/bash
-# The P6 Dock phase finds `dockutil` on a machine whose shell has never loaded Homebrew.
+# The System settings phase's Dock script finds `dockutil` on a machine whose shell has never loaded Homebrew.
 #
 # `dockutil` is a formula, so it lives under Homebrew's prefix, which is on PATH only once
 # something has run `brew shellenv`. On a routine apply the user's login shell already has,
 # so a phase that forgets to load it works there and nowhere else: it surfaced on a
-# bootstrap, as `dockutil: command not found` and `exit status 127` after P4 had installed
-# it and P5 — which does load Homebrew — had just used it.
+# bootstrap, as `dockutil: command not found` and `exit status 127` after the Packages phase had installed
+# it and the Runtimes phase — which does load Homebrew — had just used it.
 #
 # So the oracle is not "the script ran". It is that the phase's preamble, run under a PATH
 # with no Homebrew on it, leaves Homebrew's bin directory on PATH before the first Dock

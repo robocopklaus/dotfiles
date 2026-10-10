@@ -5,8 +5,8 @@
 # the two steps, or `dockutil`'s changes would need a second one anyway.
 #
 # So 60 records its change here and 61 performs the single `killall Dock` at the end of
-# P6. This file carries the one fact the two must agree on and nothing else; a pair of
-# wrapper functions around `touch` and `killall` would be a framework for two call sites.
+# the System settings phase. This file carries the one fact the two must agree on and
+# nothing else; a pair of wrapper functions around `touch` and `killall` would be a framework for two call sites.
 #
 # The request outlives the process rather than the run, which is the honest cost of the
 # two steps being two `run_onchange_` scripts: if 60 runs in an apply where 61's content

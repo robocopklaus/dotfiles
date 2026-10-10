@@ -1,11 +1,11 @@
 #!/bin/bash
-# Phase: P5 — runtimes: mise install, from the managed declaration
-# Requires: P3 (~/.config/mise/config.toml), P4 (the mise formula)
+# Phase: Runtimes — mise install, from the managed declaration
+# Requires: the Files phase (~/.config/mise/config.toml), the Packages phase (the mise formula)
 
 set -euo pipefail
 
 # The runtimes are declared once, in the managed `~/.config/mise/config.toml`,
-# which P3 wrote before this phase runs. `mise` reads that file itself, so this script
+# which the Files phase wrote before this phase runs. `mise` reads that file itself, so this script
 # passes it no path and holds no second copy of what it says.
 #
 # The hash below is what binds this script to that file: `run_onchange_` skips an
@@ -21,9 +21,9 @@ set -euo pipefail
 
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P5  runtimes'
+ui_header 'Runtimes'
 
-# P5 aborts on failure and needs no `if` to do it: `set -e` is the whole mechanism.
+# The Runtimes phase aborts on failure and needs no `if` to do it: `set -e` is the whole mechanism.
 # The collect-and-report shape 40 and 41 carry is for a phase installing many independent
 # things; this is one command over one declaration.
 ui_step 'runtimes' mise install

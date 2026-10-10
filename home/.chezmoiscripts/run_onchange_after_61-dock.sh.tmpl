@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phase: P6 — system configuration: the Dock's layout, reconciled against the declaration
-# Requires: P4 (the applications the tiles point at, and dockutil), a non-root user
+# Phase: System settings — the Dock's layout, reconciled against the declaration
+# Requires: the Packages phase (the applications the tiles point at, and dockutil), a non-root user
 
 set -euo pipefail
 
@@ -18,7 +18,7 @@ set -euo pipefail
 
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P6  system configuration · Dock'
+ui_header 'System settings · Dock'
 
 # Reconciled, not rebuilt (ADR 0009): read the current tile sequence, compare it to the
 # expected one, and go near `dockutil` only on mismatch. On a converged machine this
@@ -69,7 +69,7 @@ if [ "$current" != "$expected" ]; then
   rebuilt='yes'
 fi
 
-# The one restart, at the end of P6 and after the layout is written, covering both
+# The one restart, at the end of the System settings phase and after the layout is written, covering both
 # managers of the domain: this step and the defaults table before it. Every
 # `dockutil` call above passes `--no-restart` for exactly this reason.
 if [ "$rebuilt" = 'yes' ] || [ -e "$dock_restart_request" ]; then

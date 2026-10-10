@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phase: P7 — integrations: the chezmoi source remote, rewritten HTTPS → SSH
-# Requires: P2 (the 1Password SSH agent), Xcode Command Line Tools (git)
+# Phase: Integrations — the chezmoi source remote, rewritten HTTPS → SSH
+# Requires: the gate (the 1Password SSH agent), Xcode Command Line Tools (git)
 
 set -euo pipefail
 
@@ -25,7 +25,7 @@ esac
 # The agent is the whole reason for the rewrite, so its absence is the reason not to
 # perform it: a machine pointed at a remote it cannot authenticate to is worse off than
 # one still on HTTPS. Silently, and that is not a swallowed error — the gate refuses every
-# real Mac whose agent socket is missing (the gate's P0 item 5), and only under CI does it
+# real Mac whose agent socket is missing (the gate's 1Password SSH agent check), and only under CI does it
 # report the item instead. CI is therefore the one machine that reaches this line, on
 # every run.
 {{ template "lib/onepassword-paths.sh" . }}
@@ -39,6 +39,6 @@ path=${remote#https://github.com/}
 path=${path%.git}
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P7  integrations'
+ui_header 'Integrations'
 ui_step "source remote → git@github.com:$path.git" \
   git -C "$CHEZMOI_SOURCE_DIR" remote set-url origin "git@github.com:$path.git"
