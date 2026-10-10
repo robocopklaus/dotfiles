@@ -39,6 +39,29 @@ key = "autohide"
 type = "bool"
 value = "false"
 
+# Spaces keep the order they were given. Each Space has a fixed purpose and is jumped to
+# by number, which an order rearranged by recent use would silently break.
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "mru-spaces"
+type = "bool"
+value = "false"
+
+# Window tiling. Amethyst tiles automatically, and macOS tiling a window dragged to an
+# edge or to the top competes with it for the same gesture. Both keys, because the
+# side edges and the top edge are switched separately.
+[[macosDefaults]]
+domain = "com.apple.WindowManager"
+key = "EnableTilingByEdgeDrag"
+type = "bool"
+value = "false"
+
+[[macosDefaults]]
+domain = "com.apple.WindowManager"
+key = "EnableTopTilingByEdgeDrag"
+type = "bool"
+value = "false"
+
 # Finder. `ShowExternalHardDrivesOnDesktop` and `ShowRecentTags` were cut as keys whose
 # absence was never consciously noticed, and
 # `DesktopViewSettings:IconViewSettings:arrangeBy` because it is a path into a nested

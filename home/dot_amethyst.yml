@@ -1,0 +1,15 @@
+# Amethyst reads this at launch; restart it to pick up a change.
+#
+# Only what differs from Amethyst's defaults. The modifiers are left unset on purpose:
+# they are Amethyst's own (option+shift, option+shift+control), clear of
+# InstantSpaceSwitcher's control+number and control+arrow, and restating a default
+# value here is what Amethyst issue 1419 says can stop a binding from working.
+
+layouts:
+  - tall
+  - fullscreen
+
+# Applications that keep floating, by bundle identifier. An entry is added when tiling an
+# application gets in the way, not ahead of it.
+floating:
+  - com.apple.systempreferences # System Settings: fixed-width panes, never meant to tile

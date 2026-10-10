@@ -71,10 +71,20 @@ ui_note 'Re-run the bootstrap if an App Store app is missing above.'
 
 printf '\nRestores itself once you sign in\n'
 printf '  %s\n' \
-  '1Password, Chrome, VS Code, Raycast, Slack, ChatGPT, Mimestream,' \
-  'Clockify, WhatsApp, GCal, Docker Desktop' \
+  '1Password, Chrome, VS Code, Slack, ChatGPT, Mimestream, Clockify,' \
+  'WhatsApp, GCal, Docker Desktop' \
   'Agent skills and plugins, via the claude.ai account'
 ui_note 'Allow 15 minutes before an empty plugin list means anything.'
+
+printf '\nAllow on first launch\n'
+# Neither does anything without Accessibility, and InstantSpaceSwitcher is unsigned, so
+# Gatekeeper holds its first launch until it is let through. The privacy database
+# behind both is unreadable without Full Disk Access, so the run cannot check either.
+# The hotkeys are set by hand rather than declared: the app keeps each one as JSON inside
+# a data value, and a `data` type in the defaults table would serve this one app alone.
+printf '  %-22s%s\n' 'InstantSpaceSwitcher' 'Privacy & Security → Open Anyway, then Accessibility' \
+  '' 'Settings → hotkeys Ctrl+1…4 and Ctrl+←/→'
+printf '  %-22s%s\n' 'Amethyst' 'Accessibility'
 
 printf '\nFrom 1Password, when the tool first asks\n'
 # The tilde is text for a human, not a path for the shell to expand.

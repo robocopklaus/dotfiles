@@ -65,6 +65,9 @@ restart_if_changed() {
 }
 
 restart_if_changed com.apple.finder Finder
+# Whether WindowManager re-reads its tiling keys while running is undocumented, so it is
+# restarted rather than trusted to; launchd brings it straight back.
+restart_if_changed com.apple.WindowManager WindowManager
 
 # The Dock is the one domain this script does not restart itself. It has two managers —
 # this table and 61's layout — and restarting it here would be both a restart too early,
