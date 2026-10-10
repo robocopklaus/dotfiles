@@ -1,3 +1,5 @@
+tap "jurplel/tap"  # Backs InstantSpaceSwitcher below, which homebrew/cask does not carry
+
 brew "chezmoi"             # Drives the entire bootstrap
 brew "git"                 # Version control
 brew "gh"                  # GitHub CLI — issues and this repository's map live there
@@ -19,7 +21,6 @@ cask "visual-studio-code"        # Editor
 cask "ghostty"                   # Terminal
 cask "google-chrome"             # Browser
 cask "slack"                     # Messaging
-cask "raycast"                   # Launcher
 cask "mimestream"                # Mail
 cask "obsidian"                  # Notes
 cask "clockify"                  # Time tracking
@@ -27,6 +28,8 @@ cask "chatgpt"                   # Assistant
 cask "whatsapp"                  # Messaging
 cask "codex"                     # Coding agent
 cask "docker-desktop"            # Containers
+cask "amethyst"                  # Auto-tiles windows on native Spaces; background app, so no launch record by design
+cask "instant-space-switcher"    # Switches Spaces without the animation; unsigned, background app, so no launch record by design
 cask "finicky"                   # Routes URLs between browsers; background app, so no launch record by design
 cask "font-meslo-lg-nerd-font"   # Bootstrap dependency: the glyphs oh-my-posh renders
 

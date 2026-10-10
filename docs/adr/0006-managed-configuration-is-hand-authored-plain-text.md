@@ -21,6 +21,7 @@ Paths are relative to `home/`. The reason belongs here rather than in the file: 
 | Path | Reason |
 | --- | --- |
 | `dot_config/ghostty/config` | Terminal; hand-written |
+| `dot_amethyst.yml` | Tiling layouts; hand-written |
 | `dot_config/finicky/finicky.ts` | URL routing rules; all human |
 | `dot_config/oh-my-posh/config.omp.json` | Prompt definition |
 | `dot_config/mise/config.toml` | Runtime pins |

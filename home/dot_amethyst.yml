@@ -1,0 +1,10 @@
+# Amethyst reads this at launch; restart it to pick up a change.
+#
+# Only what differs from Amethyst's defaults. The modifiers are left unset on purpose:
+# they are Amethyst's own (option+shift, option+shift+control), clear of
+# InstantSpaceSwitcher's control+option+command, and restating a default value here is
+# what Amethyst issue 1419 says can stop a binding from working.
+
+layouts:
+  - tall
+  - fullscreen
