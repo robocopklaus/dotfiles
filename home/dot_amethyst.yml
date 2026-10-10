@@ -1,4 +1,6 @@
-# Amethyst reads this at launch; restart it to pick up a change.
+# Amethyst reads this at launch; restart it to pick up a change. Settings changed in
+# Amethyst's preferences window are overwritten by this file at the next launch for
+# every key set here; change them here.
 #
 # Only what differs from Amethyst's defaults. The modifiers are left unset on purpose:
 # they are Amethyst's own (option+shift, option+shift+control), clear of
@@ -13,6 +15,7 @@ layouts:
 # application gets in the way, not ahead of it.
 floating:
   - com.apple.systempreferences # System Settings: fixed-width panes, never meant to tile
+  - com.1password.1password # 1Password: opened briefly to look something up; tiling it reshuffles the working windows
 
 # Focus follows the pointer, and the pointer follows a focus moved from the keyboard.
 # One without the other is a trap: focus moved by key leaves the pointer over the old
