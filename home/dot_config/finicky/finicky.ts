@@ -28,6 +28,7 @@ export default {
   defaultBrowser: BROWSERS.SAFARI,
   options: {
     checkForUpdates: false,
+    hideIcon: true,
   },
   handlers: [routeToChrome],
 } satisfies FinickyConfig;
