@@ -20,6 +20,7 @@ cask "claude"                    # Primary coding agent — the desktop applicat
 cask "visual-studio-code"        # Editor
 cask "ghostty"                   # Terminal
 cask "google-chrome"             # Browser
+cask "zen"                       # Browser — a third, alongside Safari and Chrome
 cask "slack"                     # Messaging
 cask "mimestream"                # Mail
 cask "obsidian"                  # Notes
