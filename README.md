@@ -84,7 +84,7 @@ measured between two machines — the repository is the shared reference.
 
 ## Deeper
 
-The glossary is in [CONTEXT.md](CONTEXT.md), the structural decisions are under
+The glossary is in [GLOSSARY.md](GLOSSARY.md), the structural decisions are under
 [docs/adr/](docs/adr/), the review that happens before a wipe is in
 [docs/annual-review.md](docs/annual-review.md), and what the machine holds is declared by
 the [Brewfile](Brewfile) and the files under `home/`.
