@@ -8,3 +8,8 @@
 layouts:
   - tall
   - fullscreen
+
+# Applications that keep floating, by bundle identifier. An entry is added when tiling an
+# application gets in the way, not ahead of it.
+floating:
+  - com.apple.systempreferences # System Settings: fixed-width panes, never meant to tile
