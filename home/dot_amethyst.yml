@@ -13,3 +13,9 @@ layouts:
 # application gets in the way, not ahead of it.
 floating:
   - com.apple.systempreferences # System Settings: fixed-width panes, never meant to tile
+
+# Focus follows the pointer, and the pointer follows a focus moved from the keyboard.
+# One without the other is a trap: focus moved by key leaves the pointer over the old
+# window, and the next nudge of the mouse takes focus back.
+focus-follows-mouse: true
+mouse-follows-focus: true
