@@ -29,7 +29,7 @@ ui_header 'The closing report'
 #
 # The managed `.zshrc` puts `~/.local/bin` first on PATH, but this script runs in
 # chezmoi's environment rather than a login shell, so that declaration has not been read
-# here. Seeding it is what lets the guard below see a `drift` that P3 did write.
+# here. Seeding it is what lets the guard below see a `drift` that the Files phase did write.
 export PATH="$HOME/.local/bin:$PATH"
 
 printf '\n'

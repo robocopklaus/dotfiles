@@ -67,7 +67,7 @@ says "$out" 'shown' 'chezmoi apply --verbose unfolds it'
 printf '\nUnfolded, without a terminal\n'
 # shellcheck disable=SC1090
 out=$(source "$ui" && {
-  ui_header 'P0  a phase'
+  ui_header 'Gate'
   ui_step 'a step that succeeds' echo shown
   ui_step 'a step that fails' sh -c 'echo also shown; exit 1'
   ui_ok 'a check that passed'

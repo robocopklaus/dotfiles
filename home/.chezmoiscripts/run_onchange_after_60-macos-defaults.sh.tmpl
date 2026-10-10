@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phase: P6 — system configuration: the managed macOS defaults, from the declaration
-# Requires: P4 (the applications whose domains these are), a non-root user
+# Phase: System settings — the managed macOS defaults, from the declaration
+# Requires: the Packages phase (the applications whose domains these are), a non-root user
 
 set -euo pipefail
 
@@ -14,7 +14,7 @@ set -euo pipefail
 
 {{ template "lib/ui.sh" . }}
 
-ui_header 'P6  system configuration · macOS defaults'
+ui_header 'System settings · macOS defaults'
 
 # They are applied unconditionally: there is no flag to forget, and no
 # `CHEZMOI_APPLY_MACOS_DEFAULTS` to leave off. A gate that defaults to off means a
@@ -72,7 +72,7 @@ restart_if_changed com.apple.WindowManager WindowManager
 # The Dock is the one domain this script does not restart itself. It has two managers —
 # this table and 61's layout — and restarting it here would be both a restart too early,
 # before the layout is written, and the first of two (ADR 0009). So the change is
-# recorded and 61 performs the single `killall Dock` at the end of P6.
+# recorded and 61 performs the single `killall Dock` at the end of the System settings phase.
 if domain_changed com.apple.dock; then
   : >"$dock_restart_request"
 fi

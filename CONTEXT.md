@@ -29,10 +29,11 @@ the source this machine reads. `git pull` moves only the first.
 _Avoid_: pull, sync
 
 **Phase**:
-One step of the bootstrap, cut by a precondition and never by numeric convention. Its
-number records an order that a precondition justifies; the number is never itself the
-justification.
-_Avoid_: stage, step
+One step of the bootstrap, cut by a precondition and never by numeric convention. A phase
+is named by what it does — Preflight, Acquisition, Gate, Files, Packages, Runtimes,
+System settings, Integrations — and in prose always with the word: "the Packages phase".
+Its place in the order is a precondition's consequence, never a name.
+_Avoid_: stage, step, P0–P7 and any other phase number
 
 **Preflight**:
 The preconditions of the run. Most are work done by hand on the fresh machine before the
@@ -95,7 +96,7 @@ Everything else on the machine is a decision that has not been made yet.
 
 **CLI integration**:
 The 1Password setting that hands the account to `op`. Without it `op` holds no account at
-all, and asks for one — which is why it is a gate item rather than something P3 discovers.
+all, and asks for one — which is why it is a gate item rather than something the Files phase discovers.
 
 **App data access**:
 Whether the process that starts the run may read the 1Password app's own data. The CLI

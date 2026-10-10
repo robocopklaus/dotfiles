@@ -30,4 +30,4 @@ Every phase draws itself, through one library included at render time, `lib/ui.s
 
 **CI never takes the folded path**, because the runner has no terminal. `tests/ui.sh` drives the library under a pseudo-terminal so that it is exercised at all.
 
-**chezmoi's own verbose output is accepted.** Under `--verbose` it also prints each script it runs, P4's inlined Brewfile included.
+**chezmoi's own verbose output is accepted.** Under `--verbose` it also prints each script it runs, the Packages phase's inlined Brewfile included.

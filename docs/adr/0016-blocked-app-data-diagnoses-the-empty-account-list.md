@@ -32,7 +32,7 @@ repository was written on reads the file without it.
 **Why the remedy is typed rather than declared.** `op` is invoked in two places — this
 check, and `onepasswordRead` in `lib/work-identity.json`. The second is rendered by
 chezmoi *itself*, so the variable has to be in chezmoi's own environment. The gate is a
-child process and cannot put it there, and `dot_zprofile.tmpl` is written in P3, after
+child process and cannot put it there, and `dot_zprofile.tmpl` is written in the Files phase, after
 the gate: on the run that needs it, the file does not exist yet. There is no arrangement
 of this repository that sets the variable for the run that is failing. Naming it in a
 remedy is not the lesser option; it is the only one.

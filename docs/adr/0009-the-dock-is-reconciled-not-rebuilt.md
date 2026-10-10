@@ -1,6 +1,6 @@
 # The Dock is reconciled, not rebuilt
 
-The Dock's layout is managed. It is declared as **ordered categories of applications** in `home/.chezmoidata/dock.toml`, and `run_onchange_after_61-dock.sh.tmpl` brings the machine to that declaration in P6, after the applications exist.
+The Dock's layout is managed. It is declared as **ordered categories of applications** in `home/.chezmoidata/dock.toml`, and `run_onchange_after_61-dock.sh.tmpl` brings the machine to that declaration in the System settings phase, after the applications exist.
 
 The script **reconciles**: it reads the Dock's current tile sequence, compares it to the expected one, and rebuilds through `dockutil` only when they differ. On a converged machine it is a silent no-op — no clear, no rebuild, no `killall`. The expected sequence is the declaration **rendered**: apps that are not installed drop out, and a small spacer is emitted after each category that still has a member.
 

@@ -38,17 +38,17 @@ file.
 
 Phases are cut by precondition, never by numeric convention.
 
-- **P0 — preflight.** The part no script can do: the sign-ins and the key registration.
-- **P1 — acquisition.** The chezmoi binary, and this repository cloned.
-- **P2 — the gate.** Acquires administrator rights and the trust chain, then verifies
+- **Preflight.** The part no script can do: the sign-ins and the key registration.
+- **Acquisition.** The chezmoi binary, and this repository cloned.
+- **Gate.** Acquires administrator rights and the trust chain, then verifies
   every precondition. Nothing in `$HOME` is touched until it passes.
-- **P3 — files.** The managed configuration, applied before the software it configures
+- **Files.** The managed configuration, applied before the software it configures
   exists.
-- **P4 — packages.** Homebrew formulae and casks, the App Store entries, and the one
+- **Packages.** Homebrew formulae and casks, the App Store entries, and the one
   tool that has neither.
-- **P5 — runtimes.** The pinned language runtimes.
-- **P6 — system configuration.** macOS defaults and the Dock.
-- **P7 — integrations.** The wiring that only works once the rest is there.
+- **Runtimes.** The pinned language runtimes.
+- **System settings.** macOS defaults and the Dock.
+- **Integrations.** The wiring that only works once the rest is there.
 - **The closing report.** What is still missing, re-derived by checking the machine
   rather than by replaying what earlier phases recorded.
 

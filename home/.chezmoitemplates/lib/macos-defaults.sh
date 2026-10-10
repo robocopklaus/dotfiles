@@ -1,6 +1,6 @@
 # The managed defaults, rendered from `.chezmoidata/macos-defaults.toml` — the
-# one declaration the P6 script and `drift` both derive from (ADR 0002). Included at
-# render time, so the P6 script's `run_onchange_` hash moves whenever the table does.
+# one declaration System settings phase's defaults script and `drift` both derive from (ADR 0002). Included at
+# render time, so the defaults script's `run_onchange_` hash moves whenever the table does.
 #
 # One tab-separated line per entry: domain, key, type, expected value, and the scope —
 # `currentHost` for the one key macOS keeps per machine, `any` for every other. The scope

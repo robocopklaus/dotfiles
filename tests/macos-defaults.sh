@@ -1,5 +1,5 @@
 #!/bin/bash
-# The P6 defaults phase's write spelling, against a `defaults` stub that is strict about
+# The System settings phase's defaults script and its write spelling, against a `defaults` stub that is strict about
 # it the way the real one is.
 #
 # `defaults write … -bool` accepts `true`, `false`, `yes` and `no`, and rejects `1` and
@@ -37,7 +37,7 @@ shift || true
 
 usage() {
   # The real one prints its usage to stdout and exits 255. Both matter: the exit status is
-  # what killed the phase, and the stdout is what the user saw instead of a P6 line.
+  # what killed the phase, and the stdout is what the user saw instead of a System settings line.
   echo "Command line interface to a user's defaults."
   echo '  -bool[ean] (true | false | yes | no)'
   exit 255

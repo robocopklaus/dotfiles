@@ -7,7 +7,7 @@ set -euo pipefail
 # Drift is never measured Mac-to-Mac. Everything below compares this machine against the
 # declarations carried in this file, which are the repository's (ADR 0002).
 #
-# The Brewfile is inlined at render time, as the P4 scripts inline it — but for a
+# The Brewfile is inlined at render time, as the Packages phase's scripts inline it — but for a
 # different reason. There it is `run_onchange_`'s content hash; here it is this command's:
 # the one command whose whole value is being run on a whim must not require the source
 # tree to be on disk, let alone a `cd` into it. The price is that this command ages with
@@ -16,7 +16,7 @@ set -euo pipefail
 # what `chezmoi update` is the everyday verb for, and why the annual review runs it first.
 #
 # The work group is appended under the same
-# `op` guard the P4 script inlines it behind, and this file is rendered by chezmoi too —
+# `op` guard the Packages phase's script inlines it behind, and this file is rendered by chezmoi too —
 # so the check and the applying script evaluate one condition at one moment. That is why
 # no special case for the group is written anywhere below: on a company Mac the five are
 # declared and installed, on CI they are neither, and neither machine reports them under
@@ -32,13 +32,13 @@ BREWFILE
 # shell, which already has brew on PATH, and from the tail of a bootstrap, which does not.
 {{ template "lib/homebrew.sh" . }}
 
-# The managed defaults, from the declaration P6 applies — the same table, read
+# The managed defaults, from the declaration the System settings phase applies — the same table, read
 # here rather than copied (ADR 0002). A second list of expected values beside the script
 # that writes them would guarantee drift, which is an unusually poor property for a drift
 # detector.
 {{ template "lib/macos-defaults.sh" . }}
 
-# The Dock's layout, from the declaration P6 reconciles against — the same comparison the
+# The Dock's layout, from the declaration the System settings phase reconciles against — the same comparison the
 # reconcile performs, so the check and the application are one mechanism (ADR 0009).
 {{ template "lib/dock.sh" . }}
 
@@ -50,7 +50,7 @@ diverged=()
 # the one failure a drift detector must not do quietly.
 incomplete=()
 
-# Declared, read from the entry shape the Brewfile fixes — the same shape the P4 scripts
+# Declared, read from the entry shape the Brewfile fixes — the same shape the Packages phase's scripts
 # and the CI reason-comment check read.
 declared_taps=$(sed -n 's/^tap "\([^"]*\)".*/\1/p' <<<"$brewfile")
 declared_formulae=$(sed -n 's/^brew "\([^"]*\)".*/\1/p' <<<"$brewfile")

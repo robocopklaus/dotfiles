@@ -1,6 +1,6 @@
 # Homebrew, acquired if it is absent and put on the calling script's PATH either way.
 # Two call sites want this, in different phases — the gate, which acquires the trust
-# chain before it verifies it, and P4, which acquires everything else — so the fetch is
+# chain before it verifies it, and the Packages phase, which acquires everything else — so the fetch is
 # written once here rather than twice (ADR 0005). It draws its line with `lib/ui.sh`,
 # which every caller has already included.
 {{ template "lib/homebrew.sh" . }}
