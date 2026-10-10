@@ -18,9 +18,9 @@
 # so the string the machine is given and the string `drift` compares against are produced
 # by the same line.
 
-# The Dock. `autohide-delay` and `autohide-time-modifier` were cut, dead once autohide is
-# off. Magnification was cut once as cosmetic and brought back: the machine still held
-# it, so it was missed rather than unnoticed.
+# The Dock. `autohide-time-modifier` was cut, dead once autohide is off. Magnification was
+# cut once as cosmetic and brought back: the machine still held it, so it was missed
+# rather than unnoticed.
 # `autohide` is declared `false` because that is what the live machine held — the prior
 # declaration was the stale half, not the machine.
 [[macosDefaults]]
@@ -52,6 +52,14 @@ domain = "com.apple.dock"
 key = "autohide"
 type = "bool"
 value = "false"
+
+# Dormant while autohide is off, and declared anyway: it was asked for knowingly, so that
+# autohide switched on by hand shows the Dock without the default pause.
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "autohide-delay"
+type = "float"
+value = "0"
 
 # Spaces keep the order they were given. Each Space has a fixed purpose and is jumped to
 # by number, which an order rearranged by recent use would silently break.
