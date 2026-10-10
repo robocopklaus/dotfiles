@@ -28,7 +28,7 @@ Paths are relative to `home/`. The reason belongs here rather than in the file: 
 | `dot_config/ccstatusline/settings.json` | Statusline definition |
 | `dot_gitconfig`, `dot_gitignore` | Global version-control behaviour and the `includeIf` set that selects an identity; templated, because the client-issued half of that set is guarded (ADR 0011) |
 | `dot_config/git/allowed_signers`, `config-work` | Signing and the client-issued identity; templated (ADR 0003) |
-| `dot_config/git/config-personal`, `config-company` | The two cleartext identities, each included by remote (ADR 0011) |
+| `dot_config/git/config-personal` | The cleartext identity, included for every github.com remote (ADR 0018) |
 | `dot_claude/settings.json` | Permissions and hooks — the dominance clause above is what admits it |
 | `dot_mcp.json` | Fully hand-authored |
 | `dot_editorconfig` | Editor defaults |

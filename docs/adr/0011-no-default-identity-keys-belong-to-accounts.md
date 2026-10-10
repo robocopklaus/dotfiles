@@ -1,5 +1,7 @@
 # There is no default identity; keys belong to accounts, addresses to engagements
 
+_Partly superseded by ADR 0018: on github.com the address follows the account, and the company identity is gone. The refusal stands._
+
 Three identities commit from this machine, not two: the **personal** one, the **company** one (21st digital, under which client work on github.com is done), and the **client-issued** one, whose account, hosts and key belong to a client rather than to the person or the company.
 
 They are selected by two different rules, because two different things are being decided.

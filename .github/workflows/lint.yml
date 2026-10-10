@@ -89,8 +89,7 @@ jobs:
           "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
             < home/dot_gitconfig.tmpl > "$RUNNER_TEMP/rendered-bin/gitconfig"
           tests/identity.sh "$RUNNER_TEMP/rendered-bin/gitconfig" \
-            home/dot_config/git/config-personal \
-            home/dot_config/git/config-company
+            home/dot_config/git/config-personal
 
       # Presence only — what the reason says is never judged, because a check that
       # graded it would be satisfied by "# tool" and would have to be argued with.
