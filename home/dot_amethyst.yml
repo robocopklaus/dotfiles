@@ -11,6 +11,10 @@ layouts:
   - tall
   - fullscreen
 
+# Each space keeps the layout it had across a restart. macOS reopening the windows puts
+# the applications back on their spaces; the window order within a space is not restored.
+restore-layouts-on-launch: true
+
 # Applications that keep floating, by bundle identifier. An entry is added when tiling an
 # application gets in the way, not ahead of it.
 floating:
