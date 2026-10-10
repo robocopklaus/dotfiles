@@ -150,17 +150,16 @@ _Avoid_: doctor, diff, divergence
 
 **Identity**:
 The bundle a commit is made under: a name, an address, a signing key, and the account that
-verifies it. Two identities may share one key while keeping separate addresses — the key
-belongs to the account, the address belongs to the engagement.
+verifies it. One identity per account: the key belongs to the account, and so does the
+address.
 _Avoid_: profile, persona, account
 
 **Personal identity**:
-The identity for this person's own work. Public on GitHub, and therefore kept in cleartext
-in this repository.
-
-**Company identity**:
-The identity for 21st digital's work on github.com. Shares the personal identity's account
-and key; only the address differs.
+The identity of this person's own github.com account, robocopklaus. Every commit on
+github.com is made under it, whoever the work is for — this person, 21st digital, or a
+client whose organisation the account is invited into. Public on GitHub, and therefore kept
+in cleartext in this repository.
+_Avoid_: company identity
 
 **Work identity**:
 The client-issued identity, whose account and hosts belong to a client. The word *work* is

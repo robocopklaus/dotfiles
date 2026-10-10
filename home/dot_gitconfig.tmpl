@@ -39,8 +39,7 @@
 # `user.email` and no `user.signingkey` here on purpose: with `useConfigOnly` set, a
 # repository that no `includeIf` below matches refuses to commit rather than falling back
 # to a plausible wrong answer (ADR 0011). Every default is wrong somewhere and wrong
-# silently — a personal default signs paid work with a private address, a company default
-# writes an employer into a repository that outlives the employment.
+# silently. On github.com the account settles it (ADR 0018); everywhere else nothing does.
 [user]
 	name = Fabian Pahl
 	useConfigOnly = true
@@ -58,7 +57,7 @@
 [tag]
 	gpgSign = true
 
-# The three identities (ADR 0011), each switched on by the remote a repository points
+# The two identities (ADR 0011, ADR 0018), each switched on by the remote a repository points
 # at rather than by the directory it sits in — a directory convention describes where files
 # were put, and breaks the first time a repository is cloned somewhere else.
 #
@@ -68,16 +67,16 @@
 # to do with the repository. Only [user] is overridden; everything above is inherited.
 # Requires git >= 2.36 (hasconfig).
 #
+# Every owner on github.com is the personal identity, because every one of them is reached
+# through the one github.com account (ADR 0018) — so no organisation, the company's or a
+# client's, is named here.
+#
 # The client-issued identity's hosts come from the 1Password item, which is why this file
 # is templated: the hosts leak exactly what the file they include does, so they are
 # rendered under the same guard and are simply absent on a machine without `op`.
 {{- $identities := list
       (dict "path" "~/.config/git/config-personal"
-            "matches" (list (dict "host" "github.com" "owner" "robocopklaus"))) -}}
-{{- $identities = append $identities
-      (dict "path" "~/.config/git/config-company"
-            "matches" (list (dict "host" "github.com" "owner" "21stdigital")
-                            (dict "host" "github.com" "owner" "21st-digital"))) -}}
+            "matches" (list (dict "host" "github.com" "owner" "*"))) -}}
 {{- if lookPath "op" -}}
 {{-   $work := fromJson (includeTemplate "lib/work-identity.json" .) -}}
 {{-   $matches := list -}}
