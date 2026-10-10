@@ -59,7 +59,7 @@ case $verb in
           *) usage ;;
         esac
         ;;
-      -int | -string) printf '%s\n' "$value" >"$slot" ;;
+      -int | -float | -string) printf '%s\n' "$value" >"$slot" ;;
       *) usage ;;
     esac
     printf 'WROTE %s %s %s %s %s\n' "$scope" "$domain" "$key" "$flag" "$value" >>"$STUB_STORE/.log"

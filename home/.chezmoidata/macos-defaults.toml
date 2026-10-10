@@ -18,8 +18,9 @@
 # so the string the machine is given and the string `drift` compares against are produced
 # by the same line.
 
-# The Dock. `magnification`, `largesize`, `autohide-delay` and `autohide-time-modifier`
-# were cut: the first two are cosmetic, the last two dead once autohide is off.
+# The Dock. `autohide-time-modifier` was cut, dead once autohide is off. Magnification was
+# cut once as cosmetic and brought back: the machine still held it, so it was missed
+# rather than unnoticed.
 # `autohide` is declared `false` because that is what the live machine held — the prior
 # declaration was the stale half, not the machine.
 [[macosDefaults]]
@@ -36,9 +37,29 @@ value = "false"
 
 [[macosDefaults]]
 domain = "com.apple.dock"
+key = "magnification"
+type = "bool"
+value = "true"
+
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "largesize"
+type = "int"
+value = "100"
+
+[[macosDefaults]]
+domain = "com.apple.dock"
 key = "autohide"
 type = "bool"
 value = "false"
+
+# Dormant while autohide is off, and declared anyway: it was asked for knowingly, so that
+# autohide switched on by hand shows the Dock without the default pause.
+[[macosDefaults]]
+domain = "com.apple.dock"
+key = "autohide-delay"
+type = "float"
+value = "0"
 
 # Spaces keep the order they were given. Each Space has a fixed purpose and is jumped to
 # by number, which an order rearranged by recent use would silently break.
@@ -65,8 +86,8 @@ value = "false"
 
 # Finder. `ShowExternalHardDrivesOnDesktop` and `ShowRecentTags` were cut as keys whose
 # absence was never consciously noticed, and
-# `DesktopViewSettings:IconViewSettings:arrangeBy` because it is a path into a nested
-# dictionary this table cannot express — the load-bearing cut.
+# `DesktopViewSettings:IconViewSettings:arrangeBy` and `…:showItemInfo` because each is a
+# path into a nested dictionary this table cannot express — the load-bearing cut.
 [[macosDefaults]]
 domain = "com.apple.finder"
 key = "_FXSortFoldersFirst"
@@ -134,7 +155,7 @@ key = "Clicking"
 type = "bool"
 value = "true"
 
-# Tap-to-drag is off: three-finger drag above covers dragging, and having both turns a
+# Tap-to-drag is off: three-finger drag covers dragging, and having both turns a
 # resting finger into a drag that was never asked for.
 [[macosDefaults]]
 domain = "com.apple.AppleMultitouchTrackpad"
@@ -154,7 +175,7 @@ key = "Clicking"
 type = "bool"
 value = "true"
 
-# Tap-to-drag is off: three-finger drag above covers dragging, and having both turns a
+# Tap-to-drag is off: three-finger drag covers dragging, and having both turns a
 # resting finger into a drag that was never asked for.
 [[macosDefaults]]
 domain = "com.apple.driver.AppleBluetoothMultitouch.trackpad"
