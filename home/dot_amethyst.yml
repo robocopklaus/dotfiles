@@ -16,12 +16,3 @@ layouts:
 floating:
   - com.apple.systempreferences # System Settings: fixed-width panes, never meant to tile
   - com.1password.1password # 1Password: opened briefly to look something up; tiling it reshuffles the working windows
-
-# Focus follows the pointer. Its counterpart, mouse-follows-focus, is off: Amethyst's docs
-# call the two largely incompatible, and together they pulled the pointer off a Dock
-# icon's menu into the middle of a window. The cost is accepted: focus moved by key leaves
-# the pointer over the old window, and the next nudge of the mouse takes focus back.
-# The off is stated although it is the default, because only a key set here overwrites
-# the value a machine already holds in Amethyst's preferences.
-focus-follows-mouse: true
-mouse-follows-focus: false
