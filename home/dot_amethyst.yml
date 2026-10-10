@@ -15,6 +15,10 @@ layouts:
 # the applications back on their spaces; the window order within a space is not restored.
 restore-layouts-on-launch: true
 
+# Switching spaces does not flash the layout's name; the layout is already visible in how
+# the windows sit. Cycling layouts still shows it, since that is a change asked for.
+enables-layout-hud-on-space-change: false
+
 # Applications that keep floating, by bundle identifier. An entry is added when tiling an
 # application gets in the way, not ahead of it.
 floating:
