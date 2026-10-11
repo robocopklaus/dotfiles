@@ -32,6 +32,9 @@ BREWFILE
 # shell, which already has brew on PATH, and from the tail of a bootstrap, which does not.
 {{ template "lib/homebrew.sh" . }}
 
+# The inventory's reader — the entry shape, written once (ADR 0005).
+{{ template "lib/inventory.sh" . }}
+
 # The managed defaults, from the declaration the System settings phase applies — the same table, read
 # here rather than copied (ADR 0002). A second list of expected values beside the script
 # that writes them would guarantee drift, which is an unusually poor property for a drift
@@ -50,12 +53,11 @@ diverged=()
 # the one failure a drift detector must not do quietly.
 incomplete=()
 
-# Declared, read from the entry shape the Brewfile fixes — the same shape the Packages phase's scripts
-# and the CI reason-comment check read.
-declared_taps=$(sed -n 's/^tap "\([^"]*\)".*/\1/p' <<<"$brewfile")
-declared_formulae=$(sed -n 's/^brew "\([^"]*\)".*/\1/p' <<<"$brewfile")
-declared_casks=$(sed -n 's/^cask "\([^"]*\)".*/\1/p' <<<"$brewfile")
-declared_mas=$(sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p' <<<"$brewfile")
+# Declared, read through the one reader the Packages phase's scripts and the lint tier use.
+declared_taps=$(inventory_entries tap <<<"$brewfile")
+declared_formulae=$(inventory_entries brew <<<"$brewfile")
+declared_casks=$(inventory_entries cask <<<"$brewfile")
+declared_mas=$(inventory_entries mas <<<"$brewfile")
 
 # grep -x -F: a name matches a whole line or not at all, and never as a pattern.
 #

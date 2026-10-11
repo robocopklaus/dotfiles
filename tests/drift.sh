@@ -1,7 +1,7 @@
 #!/bin/bash
 # Exercises the rendered `drift` against stubbed inventories.
 #
-# Usage: tests/drift.sh <rendered-drift>
+# Usage: tests/drift.sh <rendered-drift> <rendered lib/inventory.sh>
 #
 # What this holds is drift's own logic — which section an entry lands in, and how a
 # bundle's provenance is decided — never a second list of what this machine should have.
@@ -17,7 +17,8 @@
 
 set -uo pipefail
 
-rendered=${1:?usage: tests/drift.sh <rendered-drift>}
+rendered=${1:?usage: tests/drift.sh <rendered-drift> <rendered lib/inventory.sh>}
+inventory_lib=${2:?usage: tests/drift.sh <rendered-drift> <rendered lib/inventory.sh>}
 repo=$(cd "$(dirname "$0")/.." && pwd)
 
 failures=0
@@ -62,10 +63,16 @@ mkdir -p "$machine/bin" "$machine/Applications" "$machine/DockApps"
 # compares against on a runner without `op` and not on a Mac with one — and a stub built
 # from the wrong list reports drift that is the test's own.
 brewfile=$(awk '/^BREWFILE$/ { held = 0 } held { print } /cat <<.BREWFILE.$/ { held = 1 }' "$rendered")
-sed -n 's/^tap "\([^"]*\)".*/\1/p' <<<"$brewfile" >"$machine/taps"
-sed -n 's/^brew "\([^"]*\)".*/\1/p' <<<"$brewfile" >"$machine/formulae"
-sed -n 's/^cask "\([^"]*\)".*/\1/p' <<<"$brewfile" >"$machine/casks"
-sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p' <<<"$brewfile" >"$machine/mas"
+#
+# Through the subject's own reader, which tests/inventory.sh pins against a literal
+# inventory — so a reader that dropped an entry fails there, rather than dropping it from
+# both sides here and passing.
+# shellcheck disable=SC1090
+. "$inventory_lib"
+inventory_entries tap <<<"$brewfile" >"$machine/taps"
+inventory_entries brew <<<"$brewfile" >"$machine/formulae"
+inventory_entries cask <<<"$brewfile" >"$machine/casks"
+inventory_entries mas <<<"$brewfile" >"$machine/mas"
 cp "$machine/formulae" "$machine/leaves"
 printf '{"casks":[]}\n' >"$machine/cask-info.json"
 : >"$machine/chezmoi-status"

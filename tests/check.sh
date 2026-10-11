@@ -58,6 +58,7 @@ render_all() {
   # Rendered for the tests alone, and kept out of the lint: the library defines functions
   # only its includers call, and the gitconfig is not shell.
   render home/.chezmoitemplates/lib/macos-defaults.sh "$out/other/macos-defaults.sh" || status=1
+  render home/.chezmoitemplates/lib/inventory.sh "$out/other/inventory.sh" || status=1
   render home/dot_gitconfig.tmpl "$out/other/gitconfig" || status=1
   return "$status"
 }
@@ -82,7 +83,11 @@ step 'Script headers' script_headers
 
 # drift's own logic, against stubbed inventories. What the machine actually holds is the
 # end-to-end tier's question, and the report is its oracle.
-step 'drift' tests/drift.sh "$out/bin/drift.sh"
+step 'drift' tests/drift.sh "$out/bin/drift.sh" "$out/other/inventory.sh"
+
+# The inventory's reader, against a literal inventory. Every other reader goes through it,
+# drift's test included, so a reader that dropped an entry is caught here or nowhere.
+step 'The inventory reader' tests/inventory.sh "$out/other/inventory.sh"
 
 # The gate's two stops, against stubbed system commands. Only the cases that install
 # nothing are covered, on purpose — see the header of tests/gate.sh.
