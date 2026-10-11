@@ -12,6 +12,8 @@ jobs:
     # Both tiers run on macOS: the source tree is templated for darwin, so a Linux runner
     # would render the branch this repository never applies and lint the wrong shell.
     runs-on: macos-26
+    # Every `run:` block below executes under `bash -e` without pipefail — the runner's
+    # default when no `shell:` is named — and is linted by actionlint in tests/check.sh.
     steps:
       - uses: actions/checkout@v4
 
@@ -24,6 +26,9 @@ jobs:
 
       - name: Install shellcheck
         run: command -v shellcheck >/dev/null || brew install shellcheck
+
+      - name: Install actionlint
+        run: command -v actionlint >/dev/null || brew install actionlint
 
       # The Dock reference check reads Homebrew's cask metadata with it, as drift does.
       - name: Install jq
