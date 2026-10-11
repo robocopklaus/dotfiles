@@ -15,8 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # On PATH for the steps after it, because tests/check.sh asks the machine for chezmoi
+      # the way it would at a desk.
       - name: Install chezmoi
-        run: sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$RUNNER_TEMP/bin"
+        run: |
+          sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Install shellcheck
         run: command -v shellcheck >/dev/null || brew install shellcheck
@@ -31,70 +35,10 @@ jobs:
           --source .
           --destination "$RUNNER_TEMP/home"
 
-      # Sources are .tmpl, so the tier renders them first: a template that fails to
-      # render is caught a step earlier than one that renders to broken shell.
-      - name: Render scripts
-        run: |
-          mkdir -p "$RUNNER_TEMP/rendered"
-          for template in home/.chezmoiscripts/*.tmpl; do
-            rendered="$RUNNER_TEMP/rendered/$(basename "$template" .tmpl)"
-            "$RUNNER_TEMP/bin/chezmoi" execute-template --source . < "$template" > "$rendered"
-          done
-
-      # drift is shell too, and the one piece of it a human runs by hand, so it is
-      # rendered and linted with the phase scripts. It is kept out of the directory the
-      # header check reads: it is a command, not a phase, so it carries no phase header.
-      - name: Render drift
-        run: |
-          mkdir -p "$RUNNER_TEMP/rendered-bin"
-          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
-            < home/dot_local/bin/executable_drift.tmpl > "$RUNNER_TEMP/rendered-bin/drift.sh"
-
-      - name: Shellcheck rendered scripts
-        run: shellcheck "$RUNNER_TEMP"/rendered/*.sh "$RUNNER_TEMP"/rendered-bin/*.sh tests/*.sh
-
-      # drift's own logic, against stubbed inventories. What the machine actually holds is
-      # the end-to-end tier's question, and the report is its oracle.
-      - name: Test drift
-        run: tests/drift.sh "$RUNNER_TEMP/rendered-bin/drift.sh"
-
-      # The gate's two stops, against stubbed system commands. Only the cases that
-      # install nothing are covered, on purpose — see the header of tests/gate.sh.
-      - name: Test the gate
-        run: tests/gate.sh "$RUNNER_TEMP/rendered/run_before_20-gate.sh"
-
-      # The managed defaults module's two spellings, against a `defaults` stub that refuses
-      # the wrong one the way the real binary does. A converged machine writes nothing at
-      # all, so the stub is also what supplies the drifted boolean the failure needed. The
-      # module is rendered alone and tested at its interface, which both the defaults phase
-      # and drift reach it through.
-      - name: Test the managed defaults
-        run: |
-          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
-            < home/.chezmoitemplates/lib/macos-defaults.sh > "$RUNNER_TEMP/rendered-bin/macos-defaults.sh"
-          tests/macos-defaults.sh "$RUNNER_TEMP/rendered-bin/macos-defaults.sh"
-
-      # The Dock phase's PATH, under a shell that never loaded Homebrew — a bootstrap's.
-      # A routine apply inherits a login shell that already has, which is why the missing
-      # load surfaced only on a fresh machine.
-      - name: Test the Dock phase
-        run: tests/dock.sh "$RUNNER_TEMP/rendered/run_onchange_after_61-dock.sh"
-
-      # The progress view, folded under a pseudo-terminal and unfolded without one. The
-      # runner has no terminal, so every phase CI runs takes the unfolded path, and without
-      # this step the folded one — every bootstrap at a desk — is never exercised. ADR 0017
-      - name: Test the progress view
-        run: tests/ui.sh
-
-      # Which identity a remote selects, asked of the real git against the rendered
-      # configuration. A pattern that looks right and matches nothing is silent everywhere
-      # else: with no default, it surfaces as a refused commit far from here. ADR 0011
-      - name: Test identity selection
-        run: |
-          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
-            < home/dot_gitconfig.tmpl > "$RUNNER_TEMP/rendered-bin/gitconfig"
-          tests/identity.sh "$RUNNER_TEMP/rendered-bin/gitconfig" \
-            home/dot_config/git/config-personal
+      # Rendering, the lint, the script headers and every test: the one list, which a run
+      # at a desk reads too. What each step is for is written beside it there.
+      - name: Check
+        run: tests/check.sh
 
       # The agent's attribution hook, fed the payloads it is for. A hook that matches
       # nothing fails silently, exactly like no hook at all.
@@ -177,18 +121,4 @@ jobs:
             "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
               '{{ range .dock.categories }}{{ range .apps }}{{ . }}{{ "\n" }}{{ end }}{{ end }}'
           )
-          exit "$status"
-
-      # Presence only — the prose is never read.
-      - name: Script headers
-        run: |
-          status=0
-          for rendered in "$RUNNER_TEMP"/rendered/*.sh; do
-            for field in '# Phase:' '# Requires:'; do
-              if ! grep -q "^$field" "$rendered"; then
-                echo "$(basename "$rendered"): missing '$field' header field"
-                status=1
-              fi
-            done
-          done
           exit "$status"

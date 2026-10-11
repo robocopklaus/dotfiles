@@ -4,6 +4,7 @@ brew "chezmoi"             # Drives the entire bootstrap
 brew "git"                 # Version control
 brew "gh"                  # GitHub CLI — issues and this repository's map live there
 brew "jq"                  # Bootstrap dependency: scripts parse JSON
+brew "shellcheck"          # Lints the rendered scripts — tests/check.sh runs it before a push, as CI does
 brew "mas"                 # Bootstrap dependency: installs the App Store entries
 brew "dockutil"            # Bootstrap dependency: reconciles the Dock
 brew "mise"                # Runtime manager
