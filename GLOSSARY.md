@@ -182,3 +182,8 @@ never disagree.
 **The map**:
 The GitHub issue and its tickets where the reasoning behind the rules lives. The
 repository states the rule; the map is why it is the rule.
+
+**Standing rule**:
+A rule that holds everywhere in the repository rather than for one area, stated once and
+followed without being re-argued.
+_Avoid_: convention, guideline, coding standard
