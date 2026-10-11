@@ -31,37 +31,27 @@ ui_header 'Packages · Homebrew'
 # precondition.
 {{ template "lib/homebrew-install.sh" . }}
 
-# Homebrew 7 refuses to load a formula or cask from a third-party tap until the tap is
-# trusted, and `brew bundle` reports the refusal per entry and carries on — so a missing
-# decision arrives looking like a flaky partial install, which is how it arrived here.
+# The inventory's reader, included at render time so the entry shape is written once
+# (ADR 0005).
+{{ template "lib/inventory.sh" . }}
+
+# The taps are trusted ahead of `brew bundle` rather than between its two halves, since
+# trusting does not require the tap to exist yet. `brew trust` is not guarded for absence
+# the way `op` is: it is Homebrew's own subcommand, and the Homebrew this bootstrap has is
+# the one the gate just acquired.
 #
-# Which taps are trusted is derived from the `tap` lines already in the inventory, not
-# named a second time: declaring a tap in a Brewfile is already the statement that its
-# formulae may be installed and run, so a separate list of the trusted ones would be a
-# second truth that can only drift from the first. Trusting is idempotent and does not
-# require the tap to exist yet, so this runs ahead of `brew bundle` rather than between
-# its two halves.
-#
-# `brew trust` is not guarded for absence the way `op` is. It is Homebrew's own
-# subcommand, and the Homebrew this bootstrap has is the one the gate just acquired.
-#
-# Each failure is returned by hand, because this runs as a step, where `set -e` does not
+# The failure is returned by hand, because this runs as a step, where `set -e` does not
 # reach.
 bundle() {
-  local tap
-  while IFS= read -r tap; do
-    [ -n "$tap" ] || continue
-    brew trust --tap "$tap" || return
-  done < <(printf '%s\n' "$1" | sed -n 's/^tap "\([^"]*\)".*/\1/p')
+  inventory_trust_taps <<<"$1" || return
   printf '%s\n' "$1" | brew bundle --file=-
 }
 
-# Both filters below read the entry shape the Brewfile fixes: a type keyword at column
-# zero, then a double-quoted name. Homebrew offers no filter of its own, and the CI
-# reason-comment check reads the same shape.
-#
 # Homebrew itself and the formulae abort the run, because later phases depend on them:
 # The Runtimes phase needs `mise`, the System settings phase needs `dockutil`. `set -e` makes both fatal.
+#
+# Whole entries rather than names, because `brew bundle` is what reads them — the one
+# filter that keeps an entry's options and so cannot be answered from `inventory_entries`.
 ui_step 'formulae' bundle "$(grep -E '^(tap|brew) ' <<<"$brewfile")"
 
 # Casks degrade instead: installed one at a time, so a single bad GUI app cannot kill a
@@ -79,7 +69,7 @@ while IFS= read -r cask; do
   if ! ui_step "cask $cask" brew install --cask --adopt "$cask"; then
     failed+=("$cask")
   fi
-done < <(printf '%s\n' "$brewfile" | sed -n 's/^cask "\([^"]*\)".*/\1/p')
+done < <(inventory_entries cask <<<"$brewfile")
 
 # The `mas` lines are deliberately not installed here. They need an Apple ID, which is a
 # precondition of their own, so they are 41-mas.

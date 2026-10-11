@@ -39,7 +39,9 @@ ui_header 'Packages · App Store'
 # attempted, which is the right answer when the machine cannot say what it already has.
 installed=$(mas list 2>/dev/null | awk '{print $1}') || installed=''
 
-# Reads the entry shape the Brewfile fixes — `mas "Name", id: 123` — and yields `id name`.
+# The inventory's reader, which yields the App Store entries as `id name` (ADR 0005).
+{{ template "lib/inventory.sh" . }}
+
 # The App Store population is closed by construction: an entry reaches this loop only
 # through the Brewfile, where `brew search --cask` has already shown no cask exists (ADR
 # 0007).
@@ -54,7 +56,7 @@ while read -r id name; do
   if ! ui_step "$name ($id)" mas install "$id"; then
     failed+=("$name ($id)")
   fi
-done < <(printf '%s\n' "$brewfile" | sed -n 's/^mas "\([^"]*\)", id: \([0-9][0-9]*\).*/\2 \1/p')
+done < <(inventory_entries mas <<<"$brewfile")
 
 if [ ${#failed[@]} -gt 0 ]; then
   ui_note "${#failed[@]} App Store entry(s) did not install: ${failed[*]}."

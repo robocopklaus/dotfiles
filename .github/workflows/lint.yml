@@ -51,6 +51,16 @@ jobs:
             exit 1
           fi
 
+      # The inventory's reader, rendered as the scripts include it, so the two checks below
+      # read the entry shape the Packages phase and drift read rather than a copy of it.
+      # Rendered once into a file: a render that fails then fails here, by name, where a
+      # `source <(…)` would hand the checks an empty reader and let them pass.
+      - name: Render the inventory reader
+        run: |
+          mkdir -p "$RUNNER_TEMP/lib"
+          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+            '{{ template "lib/inventory.sh" . }}' >"$RUNNER_TEMP/lib/inventory.sh"
+
       # Homebrew moves packages between kinds: `azure-cli` left homebrew/core for
       # homebrew/cask, and the declaration as a formula surfaced only as a failed install
       # on a bootstrap. The taps are read out of the inventories and trusted as the Packages phase trusts
@@ -59,20 +69,26 @@ jobs:
       # copy would miss exactly the moves it is here for, so it is refreshed first.
       - name: Brewfile entries resolve
         run: |
+          . "$RUNNER_TEMP/lib/inventory.sh"
           status=0
           brew update --quiet
-          for tap in $(sed -n 's/^tap "\([^"]*\)".*/\1/p' Brewfile Brewfile.work); do
-            brew trust --tap "$tap"
+          inventories=$(cat Brewfile Brewfile.work)
+          inventory_trust_taps <<<"$inventories"
+          for tap in $(inventory_entries tap <<<"$inventories"); do
             brew tap "$tap"
           done
           for inventory in Brewfile Brewfile.work; do
-            while read -r kind name; do
-              if ! error=$(brew info --"$kind" --json=v2 "$name" 2>&1 >/dev/null); then
-                echo "$inventory: '$name' is declared as a $kind and is not one."
-                printf '%s\n' "$error" | sed 's/^/  /'
-                status=1
-              fi
-            done < <(sed -n 's/^brew "\([^"]*\)".*/formula \1/p; s/^cask "\([^"]*\)".*/cask \1/p' "$inventory")
+            # The entry kind is the Brewfile's keyword; `brew info` spells a formula out.
+            for kind in brew cask; do
+              flag=${kind/brew/formula}
+              while IFS= read -r name; do
+                if ! error=$(brew info --"$flag" --json=v2 "$name" 2>&1 >/dev/null); then
+                  echo "$inventory: '$name' is declared as a $flag and is not one."
+                  printf '%s\n' "$error" | sed 's/^/  /'
+                  status=1
+                fi
+              done < <(inventory_entries "$kind" <"$inventory")
+            done
           done
           exit "$status"
 
@@ -83,17 +99,18 @@ jobs:
       # prior Dock declaration.
       - name: Dock entry references
         run: |
+          . "$RUNNER_TEMP/lib/inventory.sh"
           status=0
           # The bundle each declared cask installs, asked of Homebrew rather than guessed
           # from the cask's token: `telegram-desktop` and `microsoft-teams` are the
           # examples that defeat guessing, and drift asks the same question the same way
           # for the same reason. The App Store entries name their bundle directly.
-          casks=$(sed -n 's/^cask "\([^"]*\)".*/\1/p' Brewfile)
+          casks=$(inventory_entries cask <Brewfile)
           # shellcheck disable=SC2086
           cask_apps=$(brew info --cask --json=v2 $casks |
             jq -r '[.casks[].artifacts | .. | strings] | .[] | select(endswith(".app"))' |
             sed 's|.*/||; s|\.app$||')
-          store_apps=$(sed -n 's/^mas "\([^"]*\)".*/\1/p' Brewfile)
+          store_apps=$(inventory_entries mas <Brewfile | cut -d' ' -f2-)
           while IFS= read -r name; do
             [ -n "$name" ] || continue
             if grep -qxF "$name" <<<"$cask_apps" || grep -qxF "$name" <<<"$store_apps"; then
