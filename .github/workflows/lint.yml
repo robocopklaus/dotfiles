@@ -96,6 +96,11 @@ jobs:
           tests/identity.sh "$RUNNER_TEMP/rendered-bin/gitconfig" \
             home/dot_config/git/config-personal
 
+      # The agent's attribution hook, fed the payloads it is for. A hook that matches
+      # nothing fails silently, exactly like no hook at all.
+      - name: Test the attribution hook
+        run: tests/attribution.sh home/dot_claude/settings.json
+
       # Presence only — what the reason says is never judged, because a check that
       # graded it would be satisfied by "# tool" and would have to be argued with.
       - name: Brewfile reason comments
