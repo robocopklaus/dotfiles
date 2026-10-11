@@ -17,10 +17,10 @@ set -uo pipefail
 repo=$(cd "$(dirname "$0")/.." && pwd)
 cd "$repo" || exit 1
 
-# The three tools the steps reach for, asked of the machine. Each is a Brewfile entry, so
-# the remedy is the inventory's, not a one-off install.
+# The tools the steps reach for, asked of the machine. Each is a Brewfile entry, so the
+# remedy is the inventory's, not a one-off install.
 missing=()
-for tool in chezmoi shellcheck jq; do
+for tool in chezmoi shellcheck actionlint jq; do
   command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
 done
 if [ ${#missing[@]} -gt 0 ]; then
@@ -80,6 +80,10 @@ script_headers() {
 step 'Render' render_all
 step 'Shellcheck' shellcheck "$out"/scripts/*.sh "$out"/bin/*.sh tests/*.sh
 step 'Script headers' script_headers
+
+# The workflows, and through shellcheck the shell in their `run:` blocks. That shell
+# sources the rendered readers and is otherwise checked by nothing short of a push.
+step 'Workflows' actionlint
 
 # drift's own logic, against stubbed inventories. What the machine actually holds is the
 # end-to-end tier's question, and the report is its oracle.
