@@ -1,6 +1,15 @@
 # dotfiles
 
+[![Lint](https://github.com/robocopklaus/dotfiles/actions/workflows/lint.yml/badge.svg)](https://github.com/robocopklaus/dotfiles/actions/workflows/lint.yml)
+
 The source two Apple Silicon Macs are rebuilt from, in one command.
+
+```sh
+sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- -- --use-builtin-git=true init --apply robocopklaus/dotfiles
+```
+
+> [!TIP]
+> Re-running it is the only recovery mechanism there is, and it is always safe.
 
 They are wiped and reinstalled at least once a year. The wipe is a forced review date,
 so this repository has a second job and it is the harder one: every managed entry states
@@ -10,24 +19,30 @@ an archaeology exercise.
 It is built for two identical machines and one reader. Take it as a template, not as a
 product — onboarding a third machine, or handing this to someone else, is not a goal.
 
+## Three commands
+
+| Command | When |
+| --- | --- |
+| [The bootstrap](#the-command) | A freshly wiped machine, or a broken one. |
+| [`chezmoi update`](#when-the-repository-moves-chezmoi-update) | The repository has moved and this machine has not. |
+| [`drift`](#afterwards-drift) | Any day, and first thing in the annual review. |
+
 ## The command
 
-```sh
-sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- -- --use-builtin-git=true init --apply robocopklaus/dotfiles
-```
-
-That is the whole entry point. There is no `install.sh` and no preflight script: the
-command installs chezmoi and clones this repository before Xcode Command Line Tools
-exist, which is the knot a hand-rolled installer would have to untie again, worse.
-
-Re-running it is the only recovery mechanism there is, and it is always safe.
+The bootstrap command above is the whole entry point. There is no `install.sh` and no
+preflight script: the command installs chezmoi and clones this repository before Xcode
+Command Line Tools exist, which is the knot a hand-rolled installer would have to untie
+again, worse.
 
 ## What the machine needs first
 
-A freshly installed macOS with an Apple Account signed in, a network, and administrator
-rights. Xcode Command Line Tools, via `xcode-select --install`. 1Password signed in and
-unlocked, with both its SSH agent and its CLI integration switched on, and this machine's
-public key registered on GitHub under *SSH keys* and *SSH signing keys* both.
+- A freshly installed macOS with an Apple Account signed in, a network, and administrator
+  rights.
+- Xcode Command Line Tools, via `xcode-select --install`.
+- 1Password signed in and unlocked, with both its SSH agent and its CLI integration
+  switched on.
+- This machine's public key registered on GitHub under *SSH keys* and *SSH signing keys*
+  both.
 
 You do not have to work that list out in advance. Run the command: it installs what it
 can — Homebrew and the two 1Password applications — and then stops and names exactly what
@@ -38,19 +53,24 @@ file.
 
 Phases are cut by precondition, never by numeric convention.
 
-- **Preflight.** The part no script can do: the sign-ins and the key registration.
-- **Acquisition.** The chezmoi binary, and this repository cloned.
-- **Gate.** Acquires administrator rights and the trust chain, then verifies
-  every precondition. Nothing in `$HOME` is touched until it passes.
-- **Files.** The managed configuration, applied before the software it configures
-  exists.
-- **Packages.** Homebrew formulae and casks, the App Store entries, and the one
-  tool that has neither.
-- **Runtimes.** The pinned language runtimes.
-- **System settings.** macOS defaults and the Dock.
-- **Integrations.** The wiring that only works once the rest is there.
-- **The closing report.** What is still missing, re-derived by checking the machine
-  rather than by replaying what earlier phases recorded.
+```mermaid
+flowchart TD
+    preflight[/"<b>Preflight</b><br/>The part no script can do: the sign-ins and the key registration."/]
+    acquisition["<b>Acquisition</b><br/>The chezmoi binary, and this repository cloned."]
+    gate{{"<b>Gate</b><br/>Acquires administrator rights and the trust chain, then verifies every precondition. Nothing in $HOME is touched until it passes."}}
+    remedy>"Stops with a precise instruction beside each failed precondition"]
+    files["<b>Files</b><br/>The managed configuration, applied before the software it configures exists."]
+    packages["<b>Packages</b><br/>Homebrew formulae and casks, the App Store entries, and the one tool that has neither."]
+    runtimes["<b>Runtimes</b><br/>The pinned language runtimes."]
+    settings["<b>System settings</b><br/>macOS defaults and the Dock."]
+    integrations["<b>Integrations</b><br/>The wiring that only works once the rest is there."]
+    report(["<b>The closing report</b><br/>What is still missing, re-derived by checking the machine rather than by replaying what earlier phases recorded."])
+
+    preflight --> acquisition --> gate
+    gate -- passes --> files --> packages --> runtimes --> settings --> integrations --> report
+    gate -- refuses --> remedy
+    remedy -. run it again .-> acquisition
+```
 
 The run stops once, at the gate. After that it either completes, or it stops with a
 precise instruction and you run it again.
@@ -62,10 +82,13 @@ chezmoi update
 ```
 
 The repository moves without this machine — a pull request merged, or the other Mac. This
-is the command that brings it here: it pulls and applies in one step. A `git pull` in the
-source tree moves the repository you *develop* and leaves the machine where it was, and
-nothing on the machine says so — `drift` carries the declarations it was rendered with, so
-a machine the repository has moved past reports clean.
+is the command that brings it here: it pulls and applies in one step.
+
+> [!WARNING]
+> A `git pull` in the source tree moves the repository you *develop* and leaves the
+> machine where it was, and nothing on the machine says so — `drift` carries the
+> declarations it was rendered with, so a machine the repository has moved past reports
+> clean.
 
 Re-running the bootstrap command is not this command. `chezmoi init` clones only when the
 source directory holds no repository, so on a machine that already has one it re-applies
