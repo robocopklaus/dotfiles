@@ -51,15 +51,17 @@ jobs:
             exit 1
           fi
 
-      # The inventory's reader, rendered as the scripts include it, so the two checks below
-      # read the entry shape the Packages phase and drift read rather than a copy of it.
-      # Rendered once into a file: a render that fails then fails here, by name, where a
-      # `source <(…)` would hand the checks an empty reader and let them pass.
-      - name: Render the inventory reader
+      # The readers the checks below share with drift and the Packages phase, rendered as
+      # the scripts include them: the inventory's entry shape, and the bundles a cask's
+      # metadata names. Rendered once into files: a render that fails then fails here, by
+      # name, where a `source <(…)` would hand the checks an empty reader and let them pass.
+      - name: Render the readers
         run: |
           mkdir -p "$RUNNER_TEMP/lib"
-          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
-            '{{ template "lib/inventory.sh" . }}' >"$RUNNER_TEMP/lib/inventory.sh"
+          for reader in inventory cask-bundles; do
+            "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+              "{{ template \"lib/$reader.sh\" . }}" >"$RUNNER_TEMP/lib/$reader.sh"
+          done
 
       # Homebrew moves packages between kinds: `azure-cli` left homebrew/core for
       # homebrew/cask, and the declaration as a formula surfaced only as a failed install
@@ -100,16 +102,15 @@ jobs:
       - name: Dock entry references
         run: |
           . "$RUNNER_TEMP/lib/inventory.sh"
+          . "$RUNNER_TEMP/lib/cask-bundles.sh"
           status=0
-          # The bundle each declared cask installs, asked of Homebrew rather than guessed
-          # from the cask's token: `telegram-desktop` and `microsoft-teams` are the
-          # examples that defeat guessing, and drift asks the same question the same way
-          # for the same reason. The App Store entries name their bundle directly.
+          # The bundle each declared cask installs, by the rule drift's sweep reads it by.
+          # The pkg receipts drift adds are absent here by nature: the runner never
+          # installed the casks it asks about. The App Store entries name their bundle
+          # directly.
           casks=$(inventory_entries cask <Brewfile)
           # shellcheck disable=SC2086
-          cask_apps=$(brew info --cask --json=v2 $casks |
-            jq -r '[.casks[].artifacts | .. | strings] | .[] | select(endswith(".app"))' |
-            sed 's|.*/||; s|\.app$||')
+          cask_apps=$(brew info --cask --json=v2 $casks | cask_bundles | sed 's|\.app$||')
           store_apps=$(inventory_entries mas <Brewfile | cut -d' ' -f2-)
           while IFS= read -r name; do
             [ -n "$name" ] || continue
