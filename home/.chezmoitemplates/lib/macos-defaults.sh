@@ -2,6 +2,13 @@
 # one declaration System settings phase's defaults script and `drift` both derive from (ADR 0002). Included at
 # render time, so the defaults script's `run_onchange_` hash moves whenever the table does.
 #
+# Two calls are the whole interface: `managed_defaults_diverged` says which entries the
+# machine disagrees with, and `managed_default_apply` writes one of them back. Everything
+# else here — the table, the scope flag, and the two spellings a boolean has — is how
+# those two work, and no caller reaches past them. A caller that picked a spelling once
+# wrote the read one, and a converged machine never writes, so nothing caught it until a
+# single boolean drifted on a live Mac.
+#
 # One tab-separated line per entry: domain, key, type, expected value, and the scope —
 # `currentHost` for the one key macOS keeps per machine, `any` for every other. The scope
 # is asked for with `hasKey` because only that one entry declares it; chezmoi treats a
@@ -77,4 +84,38 @@ managed_default_label() {
   else
     printf '%s\n' "$domain"
   fi
+}
+
+# Every entry the machine disagrees with, one tab-separated line each: scope, domain, key,
+# label, the expected value and the current one. An entry is named by all three of scope,
+# domain and key, because tap-to-click is declared twice and only the scope tells the two
+# apart. The current value comes last because it is the one field that can be empty — an
+# unset key — and `read` with a tab separator folds an empty field anywhere else into the
+# next one.
+managed_defaults_diverged() {
+  local domain key type value scope expected current
+  while IFS=$'\t' read -r domain key type value scope; do
+    [ -n "$domain" ] || continue
+    expected=$(managed_default_expected "$type" "$value")
+    current=$(managed_default_current "$scope" "$domain" "$key")
+    [ "$current" = "$expected" ] && continue
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$scope" "$domain" "$key" \
+      "$(managed_default_label "$scope" "$domain")" "$expected" "$current"
+  done <<<"$managed_defaults"
+}
+
+# Writes one entry back as declared, in the spelling `defaults write` accepts. Asked by
+# name rather than handed a value, so the declared value never passes through the caller.
+# An entry the table does not hold is refused rather than guessed at.
+managed_default_apply() {
+  local want_scope=$1 want_domain=$2 want_key=$3 domain key type value scope
+  while IFS=$'\t' read -r domain key type value scope; do
+    if [ "$scope" = "$want_scope" ] && [ "$domain" = "$want_domain" ] && [ "$key" = "$want_key" ]; then
+      managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$(managed_default_written "$value")"
+      return
+    fi
+  done <<<"$managed_defaults"
+  printf 'managed_default_apply: %s %s %s is not a managed default\n' \
+    "$want_scope" "$want_domain" "$want_key" >&2
+  return 1
 }

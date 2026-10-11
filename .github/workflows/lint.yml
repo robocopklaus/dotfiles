@@ -63,11 +63,16 @@ jobs:
       - name: Test the gate
         run: tests/gate.sh "$RUNNER_TEMP/rendered/run_before_20-gate.sh"
 
-      # The defaults phase's write spelling, against a `defaults` stub that refuses the
-      # wrong one the way the real binary does. A converged machine writes nothing at all,
-      # so the stub is also what supplies the drifted boolean the failure needed.
-      - name: Test the macOS defaults phase
-        run: tests/macos-defaults.sh "$RUNNER_TEMP/rendered/run_onchange_after_60-macos-defaults.sh"
+      # The managed defaults module's two spellings, against a `defaults` stub that refuses
+      # the wrong one the way the real binary does. A converged machine writes nothing at
+      # all, so the stub is also what supplies the drifted boolean the failure needed. The
+      # module is rendered alone and tested at its interface, which both the defaults phase
+      # and drift reach it through.
+      - name: Test the managed defaults
+        run: |
+          "$RUNNER_TEMP/bin/chezmoi" execute-template --source . \
+            < home/.chezmoitemplates/lib/macos-defaults.sh > "$RUNNER_TEMP/rendered-bin/macos-defaults.sh"
+          tests/macos-defaults.sh "$RUNNER_TEMP/rendered-bin/macos-defaults.sh"
 
       # The Dock phase's PATH, under a shell that never loaded Homebrew — a bootstrap's.
       # A routine apply inherits a login shell that already has, which is why the missing

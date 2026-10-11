@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-# The declaration and the three things any consumer of it needs, included at render time
+# The declaration and the two calls any consumer of it needs, included at render time
 # (ADR 0005). The table is *in* this rendered script, so editing it re-triggers this
 # phase by construction — the same binding 40 gets from inlining the Brewfile.
 {{ template "lib/macos-defaults.sh" . }}
@@ -25,20 +25,11 @@ ui_header 'System settings · macOS defaults'
 # Only the keys that disagree are written, and the domains they belong to are collected.
 # A converged machine writes nothing, so it also restarts nothing.
 changed_domains=''
-while IFS=$'\t' read -r domain key type value scope; do
+while IFS=$'\t' read -r scope domain key label expected _; do
   [ -n "$domain" ] || continue
-
-  expected=$(managed_default_expected "$type" "$value")
-  if [ "$(managed_default_current "$scope" "$domain" "$key")" = "$expected" ]; then
-    continue
-  fi
-
-  # `$expected` is the read spelling and is only ever compared against; what is written is
-  # the declared value, which is the only spelling `defaults write` accepts for a bool.
-  ui_step "$(managed_default_label "$scope" "$domain") $key → $expected" \
-    managed_defaults_run "$scope" write "$domain" "$key" "-$type" "$(managed_default_written "$value")"
+  ui_step "$label $key → $expected" managed_default_apply "$scope" "$domain" "$key"
   changed_domains+="$domain"$'\n'
-done <<<"$managed_defaults"
+done < <(managed_defaults_diverged)
 
 # An application is restarted only when a key in **its own** domain changed. That
 # is what makes a mid-workday apply a no-op in practice, and it is the data declaration
