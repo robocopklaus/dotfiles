@@ -115,6 +115,11 @@ The Brewfile: the full truth of the applications and tools on the machine. It is
 hand-written, never dumped from installed state.
 _Avoid_: package list, manifest
 
+**Entry**:
+One declaration in the inventory — a tap, a formula, a cask, or an App Store application —
+together with its reason. The kind says which tool carries it, never whether it is wanted.
+_Avoid_: line, package, item
+
 **Unmanaged tail**:
 The installed things nothing declares. Rejected by design — an unmanaged tail means the
 wipe still silently deletes things, which is the loop this repository ends.
