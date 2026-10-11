@@ -14,6 +14,10 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
+## Landing a pull request
+
+PRs land by squash merge, and the branch is deleted on merge. A PR that builds on another is opened against `main` once its predecessor has merged, rather than stacked on its branch: the squash gives the predecessor's changes a new commit, so a stacked branch conflicts with `main` the moment its base lands.
+
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_
