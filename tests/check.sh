@@ -109,6 +109,10 @@ step 'The progress view' tests/ui.sh
 # with no default, it surfaces as a refused commit far from here. ADR 0011
 step 'Identity selection' tests/identity.sh "$out/other/gitconfig" home/dot_config/git/config-personal
 
+# The agent's attribution hook, fed the payloads it is for. A hook that matches nothing
+# fails silently, exactly like no hook at all.
+step 'The attribution hook' tests/attribution.sh home/dot_claude/settings.json
+
 if [ ${#failed[@]} -gt 0 ]; then
   printf '\nFailed: %s\n' "${failed[*]}"
   exit 1
