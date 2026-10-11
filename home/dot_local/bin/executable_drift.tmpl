@@ -35,6 +35,10 @@ BREWFILE
 # The inventory's reader — the entry shape, written once (ADR 0005).
 {{ template "lib/inventory.sh" . }}
 
+# The bundles a cask's metadata names, by the one rule the lint tier's Dock check reads
+# them by too.
+{{ template "lib/cask-bundles.sh" . }}
+
 # The managed defaults, from the declaration the System settings phase applies — the same table, read
 # here rather than copied (ADR 0002). A second list of expected values beside the script
 # that writes them would guarantee drift, which is an unusually poor property for a drift
@@ -227,14 +231,9 @@ if [ "$homebrew" = 'no' ] || [ "$casks_known" = 'no' ]; then
 elif ! command -v jq >/dev/null 2>&1; then
   incomplete+=('jq is not installed, so /Applications was not swept.')
 else
-  # The bundle names the installed casks claim, asked of Homebrew rather than guessed from
-  # the cask's name — `microsoft-teams` and `telegram-desktop` alone would defeat guessing.
-  #
-  # A cask names its application in one of four places: an `app` artifact, the `target` a
-  # relocated one is moved to, an `uninstall` path, or — for a cask that ships a `pkg` —
-  # nowhere at all, because the installer package's receipt is what knows. Every `.app`
-  # string anywhere in the artifacts covers the first three under one rule rather than
-  # three; the receipts named there cover the fourth.
+  # The bundle names the installed casks claim: what their metadata names, read by the
+  # rule the lint tier's Dock check reads it by, and — for a cask that ships a `pkg` — what
+  # the receipts on this machine name.
   cask_names=()
   while IFS= read -r cask; do
     [ -n "$cask" ] || continue
@@ -256,7 +255,7 @@ else
     cask_apps=''
     cask_pkgids=''
     if [ -n "$cask_json" ]; then
-      cask_apps=$(jq -r '[.casks[].artifacts | .. | strings] | .[] | select(endswith(".app"))' <<<"$cask_json" | sed 's|.*/||')
+      cask_apps=$(cask_bundles <<<"$cask_json")
       cask_pkgids=$(jq -r '[.casks[].artifacts | .. | objects | select(has("pkgutil")) | .pkgutil] | flatten | .[]' <<<"$cask_json")
     fi
 
