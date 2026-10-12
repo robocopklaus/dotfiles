@@ -1,5 +1,7 @@
 # An application comes from the App Store only when it has no Homebrew cask
 
+_The population is not closed: an adopted application with no cask reaches it by the second clause, as Super Agent did. The rule stands._
+
 Two clauses decide where a managed application comes from, applied in order. First, if the application restores itself from an account, the repository declares nothing. Second, of what remains, an application comes from the App Store only when no Homebrew cask exists for it. The App Store is a fallback, never a preference.
 
 The prior setup had no rule, only six App Store entries that had accumulated because that is where they were first found. The question the January review actually asks is not "is this app still used" — the content review answers that — but "why is this one installed differently from the others", and an inventory without a sourcing rule has no answer.

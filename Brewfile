@@ -40,3 +40,4 @@ mas "Pages", id: 361309726                     # Documents; no Homebrew cask exi
 mas "Numbers", id: 361304891                   # Spreadsheets; no Homebrew cask exists
 mas "GCal for Google Calendar", id: 1107163858 # Calendar; no Homebrew cask exists
 mas "1Password for Safari", id: 1569813296     # Safari extension; no cask, and no launch record by design
+mas "Super Agent", id: 1568262835             # Safari extension: answers cookie banners; no cask, and no launch record by design

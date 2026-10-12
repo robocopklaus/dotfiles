@@ -43,9 +43,9 @@ reason.
 
 3. **Apply the bar.** See below.
 
-4. **Re-ask the one open sourcing question.** Has a Homebrew cask appeared for any of the
-   four App Store entries (ADR 0007)? That is the only per-app question the review ever
-   asks about sourcing.
+4. **Re-ask the one open sourcing question.** Has a Homebrew cask appeared for any App
+   Store entry (ADR 0007)? That is the only per-app question the review ever asks about
+   sourcing.
 
 5. **Check the upstream health of the load-bearing tools** — chezmoi and mise above all.
    Two things are on watch: `mise` has grown its own dotfiles feature, which would collapse
@@ -72,4 +72,5 @@ re-litigated:
 - **Bootstrap dependencies** are kept because a script invokes them, never because they
   are typed.
 - **Background applications** — a URL handler, a sync daemon, a browser extension — have
-  no launch record by design, so absence of one cuts nothing.
+  no launch record by design, so absence of one cuts nothing. For a browser extension the
+  trace is being switched on in the browser's extension settings, read at review time.
