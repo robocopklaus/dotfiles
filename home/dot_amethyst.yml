@@ -26,3 +26,5 @@ floating:
   - com.1password.1password # 1Password: opened briefly to look something up; tiling it reshuffles the working windows
   - com.apple.Preview # Preview: opened briefly to look at a file; tiling it reshuffles the working windows
   - coing.ClockifyDesktop # Clockify: opened briefly to start or stop a timer; tiling it reshuffles the working windows
+  - com.yellowmonkeystudio.gcal # GCal: opened briefly to check the schedule; tiling it reshuffles the working windows
+  - com.apple.iCal # Calendar: opened briefly to check the schedule; tiling it reshuffles the working windows
